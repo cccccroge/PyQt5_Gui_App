@@ -22,7 +22,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="menuFile.py">
+    <Compile Include="menu.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="mainWindow.py" />

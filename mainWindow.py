@@ -1,20 +1,18 @@
 import sys
 from PyQt5 import QtWidgets
-import menuFile
+import menu
 
 class mainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        super().menuBar().setNativeMenuBar(False)
         self.setWindowTitle(self.tr("工研院技轉中心服務程式"))
-        self.init_menu()
+        self.init_ui()
 
-    def init_menu(self):
-        # Using default menuBar of QMainWindow
-        menu = menuFile.menuFile()
-        self.menuBar().addMenu(menu)
-        
+    def init_ui(self):
+        # Init menu
+        menu.menu(self.menuBar())
+
 
 
 

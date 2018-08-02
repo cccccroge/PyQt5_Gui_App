@@ -2,6 +2,7 @@ import sys
 from PyQt5 import QtWidgets
 import menu
 import tool
+import status
 
 class mainWindow(QtWidgets.QMainWindow):
 
@@ -12,12 +13,16 @@ class mainWindow(QtWidgets.QMainWindow):
         self.init_ui()
 
     def init_ui(self):
-        # Sending mainWindow obj to initialize menuBar and toolBar
+        # Sending mainWindow obj to initialize components
         menu.menu(self)
         tool.tool(self)
 
-        # Init status
-        self.statusBar().showMessage("Ready")
+        global statusBar = self.statusBar()
+
+        s = status.status(self)
+        s.show_default()
+
+
 
 
     # Action slots
@@ -48,11 +53,10 @@ class mainWindow(QtWidgets.QMainWindow):
     def toggle_toolbar(self):
         if (self.toolBar.isVisible()):
             self.toolBar.setVisible(False)
+            self.statusBar().showMessage("tool bar disabled", 2000)
         else:
             self.toolBar.setVisible(True)
-
-        print("開啟/關閉工具列")
-        self.statusBar().showMessage("")
+            self.statusBar().showMessage("tool bar enabled", 2000)
 
     def toggle_file_manager(self):
         print("開啟/關閉檔案管理面板")

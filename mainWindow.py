@@ -3,6 +3,8 @@ from PyQt5 import QtWidgets
 import menu
 import tool
 import status
+import central
+
 
 class mainWindow(QtWidgets.QMainWindow):
 
@@ -12,17 +14,15 @@ class mainWindow(QtWidgets.QMainWindow):
         self.actions = {}
         self.init_ui()
 
+        global statusBar
+        statusBar = self.statusBar()
+
     def init_ui(self):
         # Sending mainWindow obj to initialize components
         menu.menu(self)
         tool.tool(self)
-
-        global statusBar = self.statusBar()
-
-        s = status.status(self)
-        s.show_default()
-
-
+        status.status(self)
+        central.central(self)
 
 
     # Action slots
@@ -53,13 +53,27 @@ class mainWindow(QtWidgets.QMainWindow):
     def toggle_toolbar(self):
         if (self.toolBar.isVisible()):
             self.toolBar.setVisible(False)
-            self.statusBar().showMessage("tool bar disabled", 2000)
+            self.statusBar().showMessage("已關閉工具列", 2000)
         else:
             self.toolBar.setVisible(True)
-            self.statusBar().showMessage("tool bar enabled", 2000)
+            self.statusBar().showMessage("已開啟工作列", 2000)
 
-    def toggle_file_manager(self):
-        print("開啟/關閉檔案管理面板")
+    def toggle_main_panel(self):
+        # Find main panel
+        isClosed = True
+        targetIndex = -1
+        for i in range(self.centralWidget().count()):
+            if (self.centralWidget().widget(i) == self.mainWidget):
+                isClosed = False
+                targetIndex = i
+
+        # Close if found, otherwise add it again
+        if not isClosed:
+            self.centralWidget().removeTab(targetIndex)
+        else:
+            self.centralWidget().insertTab(0, self.mainWidget, self.tr("主要工作面板"))
+            self.centralWidget().setCurrentWidget(self.mainWidget)
+        
         
 
 

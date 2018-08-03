@@ -2,19 +2,19 @@ import sys
 from PyQt5 import QtWidgets, QtCore
 
 
-class central(QtWidgets.QWidget):
+class central(QtWidgets.QTabWidget):
     def __init__(self, parent, **kwargs):
         super().__init__(**kwargs)
 
-        # Central widget in mainWindow is a QTabwidget
-        centralWidget = QtWidgets.QTabWidget()
-        centralWidget.setTabsClosable(True)
-        centralWidget.setMovable(True)
-        centralWidget.setTabShape(QtWidgets.QTabWidget.Triangular)
-        centralWidget.tabCloseRequested.connect(lambda: self.on_centralWidget_tabCloseRequested())
-        self.connect(centralWidget, QtCore.pyqtSignal('tabCloseRequested(int)'),
-            self, QtCore.pyqtSlot(on_centralWidget_tabCloseRequested))
-        parent.setCentralWidget(centralWidget)
+        # Store mainWindow to use in slots
+        self.mainWindow = parent
+
+        # Set tabWidget properties
+        self.setTabsClosable(True)
+        self.setMovable(True)
+        self.setTabShape(QtWidgets.QTabWidget.Triangular)
+        self.tabCloseRequested.connect(self.on_tabCloseRequested)
+        parent.setCentralWidget(self)
 
         # Main work space (loaded default)
         parent.mainWidget = QtWidgets.QSplitter()   # make field of mainWindow to access mainWidget in other places
@@ -29,14 +29,21 @@ class central(QtWidgets.QWidget):
 
         parent.mainWidget.setStretchFactor(0, 1)
         parent.mainWidget.setStretchFactor(1, 5)
-
-        centralWidget.addTab(parent.mainWidget, self.tr("主要工作面板"))
+        self.addTab(parent.mainWidget, self.tr("主要工作面板"))
 
 
         # Test
         w = QtWidgets.QWidget()
-        centralWidget.addTab(w, "2")
+        self.addTab(w, "2")
 
-    def on_centralWidget_tabCloseRequested(self, index):
-        print("YO")
+    def on_tabCloseRequested(self, index):
+        target = self.widget(index)
+
+        # If is mainWidget, don't delete it
+        if target == self.mainWindow.mainWidget:
+            self.removeTab(index)
+        else:
+            target.deleteLater()
+            self.removeTab(index)
+        
 

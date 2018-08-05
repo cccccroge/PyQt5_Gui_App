@@ -1,24 +1,29 @@
 import sys
 from PyQt5 import QtWidgets
+import pandas as pd
+
 import menu
 import tool
 import status
 import central
+from glob import msgDuration
 
 
 class mainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.setWindowTitle(self.tr("工研院技轉中心服務程式"))
+
         self.actions = {}
+        self.dataFrames = {}
+
+        self.setWindowTitle(self.tr("工研院技轉中心服務程式"))
         self.init_ui()
 
-        global statusBar
-        statusBar = self.statusBar()
 
     def init_ui(self):
         # Sending mainWindow obj to initialize components
+        # (no need to store the objs because they're just init helper)
         menu.menu(self)
         tool.tool(self)
         status.status(self)
@@ -30,7 +35,46 @@ class mainWindow(QtWidgets.QMainWindow):
         print("選擇工作資料夾...")
 
     def import_excel(self):
-        print("匯入excel檔案...")
+        # Get paths of selecting files
+        filenames = QtWidgets.QFileDialog.getOpenFileNames(
+            self, self.tr("選取檔案"), ""
+            , "All Files (*);;Excel Files (*xlsx);;Excel 97-2003 Files(*xls)"
+            , "Excel Files (*xlsx)")
+        excelPaths = []
+        for n in filenames[0]:
+            excelPaths.append(n)
+
+        # Read each sheet of files into dataframe
+        self.statusBar().showMessage("已選擇 " + str(len(excelPaths)) + " 個檔案", msgDuration)
+        self.hintLabel.setText("正在讀取檔案...")
+        self.progressBar.setRange(0, len(excelPaths))
+        self.progressBar.setValue(0)
+        self.progressBar.setVisible(True)
+
+        for i in range(len(excelPaths)):
+            sheetNames = pd.ExcelFile(excelPaths[i]).sheet_names
+            if (len(sheetNames) == 1):
+                # No sheet name provided, use file name as key
+                path = excelPaths[i]
+                pos1 = path.rfind("/")
+                pos2 = excelPaths[i].rfind(".xls")
+                name = path[pos1 + 1 : pos2]
+                df = pd.read_excel(excelPaths[i], sheet_name = 0)
+                self.dataFrames[name] = df
+            else:
+                # Multiple sheets, use sheet name as key
+                for name in sheetNames:
+                    df = pd.read_excel(excelPaths[i], sheet_name = name)
+                    self.dataFrames[name] = df
+
+            self.progressBar.setValue(i + 1)
+
+        self.hintLabel.setText("就緒")
+        self.progressBar.setVisible(False)
+        
+        # WARNING: key might be overwritten due to name repetition
+        #print(self.dataFrames.keys())
+
 
     def export_excel(self):
         print("輸出excel檔案...")

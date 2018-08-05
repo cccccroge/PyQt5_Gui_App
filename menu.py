@@ -1,6 +1,9 @@
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 
+import mainWindow
+from glob import msgDuration
+
 class menu(QtWidgets.QMenu):
     def __init__(self, parent, **kwargs):
         super().__init__(**kwargs)
@@ -52,25 +55,25 @@ class menu(QtWidgets.QMenu):
 
     def on_hovered(self, parent, flag):
         if (flag == 1):
-            parent.statusBar().showMessage("選擇資料夾，載入該路徑中所有Excel檔案", 2000)
+            parent.statusBar().showMessage("選擇資料夾，載入該路徑中所有Excel檔案", msgDuration)
         elif (flag == 2):
-            parent.statusBar().showMessage("選擇一個或多個Excel檔案匯入", 2000)
+            parent.statusBar().showMessage("選擇一個或多個Excel檔案匯入", msgDuration)
         elif (flag == 3):
-            parent.statusBar().showMessage("依據目前的關聯項目輸出Excel檔案", 2000)
+            parent.statusBar().showMessage("依據目前的關聯項目輸出Excel檔案", msgDuration)
         elif (flag == 4):
-            parent.statusBar().showMessage("新增一個空的關聯項目", 2000)
+            parent.statusBar().showMessage("新增一個空的關聯項目", msgDuration)
         elif (flag == 5):
-            parent.statusBar().showMessage("讀取關聯樣板以快速輸出檔案", 2000)
+            parent.statusBar().showMessage("讀取關聯樣板以快速輸出檔案", msgDuration)
         elif (flag == 6):
-            parent.statusBar().showMessage("儲存目前的關聯樣板配置", 2000)
+            parent.statusBar().showMessage("儲存目前的關聯樣板配置", msgDuration)
         elif (flag == 7):
-            parent.statusBar().showMessage("選擇並開啟目前匯入Excel檔案", 2000)
+            parent.statusBar().showMessage("選擇並開啟目前匯入Excel檔案", msgDuration)
         elif (flag == 8):
-            parent.statusBar().showMessage("預覽目前的輸出Excel檔案", 2000)
+            parent.statusBar().showMessage("預覽目前的輸出Excel檔案", msgDuration)
         elif (flag == 9):
-            parent.statusBar().showMessage("顯示或關閉工具列", 2000)
+            parent.statusBar().showMessage("顯示或關閉工具列", msgDuration)
         elif (flag == 10):
-            parent.statusBar().showMessage("顯示或關閉主要工作面板", 2000)
+            parent.statusBar().showMessage("顯示或關閉主要工作面板", msgDuration)
 
 
 

@@ -25,6 +25,9 @@
     <Compile Include="central.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="glob.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="menu.py">
       <SubType>Code</SubType>
     </Compile>

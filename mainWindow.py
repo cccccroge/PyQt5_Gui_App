@@ -15,7 +15,7 @@ class mainWindow(QtWidgets.QMainWindow):
         super().__init__(**kwargs)
 
         self.actions = {}
-        self.dataFrames = {}
+        self.colNamesSet = {}
 
         self.setWindowTitle(self.tr("工研院技轉中心服務程式"))
         self.init_ui()
@@ -30,21 +30,31 @@ class mainWindow(QtWidgets.QMainWindow):
         central.central(self)
 
 
-    # Action slots
-    def choose_work_dir(self):
-        print("選擇工作資料夾...")
 
+    ####################
+    # Action slots
+    ####################
+
+
+    def choose_work_dir(self):
+        pass
+
+
+    # Import selected excel, store columns info and excel path
+    # After import, properties list should show sets of column name
     def import_excel(self):
+
         # Get paths of selecting files
         filenames = QtWidgets.QFileDialog.getOpenFileNames(
             self, self.tr("選取檔案"), ""
             , "All Files (*);;Excel Files (*xlsx);;Excel 97-2003 Files(*xls)"
             , "Excel Files (*xlsx)")
+
         excelPaths = []
         for n in filenames[0]:
             excelPaths.append(n)
 
-        # Read each sheet of files into dataframe
+        # Covert each sheet of files to set of column names
         self.statusBar().showMessage("已選擇 " + str(len(excelPaths)) + " 個檔案", msgDuration)
         self.hintLabel.setText("正在讀取檔案...")
         self.progressBar.setRange(0, len(excelPaths))
@@ -53,19 +63,18 @@ class mainWindow(QtWidgets.QMainWindow):
 
         for i in range(len(excelPaths)):
             sheetNames = pd.ExcelFile(excelPaths[i]).sheet_names
+
             if (len(sheetNames) == 1):
                 # No sheet name provided, use file name as key
                 path = excelPaths[i]
                 pos1 = path.rfind("/")
                 pos2 = excelPaths[i].rfind(".xls")
                 name = path[pos1 + 1 : pos2]
-                df = pd.read_excel(excelPaths[i], sheet_name = 0)
-                self.dataFrames[name] = df
+                self.colNamesSet[name] = self.load_excel_columns(excelPaths[i], 0)
             else:
                 # Multiple sheets, use sheet name as key
                 for name in sheetNames:
-                    df = pd.read_excel(excelPaths[i], sheet_name = name)
-                    self.dataFrames[name] = df
+                    self.colNamesSet[name] = self.load_excel_columns(excelPaths[i], name)
 
             self.progressBar.setValue(i + 1)
 
@@ -73,7 +82,15 @@ class mainWindow(QtWidgets.QMainWindow):
         self.progressBar.setVisible(False)
         
         # WARNING: key might be overwritten due to name repetition
-        #print(self.dataFrames.keys())
+
+        ##test
+        #for key in self.colNamesSet:
+        #    print(key + "'s data is below:")
+        #    for e in self.colNamesSet[key]:
+        #        print(e)
+
+        # Show the colNamesSet to properties list
+
 
 
     def export_excel(self):
@@ -117,6 +134,19 @@ class mainWindow(QtWidgets.QMainWindow):
         else:
             self.centralWidget().insertTab(0, self.mainWidget, self.tr("主要工作面板"))
             self.centralWidget().setCurrentWidget(self.mainWidget)
+
+
+
+    ####################
+    # Helper functions
+    ####################
+
+    def load_excel_columns(self, _path, _sheetname):
+
+        # Load only first row (column names)
+        df = pd.read_excel(_path, _sheetname, nrows=0)
+        return df
+        
         
         
 

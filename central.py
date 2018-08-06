@@ -1,6 +1,8 @@
 import sys
 from PyQt5 import QtWidgets, QtCore
 
+import properties
+
 
 class central(QtWidgets.QTabWidget):
     def __init__(self, parent, **kwargs):
@@ -19,16 +21,13 @@ class central(QtWidgets.QTabWidget):
         # Main work space (loaded default)
         parent.mainWidget = QtWidgets.QSplitter()   # make field of mainWindow to access mainWidget in other places
         
-        propertyWidget = QtWidgets.QWidget()
-        propertyWidget.sizePolicy().setHorizontalPolicy(QtWidgets.QSizePolicy.Minimum)
-        parent.mainWidget.addWidget(propertyWidget)
+        propertiesWidget = properties.properties()
+        parent.mainWidget.addWidget(propertiesWidget)
 
         fieldWidget = QtWidgets.QWidget()
-        fieldWidget.sizePolicy().setHorizontalPolicy(QtWidgets.QSizePolicy.Expanding)
         parent.mainWidget.addWidget(fieldWidget)
 
-        parent.mainWidget.setStretchFactor(0, 1)
-        parent.mainWidget.setStretchFactor(1, 5)
+        parent.mainWidget.setSizes([320, 1600])
         self.addTab(parent.mainWidget, self.tr("主要工作面板"))
 
 

@@ -13,12 +13,17 @@ class properties(QtWidgets.QWidget):
                                    , QtWidgets.QSizePolicy.Preferred)
         p1.setVerticalStretch(2)
         headWidget.setSizePolicy(p1)
-        
+
         gridLayout = QtWidgets.QGridLayout()
         comboBox = QtWidgets.QComboBox()
-        #labelImage = QtWidgets.QLabel()
-        labelText2 = QtWidgets.QLabel()
-        labelText = QtWidgets.QLabel()
+        labelImage = QtWidgets.QLabel()
+        labelImage.setText("圖片")
+        lineEdit = QtWidgets.QLineEdit()
+        lineEdit.setText("搜尋欄位名稱")
+        gridLayout.addWidget(comboBox, 0, 0, 1, 2)
+        gridLayout.addWidget(labelImage, 1, 0)
+        gridLayout.addWidget(lineEdit, 1, 1)
+        headWidget.setLayout(gridLayout)
 
         # List
         listWidget = QtWidgets.QWidget()

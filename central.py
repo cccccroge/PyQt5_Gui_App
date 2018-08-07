@@ -35,10 +35,16 @@ class central(QtWidgets.QTabWidget):
         #w = QtWidgets.QWidget()
         #self.addTab(w, "2")
 
+
+
+    ####################
+    #      Slots
+    ####################
+
     def on_tabCloseRequested(self, index):
         target = self.widget(index)
 
-        # If is mainWidget, don't delete it
+        # If is mainWidget, don't delete it, just hide
         if target == self.mainWindow.mainWidget:
             self.removeTab(index)
         else:

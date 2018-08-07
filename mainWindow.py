@@ -23,7 +23,8 @@ class mainWindow(QtWidgets.QMainWindow):
 
     def init_ui(self):
         # Sending mainWindow obj to initialize components
-        # (no need to store the objs because they're just init helper)
+        # No need to store the objs because they're just init helper
+        # Use parent-child relationship to access between classes
         menu.menu(self)
         tool.tool(self)
         status.status(self)
@@ -42,8 +43,8 @@ class mainWindow(QtWidgets.QMainWindow):
 
     # Import selected excel, store columns info and excel path
     # After import, properties list should show sets of column name
-    def import_excel(self):
 
+    def import_excel(self):
         # Get paths of selecting files
         filenames = QtWidgets.QFileDialog.getOpenFileNames(
             self, self.tr("選取檔案"), ""
@@ -79,13 +80,18 @@ class mainWindow(QtWidgets.QMainWindow):
                     newKeys.append(name)
                     self.colNamesSet[name] = self.load_excel_columns(excelPaths[i], 0)
             else:
-                # Multiple sheets, use sheet name as key
+                # Multiple sheets, use (file ： sheet) name as key
                 for name in sheetNames:
-                    if name in self.colNamesSet.keys():
+                    path = excelPaths[i]
+                    pos1 = path.rfind("/")
+                    pos2 = excelPaths[i].rfind(".xls")
+                    keyName = path[pos1 + 1 : pos2] + " ： " + name
+
+                    if keyName in self.colNamesSet.keys():
                         isDuplicated = True
                     else:
-                        newKeys.append(name)
-                        self.colNamesSet[name] = self.load_excel_columns(excelPaths[i], name)
+                        newKeys.append(keyName)
+                        self.colNamesSet[keyName] = self.load_excel_columns(excelPaths[i], name)
 
             self.progressBar.setValue(i + 1)
 

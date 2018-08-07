@@ -57,9 +57,9 @@ class list(QtWidgets.QListWidget):
             sheetName = keyName[index+3:]
 
         # Create drag object and execute
-        drag = QtGui.QDrag()
+        drag = QtGui.QDrag(self)
         data = QtCore.QMimeData()
-        data.setText(fileName + "," + sheetName + "," + keyName)
+        data.setText(fileName + "," + sheetName + "," + colName)
         drag.setMimeData(data)
 
         ret = drag.exec(QtCore.Qt.LinkAction)

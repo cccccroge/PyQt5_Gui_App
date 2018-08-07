@@ -61,6 +61,9 @@ class mainWindow(QtWidgets.QMainWindow):
         self.progressBar.setValue(0)
         self.progressBar.setVisible(True)
 
+        newKeys = []
+        isDuplicated = False
+
         for i in range(len(excelPaths)):
             sheetNames = pd.ExcelFile(excelPaths[i]).sheet_names
 
@@ -70,27 +73,35 @@ class mainWindow(QtWidgets.QMainWindow):
                 pos1 = path.rfind("/")
                 pos2 = excelPaths[i].rfind(".xls")
                 name = path[pos1 + 1 : pos2]
-                self.colNamesSet[name] = self.load_excel_columns(excelPaths[i], 0)
+                if name in self.colNamesSet.keys():
+                    isDuplicated = True
+                else:
+                    newKeys.append(name)
+                    self.colNamesSet[name] = self.load_excel_columns(excelPaths[i], 0)
             else:
                 # Multiple sheets, use sheet name as key
                 for name in sheetNames:
-                    self.colNamesSet[name] = self.load_excel_columns(excelPaths[i], name)
+                    if name in self.colNamesSet.keys():
+                        isDuplicated = True
+                    else:
+                        newKeys.append(name)
+                        self.colNamesSet[name] = self.load_excel_columns(excelPaths[i], name)
 
             self.progressBar.setValue(i + 1)
 
+        # Add new file names to combobox
+        for key in newKeys:
+            self.comboBox.addItem(key)
+
         self.hintLabel.setText("就緒")
         self.progressBar.setVisible(False)
+
+        if isDuplicated:
+            self.statusBar().showMessage("檔案讀取時發現重複的檔案或表單名稱，該部分已自動忽略"
+                                         , msgDuration)
+        else:
+            self.statusBar().showMessage("檔案讀取成功", msgDuration)
         
-        # WARNING: key might be overwritten due to name repetition
-
-        ##test
-        #for key in self.colNamesSet:
-        #    print(key + "'s data is below:")
-        #    for e in self.colNamesSet[key]:
-        #        print(e)
-
-        # Show the colNamesSet to properties list
-
 
 
     def export_excel(self):
@@ -149,11 +160,3 @@ class mainWindow(QtWidgets.QMainWindow):
         
         
         
-
-
-
-
-
-
-
-

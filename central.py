@@ -21,7 +21,7 @@ class central(QtWidgets.QTabWidget):
         # Main work space (loaded default)
         parent.mainWidget = QtWidgets.QSplitter()   # make field of mainWindow to access mainWidget in other places
         
-        propertiesWidget = properties.properties()
+        propertiesWidget = properties.properties(parent)
         parent.mainWidget.addWidget(propertiesWidget)
 
         fieldWidget = QtWidgets.QWidget()
@@ -32,8 +32,8 @@ class central(QtWidgets.QTabWidget):
 
 
         # Test
-        w = QtWidgets.QWidget()
-        self.addTab(w, "2")
+        #w = QtWidgets.QWidget()
+        #self.addTab(w, "2")
 
     def on_tabCloseRequested(self, index):
         target = self.widget(index)

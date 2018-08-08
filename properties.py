@@ -20,6 +20,7 @@ class properties(QtWidgets.QWidget):
 
         gridLayout = QtWidgets.QGridLayout()
         comboBox = QtWidgets.QComboBox()
+        comboBox.addItem(self.tr("已連結"))
         comboBox.currentIndexChanged[str].connect(self.on_comboBox_currentIndexChanged)
         parent.comboBox = comboBox
         labelImage = QtWidgets.QLabel()
@@ -42,7 +43,7 @@ class properties(QtWidgets.QWidget):
         
 
         # Button
-        button = connectButton.connectButton()
+        button = connectButton.connectButton(parent)
         p3 = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred
                                    , QtWidgets.QSizePolicy.Preferred)
         p3.setVerticalStretch(2)

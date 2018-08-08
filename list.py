@@ -1,17 +1,23 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
+from glob import msgDuration
 
 class list(QtWidgets.QListWidget):
     def __init__(self, parent, **kwargs):
         super().__init__(**kwargs)
         self.parent = parent
         self.parent.list = self
+
         self.itemPressed.connect(self.on_itemPressed)
 
 
     # Show cols for provided file
 
     def showFile(self, filename):
-        names = self.parent.colNamesSet[filename]
+        names = []
+        if filename == "已連結":
+            names = self.parent.connectedCols
+        else:
+            names = self.parent.colNamesSet[filename]
 
         self.clear()
         for n in names:
@@ -63,6 +69,11 @@ class list(QtWidgets.QListWidget):
         drag.setMimeData(data)
 
         ret = drag.exec(QtCore.Qt.LinkAction)
+        statusBar = self.parent.statusBar()
+        if ret != 0:
+            statusBar.showMessage("成功拖放欄位", msgDuration)
+        else:
+            statusBar.showMessage("取消拖放欄位", msgDuration)
 
             
         

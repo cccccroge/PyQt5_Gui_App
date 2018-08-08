@@ -16,6 +16,7 @@ class mainWindow(QtWidgets.QMainWindow):
 
         self.actions = {}
         self.colNamesSet = {}
+        self.connectedCols = []
 
         self.setWindowTitle(self.tr("工研院技轉中心服務程式"))
         self.init_ui()

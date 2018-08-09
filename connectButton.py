@@ -1,11 +1,14 @@
 from PyQt5 import QtWidgets
+import networkx as nx
+
+from glob import msgDuration
 
 class connectButton(QtWidgets.QPushButton):
     def __init__(self, parent, **kwargs):
         super().__init__(**kwargs)
 
         self.parent = parent
-        #self.colToConnect
+        self.colToConnect = []
 
         self.setText(self.tr("建立聯結"))
         self.setAcceptDrops(True)
@@ -26,10 +29,46 @@ class connectButton(QtWidgets.QPushButton):
         colName = text[pos2+1:]
 
         t = (fileName, sheetName, colName)
-        self.parent.connectedCols.append(t)
+        self.colToConnect.append(t)
 
         event.acceptProposedAction()
 
     def on_pressed(self):
-        print("connect!")
+        # Consider failed conditions
+        if len(self.colToConnect) != 2:
+            self.colToConnect.clear()
+            self.parent.statusBar().showMessage(
+                "項目連結失敗，連結項目之數目必須為兩個", msgDuration)
+            return
+
+        infoTup1 = self.colToConnect[0]
+        infoTup2 = self.colToConnect[1]
+
+        sheet1 = infoTup1[1]
+        sheet2 = infoTup2[1]
+        if sheet1 == sheet2:
+            self.colToConnect.clear()
+            self.parent.statusBar().showMessage(
+                "項目連結失敗，兩個連結項目必須來自不同的工作表", msgDuration)
+            return
+
+        # Add relationship to graph
+        nodeTup1 = infoTup1[0:2]
+        nodeTup2 = infoTup2[0:2]
+        edgeTup1to2 = (infoTup1[2], infoTup2[2])
+        edgeTup2to1 = (infoTup2[2], infoTup1[2])
+
+        g = self.parent.relatedGraph
+        g.add_node(nodeTup1)
+        g.add_node(nodeTup2)
+        g.add_edge(nodeTup1, nodeTup2, common=edgeTup1to2)
+        g.add_edge(nodeTup2, nodeTup1, common=edgeTup2to1)
+
+        #print("Graph becomes:")
+        #print("nodes x{0}".format(g.number_of_nodes()))
+        #print("edges x{0}".format(g.number_of_edges()))
+        #print(g[nodeTup1][nodeTup2]['common'])
+        #print(g[nodeTup2][nodeTup1]['common'])
+        
+
 

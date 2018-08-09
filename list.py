@@ -13,11 +13,7 @@ class list(QtWidgets.QListWidget):
     # Show cols for provided file
 
     def showFile(self, filename):
-        names = []
-        if filename == "已連結":
-            names = self.parent.connectedCols
-        else:
-            names = self.parent.colNamesSet[filename]
+        names = self.parent.colNamesSet[filename]
 
         self.clear()
         for n in names:

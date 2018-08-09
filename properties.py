@@ -20,7 +20,6 @@ class properties(QtWidgets.QWidget):
 
         gridLayout = QtWidgets.QGridLayout()
         comboBox = QtWidgets.QComboBox()
-        comboBox.addItem(self.tr("已連結"))
         comboBox.currentIndexChanged[str].connect(self.on_comboBox_currentIndexChanged)
         parent.comboBox = comboBox
         labelImage = QtWidgets.QLabel()

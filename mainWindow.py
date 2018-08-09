@@ -1,6 +1,7 @@
 import sys
 from PyQt5 import QtWidgets
 import pandas as pd
+import networkx as nx
 
 import menu
 import tool
@@ -16,7 +17,7 @@ class mainWindow(QtWidgets.QMainWindow):
 
         self.actions = {}
         self.colNamesSet = {}
-        self.connectedCols = []
+        self.relatedGraph = nx.DiGraph()
 
         self.setWindowTitle(self.tr("工研院技轉中心服務程式"))
         self.init_ui()

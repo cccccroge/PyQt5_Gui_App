@@ -14,10 +14,20 @@ class connectButton(QtWidgets.QPushButton):
         self.setAcceptDrops(True)
         self.pressed.connect(self.on_pressed)
 
+
+    ####################
+    #    Overloadeds
+    ####################
+    
+    # Define behavior when drag happening
+
     def dragEnterEvent(self, event):
         if event.mimeData().hasFormat("text/plain"):
             # TODO: add a regExpress check condition
             event.acceptProposedAction()
+
+
+    # Define behavior when drag happening
 
     def dropEvent(self, event):
         # Take out the info
@@ -32,6 +42,14 @@ class connectButton(QtWidgets.QPushButton):
         self.colToConnect.append(t)
 
         event.acceptProposedAction()
+
+
+
+    ####################
+    #      Slots
+    ####################
+
+    # With colNames loaded, press button will connect them
 
     def on_pressed(self):
         # Consider failed conditions
@@ -70,5 +88,3 @@ class connectButton(QtWidgets.QPushButton):
         #print(g[nodeTup1][nodeTup2]['common'])
         #print(g[nodeTup2][nodeTup1]['common'])
         
-
-

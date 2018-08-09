@@ -28,6 +28,9 @@
     <Compile Include="connectButton.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="filed.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="glob.py">
       <SubType>Code</SubType>
     </Compile>

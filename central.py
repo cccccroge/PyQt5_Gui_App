@@ -2,7 +2,7 @@ import sys
 from PyQt5 import QtWidgets, QtCore
 
 import properties
-
+import filed
 
 class central(QtWidgets.QTabWidget):
     def __init__(self, parent, **kwargs):
@@ -24,7 +24,7 @@ class central(QtWidgets.QTabWidget):
         propertiesWidget = properties.properties(parent)
         parent.mainWidget.addWidget(propertiesWidget)
 
-        fieldWidget = QtWidgets.QWidget()
+        fieldWidget = filed.filed(parent)
         parent.mainWidget.addWidget(fieldWidget)
 
         parent.mainWidget.setSizes([320, 1600])

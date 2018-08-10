@@ -28,7 +28,7 @@
     <Compile Include="connectButton.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="filed.py">
+    <Compile Include="field.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="glob.py">

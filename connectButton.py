@@ -38,8 +38,12 @@ class connectButton(QtWidgets.QPushButton):
         sheetName = text[pos1+1:pos2]
         colName = text[pos2+1:]
 
+        # Store and show hint
         t = (fileName, sheetName, colName)
         self.colToConnect.append(t)
+
+        n = str(len(self.colToConnect))
+        self.setText(self.tr("建立聯結\n+" + n))
 
         event.acceptProposedAction()
 
@@ -81,6 +85,9 @@ class connectButton(QtWidgets.QPushButton):
         g.add_node(nodeTup2)
         g.add_edge(nodeTup1, nodeTup2, common=edgeTup1to2)
         g.add_edge(nodeTup2, nodeTup1, common=edgeTup2to1)
+
+        # Set hint to normal
+        self.setText(self.tr("建立聯結"))
 
         #print("Graph becomes:")
         #print("nodes x{0}".format(g.number_of_nodes()))

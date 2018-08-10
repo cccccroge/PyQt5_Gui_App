@@ -28,6 +28,9 @@
     <Compile Include="connectButton.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="dataBlockMenu.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="field.py">
       <SubType>Code</SubType>
     </Compile>

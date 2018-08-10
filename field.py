@@ -1,5 +1,7 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
 
+import dataBlockMenu
+
 class field(QtWidgets.QWidget):
     def __init__(self, parent, **kwargs):
         super().__init__(**kwargs)
@@ -16,25 +18,28 @@ class field(QtWidgets.QWidget):
         p1.setVerticalStretch(2)
         headWidget.setSizePolicy(p1)
         palette = QtGui.QPalette()
-        palette.setColor(QtGui.QPalette.Background, QtGui.QColor(200, 200, 200, 255))
+        palette.setColor(QtGui.QPalette.Background, 
+                         QtGui.QColor(200, 200, 200, 255))
         headWidget.setAutoFillBackground(True)
         headWidget.setPalette(palette)
 
         addButton = QtWidgets.QPushButton()
         addButton.setText("+")
         addButton.setFixedSize(QtCore.QSize(50, 50))
+        popupMenu = dataBlockMenu.dataBlockMenu()
+        addButton.setMenu(popupMenu)
 
-        #previewButton = QtWidgets.QPushButton()
-        #previewButton.setText("預覽")
-        #previewButton.setFixedSize(QtCore.QSize(50, 25))
-        #exportButton = QtWidgets.QPushButton()
-        #exportButton.setText("輸出")
-        #exportButton.setFixedSize(QtCore.QSize(50, 25))
-        buttonMenu = QtWidgets.QMenu()
-        buttonMenu.addAction(self.parent.actions["viewExportedExcel"])
-        buttonMenu.addAction(self.parent.actions["exportExcel"])
+        previewButton = QtWidgets.QPushButton()
+        previewButton.setText("預覽")
+        previewButton.setFixedSize(QtCore.QSize(50, 25))
+        previewButton.pressed.connect(parent.actions["viewExportedExcel"].trigger)
+        exportButton = QtWidgets.QPushButton()
+        exportButton.setText("輸出")
+        exportButton.setFixedSize(QtCore.QSize(50, 25))
+        exportButton.pressed.connect(parent.actions["exportExcel"].trigger)
         hboxLayout1 = QtWidgets.QHBoxLayout()
-        hboxLayout1.addWidget(buttonMenu)
+        hboxLayout1.addWidget(previewButton)
+        hboxLayout1.addWidget(exportButton)
         hboxLayout1.setAlignment(QtCore.Qt.AlignRight)
 
         hboxLayout2 = QtWidgets.QHBoxLayout()
@@ -53,8 +58,6 @@ class field(QtWidgets.QWidget):
         b1 = QtWidgets.QPushButton()
         b1.setText("隨意")
         b1.setFixedSize(QtCore.QSize(50, 25))
-        l1 = QtWidgets.QLabel()
-        l1.setText("HA")
 
         gridLayout = QtWidgets.QGridLayout()
         gridLayout.setContentsMargins(25, 5, 25, 5)
@@ -64,5 +67,4 @@ class field(QtWidgets.QWidget):
 
         vboxLayout.addWidget(headWidget)
         vboxLayout.addWidget(bodyWidget)
-
 

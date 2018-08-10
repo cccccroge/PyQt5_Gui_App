@@ -53,6 +53,10 @@ class mainWindow(QtWidgets.QMainWindow):
             , "All Files (*);;Excel Files (*xlsx);;Excel 97-2003 Files(*xls)"
             , "Excel Files (*xlsx)")
 
+        if len(filenames) == 0:
+            self.statusBar().showMessage("取消讀取或未選取檔案")
+            return
+
         excelPaths = []
         for n in filenames[0]:
             excelPaths.append(n)

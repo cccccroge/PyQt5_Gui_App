@@ -7,9 +7,27 @@ class field(QtWidgets.QWidget):
         super().__init__(**kwargs)
 
         self.parent = parent
+        self.activeBlock = None
+        self.setMouseTracking(False)
 
         vboxLayout = QtWidgets.QVBoxLayout()
         self.setLayout(vboxLayout)
+
+        # Body
+        self.bodyWidget = QtWidgets.QWidget()
+        p2 = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred
+                                   , QtWidgets.QSizePolicy.Preferred)
+        p2.setVerticalStretch(14)
+        self.bodyWidget.setSizePolicy(p2)
+
+        b1 = QtWidgets.QPushButton()
+        b1.setText("隨意")
+        b1.setFixedSize(QtCore.QSize(50, 25))
+
+        gridLayout = QtWidgets.QGridLayout()
+        gridLayout.setContentsMargins(25, 5, 25, 5)
+        gridLayout.addWidget(b1, 0, 0, QtCore.Qt.AlignLeft)
+        self.bodyWidget.setLayout(gridLayout)
 
         # Head
         headWidget = QtWidgets.QWidget()
@@ -24,9 +42,9 @@ class field(QtWidgets.QWidget):
         headWidget.setPalette(palette)
 
         addButton = QtWidgets.QPushButton()
-        addButton.setText("+")
-        addButton.setFixedSize(QtCore.QSize(50, 50))
-        popupMenu = dataBlockMenu.dataBlockMenu()
+        addButton.setText("選擇方塊")
+        addButton.setFixedSize(QtCore.QSize(100, 50))
+        popupMenu = dataBlockMenu.dataBlockMenu(self)
         addButton.setMenu(popupMenu)
 
         previewButton = QtWidgets.QPushButton()
@@ -48,23 +66,17 @@ class field(QtWidgets.QWidget):
         hboxLayout2.addLayout(hboxLayout1)
         headWidget.setLayout(hboxLayout2)
 
-        # Body
-        bodyWidget = QtWidgets.QWidget()
-        p2 = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred
-                                   , QtWidgets.QSizePolicy.Preferred)
-        p2.setVerticalStretch(14)
-        bodyWidget.setSizePolicy(p2)
-
-        b1 = QtWidgets.QPushButton()
-        b1.setText("隨意")
-        b1.setFixedSize(QtCore.QSize(50, 25))
-
-        gridLayout = QtWidgets.QGridLayout()
-        gridLayout.setContentsMargins(25, 5, 25, 5)
-        gridLayout.addWidget(b1, 0, 0, QtCore.Qt.AlignLeft)
-        bodyWidget.setLayout(gridLayout)
-
 
         vboxLayout.addWidget(headWidget)
-        vboxLayout.addWidget(bodyWidget)
+        vboxLayout.addWidget(self.bodyWidget)
+    
 
+    def mouseMoveEvent(self, QMouseEvent):
+        pos = QMouseEvent.pos()
+        print(pos)
+        #print("mouse in field is at {1}".format(pos))
+        #self.activeBlock.move(pos)
+
+    def mousePressEvent(self, QMouseEvent):
+        self.setMouseTracking(False)
+        self.activeBlock = None

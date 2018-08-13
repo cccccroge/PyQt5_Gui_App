@@ -24,8 +24,8 @@ class central(QtWidgets.QTabWidget):
         propertiesWidget = properties.properties(parent)
         parent.mainWidget.addWidget(propertiesWidget)
 
-        fieldWidget = field.field(parent)
-        parent.mainWidget.addWidget(fieldWidget)
+        self.fieldWidget = field.field(parent)
+        parent.mainWidget.addWidget(self.fieldWidget)
 
         parent.mainWidget.setSizes([320, 1600])
         self.addTab(parent.mainWidget, self.tr("主要工作面板"))

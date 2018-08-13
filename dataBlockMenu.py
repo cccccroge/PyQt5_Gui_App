@@ -3,10 +3,11 @@ from PyQt5 import QtWidgets, QtGui
 import dataBlock
 
 class dataBlockMenu(QtWidgets.QMenu):
-    def __init__(self, parent, **kwargs):
+    def __init__(self, parent, field, **kwargs):
         super().__init__(**kwargs)
 
         self.parent = parent
+        self.field = field
 
         dataAction = self.addAction(self.tr("資料"))
         dataAction.triggered.connect(lambda: self.buildingBlock(1))
@@ -14,8 +15,15 @@ class dataBlockMenu(QtWidgets.QMenu):
 
     def buildingBlock(self, id):
         if id == 1:
-            blk = dataBlock.dataBlock()
-            blk.setParent(self.parent)
-            #self.parent.layout().addWidget(blk)
+            # This block is a temporary object
+            # It'll be actually constructed (put into gridLayout)
+            # when user press leftbutton
+            blk = dataBlock.dataBlock(self.parent, self.field)
+            blk.setParent(self.field)
+
+            blkCord = blk.mapFromGlobal(QtGui.QCursor.pos())
+            parentCord = blk.mapToParent(blkCord)
+            blk.move(parentCord - blk.offset)
+
             blk.show()
         

@@ -1,6 +1,7 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 import dataBlockMenu
+from glob import msgDuration
 
 class field(QtWidgets.QWidget):
     def __init__(self, parent, **kwargs):
@@ -26,7 +27,7 @@ class field(QtWidgets.QWidget):
         addBlkBtn = QtWidgets.QPushButton()
         addBlkBtn.setText("選擇方塊")
         addBlkBtn.setFixedSize(QtCore.QSize(100, 50))
-        popupMenu = dataBlockMenu.dataBlockMenu(self)
+        popupMenu = dataBlockMenu.dataBlockMenu(self.parent, self)
         addBlkBtn.setMenu(popupMenu)
 
         previewButton = QtWidgets.QPushButton()
@@ -58,6 +59,9 @@ class field(QtWidgets.QWidget):
         self.gridLayout.setVerticalSpacing(25)
         self.gridLayout.setHorizontalSpacing(0)
 
+        vboxLayout2.addLayout(self.gridLayout)
+        vboxLayout2.addSpacing(400)
+
         # default cols
         for i in range(5):    
             col = self.create_default_col()
@@ -71,6 +75,7 @@ class field(QtWidgets.QWidget):
         self.gridLayout.addWidget(addColBtn, self.gridLayout.rowCount(), 
                                   0, QtCore.Qt.AlignLeft)
 
+        # make body scrollable
         self.scrollArea = QtWidgets.QScrollArea()
         self.scrollArea.setWidget(bodyWidget)
         self.scrollArea.setWidgetResizable(True)
@@ -79,12 +84,9 @@ class field(QtWidgets.QWidget):
         p2.setVerticalStretch(14)
         self.scrollArea.setSizePolicy(p2)
 
-        vboxLayout2.addLayout(self.gridLayout)
-        vboxLayout2.addSpacing(400)
 
         vboxLayout1.addWidget(headWidget)
         vboxLayout1.addWidget(self.scrollArea)
-    
 
 
     ####################
@@ -98,9 +100,11 @@ class field(QtWidgets.QWidget):
         addColBtn = self.gridLayout.itemAtPosition(lastRow, 0).widget()
         newCol = self.create_default_col()
         
-        self.gridLayout.removeWidget(addColBtn)
+        #self.gridLayout.removeWidget(addColBtn)
         self.gridLayout.addWidget(newCol, lastRow, 0, QtCore.Qt.AlignLeft)
         self.gridLayout.addWidget(addColBtn, lastRow + 1, 0, QtCore.Qt.AlignLeft)
+
+        self.parent.statusBar().showMessage("新增一個欄位", msgDuration)
 
 
     ####################

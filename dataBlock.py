@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
-from glob import msgDuration
+from glob import msgDuration, fieldRowHeight
 
 class dataBlock(QtWidgets.QWidget):
     def __init__(self, parent, field, **kwargs):
@@ -7,7 +7,7 @@ class dataBlock(QtWidgets.QWidget):
 
         self.parent = parent
         self.field = field
-        self.setFixedSize(140, 25)
+        self.setFixedSize(140, fieldRowHeight)
         self.isValid = False
         self.putLoc = None
 
@@ -17,11 +17,11 @@ class dataBlock(QtWidgets.QWidget):
         self.setLayout(hboxLayout)
 
         self.nameEdit = QtWidgets.QLineEdit()
-        self.nameEdit.setFixedSize(100, 25)
+        self.nameEdit.setFixedSize(100, fieldRowHeight)
         self.nameEdit.setDisabled(True)
         self.settingBtn = QtWidgets.QPushButton()
         self.settingBtn.setText(self.tr("設定"))
-        self.settingBtn.setFixedSize(40, 25)
+        self.settingBtn.setFixedSize(40, fieldRowHeight)
 
         hboxLayout.addWidget(self.nameEdit)
         hboxLayout.addWidget(self.settingBtn)
@@ -57,11 +57,12 @@ class dataBlock(QtWidgets.QWidget):
         else:
             self.setMouseTracking(False)
 
-            b1 = QtWidgets.QPushButton()
-            b1.setText("TEST")
+            lineLabel = QtWidgets.QLabel()
+            lineLabel.setText("──")
+            lineLabel.setFixedHeight(fieldRowHeight)
 
-            #self.field.gridLayout.addWidget(b1, 0, 1, QtCore.Qt.AlignLeft)
-            self.field.gridLayout.addWidget(self, 0, 1, QtCore.Qt.AlignLeft)
+            self.field.gridLayout.addWidget(lineLabel, 0, 1, QtCore.Qt.AlignLeft)
+            self.field.gridLayout.addWidget(self, 0, 2, QtCore.Qt.AlignLeft)
             self.nameEdit.setDisabled(False)
 
             self.parent.statusBar().showMessage("已成功建立方塊", msgDuration)

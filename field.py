@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 import dataBlockMenu
-from glob import msgDuration
+from glob import msgDuration, fieldRowHeight
 
 class field(QtWidgets.QWidget):
     def __init__(self, parent, **kwargs):
@@ -115,6 +115,6 @@ class field(QtWidgets.QWidget):
     def create_default_col(self):
         le = QtWidgets.QLineEdit()
         le.setPlaceholderText(self.tr("欄位名稱"))
-        le.setFixedHeight(25)
+        le.setFixedHeight(fieldRowHeight)
         return le
 

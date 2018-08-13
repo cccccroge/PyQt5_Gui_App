@@ -51,16 +51,26 @@ class field(QtWidgets.QWidget):
 
         # Body
         bodyWidget = QtWidgets.QWidget()
-        vboxLayout2 = QtWidgets.QVBoxLayout()
-        bodyWidget.setLayout(vboxLayout2)
+        self.scrollArea = QtWidgets.QScrollArea()
+        self.scrollArea.setWidget(bodyWidget)
+        self.scrollArea.setWidgetResizable(True)
+        p2 = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred
+                                   , QtWidgets.QSizePolicy.Preferred)
+        p2.setVerticalStretch(14)
+        self.scrollArea.setSizePolicy(p2)
 
+        vboxLayout2 = QtWidgets.QVBoxLayout()
+        vboxLayout2.setAlignment(QtCore.Qt.AlignLeft)
         self.gridLayout = QtWidgets.QGridLayout()
+        self.gridLayout.setAlignment(QtCore.Qt.AlignTop)
         self.gridLayout.setContentsMargins(25, 25, 25, 25)
         self.gridLayout.setVerticalSpacing(25)
         self.gridLayout.setHorizontalSpacing(0)
-
         vboxLayout2.addLayout(self.gridLayout)
         vboxLayout2.addSpacing(400)
+        hboxLayout3 = QtWidgets.QHBoxLayout()
+        hboxLayout3.addLayout(vboxLayout2)
+        bodyWidget.setLayout(hboxLayout3)
 
         # default cols
         for i in range(5):    
@@ -74,15 +84,6 @@ class field(QtWidgets.QWidget):
         addColBtn.pressed.connect(self.on_addColBtn_pressed)
         self.gridLayout.addWidget(addColBtn, self.gridLayout.rowCount(), 
                                   0, QtCore.Qt.AlignLeft)
-
-        # make body scrollable
-        self.scrollArea = QtWidgets.QScrollArea()
-        self.scrollArea.setWidget(bodyWidget)
-        self.scrollArea.setWidgetResizable(True)
-        p2 = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred
-                                   , QtWidgets.QSizePolicy.Preferred)
-        p2.setVerticalStretch(14)
-        self.scrollArea.setSizePolicy(p2)
 
 
         vboxLayout1.addWidget(headWidget)
@@ -116,8 +117,4 @@ class field(QtWidgets.QWidget):
         le.setPlaceholderText(self.tr("欄位名稱"))
         le.setFixedHeight(25)
         return le
-
-    def delay_add_col(self, w1, r1, w2, r2):
-        self.gridLayout.addWidget(w1, r1, 0, QtCore.Qt.AlignLeft)
-        self.gridLayout.addWidget(w2, r2, 0, QtCore.Qt.AlignLeft)
 

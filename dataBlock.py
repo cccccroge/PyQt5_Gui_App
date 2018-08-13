@@ -8,6 +8,8 @@ class dataBlock(QtWidgets.QWidget):
         self.parent = parent
         self.field = field
         self.setFixedSize(140, 25)
+        self.isValid = False
+        self.putLoc = None
 
         # Widget elements
         hboxLayout = QtWidgets.QHBoxLayout()
@@ -37,8 +39,16 @@ class dataBlock(QtWidgets.QWidget):
 
 
     def mouseMoveEvent(self, QMouseEvent):
-        pos = self.mapToParent(QMouseEvent.pos())
-        self.move(pos - self.offset)
+        pos = self.mapToParent(QMouseEvent.pos()) - self.offset
+        self.move(pos)
+
+        #loc = getGridLocation(pos, self.field.gridLayout)
+        #if loc is None:
+        #    self.isValid = False
+        #    self.putLoc = None
+        #else:
+        #    self.isValid = True
+        #    self.putLoc = loc
 
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.button() == QtCore.Qt.RightButton:
@@ -46,8 +56,14 @@ class dataBlock(QtWidgets.QWidget):
             self.parent.statusBar().showMessage("已取消建立方塊", msgDuration)
         else:
             self.setMouseTracking(False)
-            #self.field.gridLayout.addWidget(self, 0, 1, QtCore.Qt.AlignLeft)
+
+            b1 = QtWidgets.QPushButton()
+            b1.setText("TEST")
+
+            #self.field.gridLayout.addWidget(b1, 0, 1, QtCore.Qt.AlignLeft)
+            self.field.gridLayout.addWidget(self, 0, 1, QtCore.Qt.AlignLeft)
             self.nameEdit.setDisabled(False)
+
             self.parent.statusBar().showMessage("已成功建立方塊", msgDuration)
 
 

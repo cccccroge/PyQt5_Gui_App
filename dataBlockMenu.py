@@ -21,6 +21,7 @@ class dataBlockMenu(QtWidgets.QMenu):
             blk = dataBlock.dataBlock(self.parent, self.field)
             blk.setParent(self.field)
 
+            # Set this temp object to correct position
             blkCord = blk.mapFromGlobal(QtGui.QCursor.pos())
             parentCord = blk.mapToParent(blkCord)
             blk.move(parentCord - blk.offset)

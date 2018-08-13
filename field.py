@@ -7,8 +7,6 @@ class field(QtWidgets.QWidget):
         super().__init__(**kwargs)
 
         self.parent = parent
-        self.activeBlock = None
-        self.setMouseTracking(False)
 
         vboxLayout = QtWidgets.QVBoxLayout()
         self.setLayout(vboxLayout)
@@ -26,7 +24,7 @@ class field(QtWidgets.QWidget):
 
         gridLayout = QtWidgets.QGridLayout()
         gridLayout.setContentsMargins(25, 5, 25, 5)
-        gridLayout.addWidget(b1, 0, 0, QtCore.Qt.AlignLeft)
+        #gridLayout.addWidget(b1, 0, 0, QtCore.Qt.AlignLeft)
         self.bodyWidget.setLayout(gridLayout)
 
         # Head
@@ -71,12 +69,3 @@ class field(QtWidgets.QWidget):
         vboxLayout.addWidget(self.bodyWidget)
     
 
-    def mouseMoveEvent(self, QMouseEvent):
-        pos = QMouseEvent.pos()
-        print(pos)
-        #print("mouse in field is at {1}".format(pos))
-        #self.activeBlock.move(pos)
-
-    def mousePressEvent(self, QMouseEvent):
-        self.setMouseTracking(False)
-        self.activeBlock = None

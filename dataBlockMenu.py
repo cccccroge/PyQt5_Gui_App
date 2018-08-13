@@ -16,8 +16,6 @@ class dataBlockMenu(QtWidgets.QMenu):
         if id == 1:
             blk = dataBlock.dataBlock()
             blk.setParent(self.parent)
-            self.parent.activeBlock = blk
             #self.parent.layout().addWidget(blk)
-            self.parent.setMouseTracking(True)
             blk.show()
         

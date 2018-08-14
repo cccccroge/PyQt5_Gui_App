@@ -37,12 +37,20 @@ class dataBlock(QtWidgets.QWidget):
         self.offset = QtCore.QPoint(self.width() / 2, self.height() / 2)
 
 
+    ####################
+    #    Overloadeds
+    ####################
+
+    # Make block's center move with cursor
+
     def mouseMoveEvent(self, QMouseEvent):
         pos = self.mapToParent(QMouseEvent.pos()) - self.offset
         self.move(pos)
 
-        #self.putRow = self.getGridRow(pos.y(), self.field.gridLayout)
+        #self.putRow = self.__getGridRow(pos.y(), self.field.gridLayout)
 
+
+    # Actions when mouse button press
 
     def mousePressEvent(self, QMouseEvent):
         # Right mouse button to cancel
@@ -58,12 +66,12 @@ class dataBlock(QtWidgets.QWidget):
             pos = fieldBodyPos - self.offset
 
             # decide position to put
-            self.putRow = self.getGridRow(pos.y(), self.field.gridLayout)
+            self.putRow = self.__getGridRow(pos.y(), self.field.gridLayout)
             if self.putRow is None:
                 self.parent.statusBar().showMessage("該位置不能放置方塊", msgDuration)
                 return
 
-            putCol = self.getGridCol(self.putRow, self.field.gridLayout)
+            putCol = self.__getGridCol(self.putRow, self.field.gridLayout)
 
             # put a line and a block
             self.setMouseTracking(False)
@@ -79,7 +87,14 @@ class dataBlock(QtWidgets.QWidget):
 
             self.parent.statusBar().showMessage("已成功建立方塊", msgDuration)
 
-    def getGridRow(self, y, gridLayout):
+
+    ####################
+    #   Private funcs
+    ####################
+
+    # Get row index to put
+
+    def __getGridRow(self, y, gridLayout):
         l, topMargin, r, b = gridLayout.getContentsMargins()
         y_eff = y - topMargin
 
@@ -102,8 +117,10 @@ class dataBlock(QtWidgets.QWidget):
 
         return row
 
-    def getGridCol(self, row, gridLayout):
-        # Iterate that row to find last col
+
+    # Get col index to put
+
+    def __getGridCol(self, row, gridLayout):
         col = 0
         while True:
             item = gridLayout.itemAtPosition(row, col)

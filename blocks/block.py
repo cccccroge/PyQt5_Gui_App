@@ -13,6 +13,7 @@ class block(QtWidgets.QWidget):
         # Widget elements
         hboxLayout = QtWidgets.QHBoxLayout()
         hboxLayout.setContentsMargins(0, 0, 0, 0)
+        hboxLayout.setSpacing(0)
         self.setLayout(hboxLayout)
 
         self.nameEdit = QtWidgets.QLineEdit()
@@ -23,8 +24,8 @@ class block(QtWidgets.QWidget):
         self.settingBtn.setText(self.tr("..."))
         self.settingBtn.setFixedSize(20, fieldRowHeight)
 
-        hboxLayout.addWidget(self.nameEdit)
-        hboxLayout.addWidget(self.settingBtn)
+        hboxLayout.addWidget(self.nameEdit, 0, QtCore.Qt.AlignLeft)
+        hboxLayout.addWidget(self.settingBtn, 0, QtCore.Qt.AlignLeft)
 
         # Transparent background
         palette = QtGui.QPalette()
@@ -77,18 +78,21 @@ class block(QtWidgets.QWidget):
                 self.parent.statusBar().showMessage("該位置不能放置方塊", msgDuration)
                 return
 
-            putCol = self.__getGridCol(self.putRow, self.field.gridLayout)
+            hboxLayout = self.field.gridLayout.itemAtPosition(self.putRow, 0)
+            #putCol = self.__getGridCol(self.putRow, self.field.gridLayout)
 
-            # put a line and a block
+            # put a line and a block to that row's hboxLayout
             self.setMouseTracking(False)
 
             lineLabel = QtWidgets.QLabel()
             lineLabel.setText("──")
             lineLabel.setFixedHeight(fieldRowHeight)
-            self.field.gridLayout.addWidget(
-                lineLabel, self.putRow, putCol, QtCore.Qt.AlignLeft)
-            self.field.gridLayout.addWidget(
-                self, self.putRow, putCol + 1, QtCore.Qt.AlignLeft)
+            hboxLayout.addWidget(lineLabel, 0, QtCore.Qt.AlignLeft)
+            hboxLayout.addWidget(self, 0, QtCore.Qt.AlignLeft)
+            #self.field.gridLayout.addWidget(
+            #    lineLabel, self.putRow, putCol, QtCore.Qt.AlignLeft)
+            #self.field.gridLayout.addWidget(
+            #    self, self.putRow, putCol + 1, QtCore.Qt.AlignLeft)
             self.nameEdit.setDisabled(False)
 
             self.parent.statusBar().showMessage("已成功建立方塊", msgDuration)
@@ -124,16 +128,16 @@ class block(QtWidgets.QWidget):
         return row
 
 
-    # Get col index to put
+    ## Get col index to put
 
-    def __getGridCol(self, row, gridLayout):
-        col = 0
-        while True:
-            item = gridLayout.itemAtPosition(row, col)
-            if item is None:
-                break;
-            col += 1
+    #def __getGridCol(self, row, gridLayout):
+    #    col = 0
+    #    while True:
+    #        item = gridLayout.itemAtPosition(row, col)
+    #        if item is None:
+    #            break;
+    #        col += 1
 
-        return col
+    #    return col
 
 

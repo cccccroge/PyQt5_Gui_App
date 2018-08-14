@@ -3,6 +3,7 @@ from PyQt5 import QtWidgets, QtGui
 import sys
 sys.path.append("./blocks")
 import dataBlock
+import condDataBlock
 
 class blockMenu(QtWidgets.QMenu):
     def __init__(self, parent, field, **kwargs):
@@ -34,16 +35,21 @@ class blockMenu(QtWidgets.QMenu):
     # Build corresponding type of block
 
     def buildingBlock(self, id):
+        # This block temporarily belongs to field
+        # It'll be actually put into gridLayout (bodyWidget) when user press leftbutton
+        blk = None
+
         if id == 1:
-            # This block temporarily belongs to field
-            # It'll be actually put into gridLayout (bodyWidget) when user press leftbutton
             blk = dataBlock.dataBlock(self.parent, self.field)
-            blk.setParent(self.field)
+        elif id == 2:
+            blk = condDataBlock.condDataBlock(self.parent, self.field)
 
-            # Set to correct position (cursor at its center) at beginning
-            blkCord = blk.mapFromGlobal(QtGui.QCursor.pos())
-            parentCord = blk.mapToParent(blkCord)
-            blk.move(parentCord - blk.offset)
+        blk.setParent(self.field)
 
-            blk.show()
+        # Set to correct position (cursor at its center) at beginning
+        blkCord = blk.mapFromGlobal(QtGui.QCursor.pos())
+        parentCord = blk.mapToParent(blkCord)
+        blk.move(parentCord - blk.offset)
+
+        blk.show()
         

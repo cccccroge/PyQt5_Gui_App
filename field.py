@@ -75,8 +75,8 @@ class field(QtWidgets.QWidget):
 
         # default cols
         for i in range(5):    
-            col = self.__create_default_col()
-            self.gridLayout.addWidget(col, i, 0, QtCore.Qt.AlignLeft)
+            rowLayout = self.__create_row_hBoxLayout()
+            self.gridLayout.addLayout(rowLayout, i, 0, QtCore.Qt.AlignLeft)
 
         # add col button
         addColBtn = QtWidgets.QPushButton()
@@ -99,11 +99,11 @@ class field(QtWidgets.QWidget):
 
     def on_addColBtn_pressed(self):
         lastRow = self.gridLayout.rowCount() - 1;
+
         addColBtn = self.gridLayout.itemAtPosition(lastRow, 0).widget()
-        newCol = self.__create_default_col()
+        rowLayout = self.__create_row_hBoxLayout()
         
-        #self.gridLayout.removeWidget(addColBtn)
-        self.gridLayout.addWidget(newCol, lastRow, 0, QtCore.Qt.AlignLeft)
+        self.gridLayout.addLayout(rowLayout, lastRow, 0, QtCore.Qt.AlignLeft)
         self.gridLayout.addWidget(addColBtn, lastRow + 1, 0, QtCore.Qt.AlignLeft)
 
         self.parent.statusBar().showMessage("新增一個欄位", msgDuration)
@@ -118,5 +118,14 @@ class field(QtWidgets.QWidget):
         le.setPlaceholderText(self.tr("欄位名稱"))
         le.setFixedSize(QtCore.QSize(125, fieldRowHeight))
         return le
+
+    def __create_row_hBoxLayout(self):
+        col = self.__create_default_col()
+        rowLayout = QtWidgets.QHBoxLayout()
+        rowLayout.setContentsMargins(0, 0, 0, 0)
+        rowLayout.setSpacing(0)
+        rowLayout.addWidget(col, 0, QtCore.Qt.AlignLeft)
+        #rowLayout.addStretch(-1)
+        return rowLayout
 
 

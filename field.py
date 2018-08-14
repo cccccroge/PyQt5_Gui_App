@@ -12,6 +12,43 @@ class field(QtWidgets.QWidget):
         vboxLayout1 = QtWidgets.QVBoxLayout()
         self.setLayout(vboxLayout1)
 
+        # Body
+        self.bodyWidget = QtWidgets.QWidget()
+        self.scrollArea = QtWidgets.QScrollArea()
+        self.scrollArea.setWidget(self.bodyWidget)
+        self.scrollArea.setWidgetResizable(True)
+        p2 = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred
+                                   , QtWidgets.QSizePolicy.Preferred)
+        p2.setVerticalStretch(14)
+        self.scrollArea.setSizePolicy(p2)
+
+        vboxLayout2 = QtWidgets.QVBoxLayout()
+        vboxLayout2.setAlignment(QtCore.Qt.AlignLeft)
+        self.gridLayout = QtWidgets.QGridLayout()
+        self.gridLayout.setAlignment(QtCore.Qt.AlignTop)
+        self.gridLayout.setContentsMargins(25, 25, 25, 25)
+        self.gridLayout.setVerticalSpacing(25)
+        self.gridLayout.setHorizontalSpacing(0)
+        vboxLayout2.addLayout(self.gridLayout)
+        vboxLayout2.addSpacing(400)
+        hboxLayout3 = QtWidgets.QHBoxLayout()
+        hboxLayout3.addLayout(vboxLayout2)
+        self.bodyWidget.setLayout(hboxLayout3)
+
+        # default cols
+        for i in range(5):    
+            col = self.create_default_col()
+            self.gridLayout.addWidget(col, i, 0, QtCore.Qt.AlignLeft)
+
+        # add col button
+        addColBtn = QtWidgets.QPushButton()
+        addColBtn.setText("+")
+        addColBtn.setFixedSize(25, 25)
+        addColBtn.pressed.connect(self.on_addColBtn_pressed)
+        self.gridLayout.addWidget(addColBtn, self.gridLayout.rowCount(), 
+                                  0, QtCore.Qt.AlignLeft)
+
+
         # Head
         headWidget = QtWidgets.QWidget()
         p1 = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred
@@ -49,42 +86,6 @@ class field(QtWidgets.QWidget):
         hboxLayout2.addLayout(hboxLayout1)
         headWidget.setLayout(hboxLayout2)
 
-        # Body
-        bodyWidget = QtWidgets.QWidget()
-        self.scrollArea = QtWidgets.QScrollArea()
-        self.scrollArea.setWidget(bodyWidget)
-        self.scrollArea.setWidgetResizable(True)
-        p2 = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred
-                                   , QtWidgets.QSizePolicy.Preferred)
-        p2.setVerticalStretch(14)
-        self.scrollArea.setSizePolicy(p2)
-
-        vboxLayout2 = QtWidgets.QVBoxLayout()
-        vboxLayout2.setAlignment(QtCore.Qt.AlignLeft)
-        self.gridLayout = QtWidgets.QGridLayout()
-        self.gridLayout.setAlignment(QtCore.Qt.AlignTop)
-        self.gridLayout.setContentsMargins(25, 25, 25, 25)
-        self.gridLayout.setVerticalSpacing(25)
-        self.gridLayout.setHorizontalSpacing(0)
-        vboxLayout2.addLayout(self.gridLayout)
-        vboxLayout2.addSpacing(400)
-        hboxLayout3 = QtWidgets.QHBoxLayout()
-        hboxLayout3.addLayout(vboxLayout2)
-        bodyWidget.setLayout(hboxLayout3)
-
-        # default cols
-        for i in range(5):    
-            col = self.create_default_col()
-            self.gridLayout.addWidget(col, i, 0, QtCore.Qt.AlignLeft)
-
-        # add col button
-        addColBtn = QtWidgets.QPushButton()
-        addColBtn.setText("+")
-        addColBtn.setFixedSize(25, 25)
-        addColBtn.pressed.connect(self.on_addColBtn_pressed)
-        self.gridLayout.addWidget(addColBtn, self.gridLayout.rowCount(), 
-                                  0, QtCore.Qt.AlignLeft)
-
 
         vboxLayout1.addWidget(headWidget)
         vboxLayout1.addWidget(self.scrollArea)
@@ -117,4 +118,5 @@ class field(QtWidgets.QWidget):
         le.setPlaceholderText(self.tr("欄位名稱"))
         le.setFixedHeight(fieldRowHeight)
         return le
+
 

@@ -8,8 +8,7 @@ class dataBlock(QtWidgets.QWidget):
         self.parent = parent
         self.field = field
         self.setFixedSize(140, fieldRowHeight)
-        self.isValid = False
-        self.putLoc = None
+        self.putRow = None
 
         # Widget elements
         hboxLayout = QtWidgets.QHBoxLayout()
@@ -42,30 +41,76 @@ class dataBlock(QtWidgets.QWidget):
         pos = self.mapToParent(QMouseEvent.pos()) - self.offset
         self.move(pos)
 
-        #loc = getGridLocation(pos, self.field.gridLayout)
-        #if loc is None:
-        #    self.isValid = False
-        #    self.putLoc = None
-        #else:
-        #    self.isValid = True
-        #    self.putLoc = loc
+        #self.putRow = self.getGridRow(pos.y(), self.field.gridLayout)
+
 
     def mousePressEvent(self, QMouseEvent):
+        # Right mouse button to cancel
         if QMouseEvent.button() == QtCore.Qt.RightButton:
             self.deleteLater()
             self.parent.statusBar().showMessage("已取消建立方塊", msgDuration)
+
+        # Left mouse button to confirm
         else:
+            # transform block-cord to fieldBody-cord
+            globPos = self.mapToGlobal(QMouseEvent.pos())
+            fieldBodyPos = self.field.bodyWidget.mapFromGlobal(globPos)
+            pos = fieldBodyPos - self.offset
+
+            # decide position to put
+            self.putRow = self.getGridRow(pos.y(), self.field.gridLayout)
+            if self.putRow is None:
+                self.parent.statusBar().showMessage("該位置不能放置方塊", msgDuration)
+                return
+
+            putCol = self.getGridCol(self.putRow, self.field.gridLayout)
+
+            # put a line and a block
             self.setMouseTracking(False)
 
             lineLabel = QtWidgets.QLabel()
             lineLabel.setText("──")
             lineLabel.setFixedHeight(fieldRowHeight)
-
-            self.field.gridLayout.addWidget(lineLabel, 0, 1, QtCore.Qt.AlignLeft)
-            self.field.gridLayout.addWidget(self, 0, 2, QtCore.Qt.AlignLeft)
+            self.field.gridLayout.addWidget(
+                lineLabel, self.putRow, putCol, QtCore.Qt.AlignLeft)
+            self.field.gridLayout.addWidget(
+                self, self.putRow, putCol + 1, QtCore.Qt.AlignLeft)
             self.nameEdit.setDisabled(False)
 
             self.parent.statusBar().showMessage("已成功建立方塊", msgDuration)
 
+    def getGridRow(self, y, gridLayout):
+        l, topMargin, r, b = gridLayout.getContentsMargins()
+        y_eff = y - topMargin
+
+        # Not even get to first row
+        if y_eff < 0:
+            return None
+
+        # Estimate row position
+        verSpace = gridLayout.verticalSpacing()
+        unit = fieldRowHeight + verSpace
+        row  = int(y_eff / unit)
+
+        # Exceed last row (exclude the addBtn)
+        if row > gridLayout.rowCount() - 2:
+            return None
+
+        # Not on the exact row (on spaces)
+        if y_eff > unit * (row + 1) - verSpace:
+            return None
+
+        return row
+
+    def getGridCol(self, row, gridLayout):
+        # Iterate that row to find last col
+        col = 0
+        while True:
+            item = gridLayout.itemAtPosition(row, col)
+            if item is None:
+                break;
+            col += 1
+
+        return col
 
     

@@ -22,16 +22,19 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="blocks\dataBlock.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="central.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="connectButton.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="dataBlock.py">
+    <Compile Include="blocks\block.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="dataBlockMenu.py">
+    <Compile Include="blockMenu.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="field.py">
@@ -59,6 +62,9 @@
     <Compile Include="tool.py">
       <SubType>Code</SubType>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="blocks\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-import dataBlockMenu
+import blockMenu
 from glob import msgDuration, fieldRowHeight
 
 class field(QtWidgets.QWidget):
@@ -27,7 +27,7 @@ class field(QtWidgets.QWidget):
         addBlkBtn = QtWidgets.QPushButton()
         addBlkBtn.setText("選擇方塊")
         addBlkBtn.setFixedSize(QtCore.QSize(100, 50))
-        popupMenu = dataBlockMenu.dataBlockMenu(self.parent, self)
+        popupMenu = blockMenu.blockMenu(self.parent, self)
         addBlkBtn.setMenu(popupMenu)
 
         previewButton = QtWidgets.QPushButton()

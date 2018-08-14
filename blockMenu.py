@@ -1,8 +1,10 @@
 from PyQt5 import QtWidgets, QtGui
 
+import sys
+sys.path.append("./blocks")
 import dataBlock
 
-class dataBlockMenu(QtWidgets.QMenu):
+class blockMenu(QtWidgets.QMenu):
     def __init__(self, parent, field, **kwargs):
         super().__init__(**kwargs)
 

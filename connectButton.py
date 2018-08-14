@@ -19,7 +19,7 @@ class connectButton(QtWidgets.QPushButton):
     #    Overloadeds
     ####################
     
-    # Define behavior when drag happening
+    # DragEnter: check if is plain text
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasFormat("text/plain"):
@@ -27,7 +27,7 @@ class connectButton(QtWidgets.QPushButton):
             event.acceptProposedAction()
 
 
-    # Define behavior when drag happening
+    # Drop: parse text to store tuple temporarily
 
     def dropEvent(self, event):
         # Take out the info

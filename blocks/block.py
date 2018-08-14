@@ -1,13 +1,13 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
 from glob import msgDuration, fieldRowHeight
 
-class dataBlock(QtWidgets.QWidget):
+class block(QtWidgets.QWidget):
     def __init__(self, parent, field, **kwargs):
         super().__init__(**kwargs)
 
         self.parent = parent
         self.field = field
-        self.setFixedSize(140, fieldRowHeight)
+        self.setFixedSize(120, fieldRowHeight)
         self.putRow = None
 
         # Widget elements
@@ -17,10 +17,11 @@ class dataBlock(QtWidgets.QWidget):
 
         self.nameEdit = QtWidgets.QLineEdit()
         self.nameEdit.setFixedSize(100, fieldRowHeight)
+        self.nameEdit.setAcceptDrops(False)
         self.nameEdit.setDisabled(True)
         self.settingBtn = QtWidgets.QPushButton()
-        self.settingBtn.setText(self.tr("設定"))
-        self.settingBtn.setFixedSize(40, fieldRowHeight)
+        self.settingBtn.setText(self.tr("..."))
+        self.settingBtn.setFixedSize(20, fieldRowHeight)
 
         hboxLayout.addWidget(self.nameEdit)
         hboxLayout.addWidget(self.settingBtn)
@@ -34,6 +35,11 @@ class dataBlock(QtWidgets.QWidget):
 
         # Controls
         self.setMouseTracking(True)
+        self.offset = QtCore.QPoint(self.width() / 2, self.height() / 2)
+
+    def disableBtn(self):
+        self.settingBtn.deleteLater()
+        self.setFixedSize(100, fieldRowHeight)
         self.offset = QtCore.QPoint(self.width() / 2, self.height() / 2)
 
 
@@ -130,4 +136,4 @@ class dataBlock(QtWidgets.QWidget):
 
         return col
 
-    
+

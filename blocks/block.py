@@ -9,7 +9,9 @@ class block(QtWidgets.QWidget):
         self.field = field
         self.setFixedSize(120, fieldRowHeight)
         self.putRow = None
+        self.colSource = None
         self.settingDialog = None
+        self.settingData = {}
 
         # Widget elements
         hboxLayout = QtWidgets.QHBoxLayout()
@@ -59,8 +61,7 @@ class block(QtWidgets.QWidget):
         self.settingLayout = QtWidgets.QVBoxLayout()
         buttonLayout = QtWidgets.QHBoxLayout()
         gridLayout.addLayout(self.settingLayout, 0, 0)
-        gridLayout.addLayout(buttonLayout, 1, 0, 
-                             QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom)
+        gridLayout.addLayout(buttonLayout, 1, 0, QtCore.Qt.AlignRight)
 
         okBtn = QtWidgets.QPushButton()
         okBtn.setText("確定")

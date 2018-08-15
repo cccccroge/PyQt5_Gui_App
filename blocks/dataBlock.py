@@ -7,7 +7,6 @@ class dataBlock(block.block):
 
         self.disableBtn()
         self.setAcceptDrops(True)
-        self.colSource = None
 
 
     ####################

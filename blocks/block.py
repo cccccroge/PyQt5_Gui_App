@@ -9,6 +9,7 @@ class block(QtWidgets.QWidget):
         self.field = field
         self.setFixedSize(120, fieldRowHeight)
         self.putRow = None
+        self.settingDialog = None
 
         # Widget elements
         hboxLayout = QtWidgets.QHBoxLayout()
@@ -38,10 +39,37 @@ class block(QtWidgets.QWidget):
         self.setMouseTracking(True)
         self.offset = QtCore.QPoint(self.width() / 2, self.height() / 2)
 
+
     def disableBtn(self):
         self.settingBtn.deleteLater()
         self.setFixedSize(100, fieldRowHeight)
         self.offset = QtCore.QPoint(self.width() / 2, self.height() / 2)
+
+
+    def enableSettingDialog(self):
+        self.settingDialog = QtWidgets.QDialog(self)
+        flag = QtCore.Qt.Window | QtCore.Qt.WindowTitleHint \
+           | QtCore.Qt.WindowCloseButtonHint
+        self.settingDialog.setWindowFlags(flag)
+        self.settingDialog.setWindowTitle(self.tr("設定"))
+
+        gridLayout = QtWidgets.QGridLayout()
+        self.settingDialog.setLayout(gridLayout)
+
+        settingLayout = QtWidgets.QVBoxLayout()
+        buttonLayout = QtWidgets.QHBoxLayout()
+        gridLayout.addLayout(settingLayout, 0, 0)
+        gridLayout.addLayout(buttonLayout, 1, 0, 
+                             QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom)
+
+        okBtn = QtWidgets.QPushButton()
+        okBtn.setText("確定")
+        okBtn.pressed.connect(lambda: self.settingDialog.accepted.emit())
+        cancelBtn = QtWidgets.QPushButton()
+        cancelBtn.setText("取消")
+        cancelBtn.pressed.connect(lambda: self.settingDialog.rejected.emit())
+        buttonLayout.addWidget(okBtn)
+        buttonLayout.addWidget(cancelBtn)
 
 
     ####################
@@ -79,7 +107,6 @@ class block(QtWidgets.QWidget):
                 return
 
             hboxLayout = self.field.gridLayout.itemAtPosition(self.putRow, 0)
-            #putCol = self.__getGridCol(self.putRow, self.field.gridLayout)
 
             # put a line and a block to that row's hboxLayout
             self.setMouseTracking(False)
@@ -89,10 +116,6 @@ class block(QtWidgets.QWidget):
             lineLabel.setFixedHeight(fieldRowHeight)
             hboxLayout.addWidget(lineLabel, 0, QtCore.Qt.AlignLeft)
             hboxLayout.addWidget(self, 0, QtCore.Qt.AlignLeft)
-            #self.field.gridLayout.addWidget(
-            #    lineLabel, self.putRow, putCol, QtCore.Qt.AlignLeft)
-            #self.field.gridLayout.addWidget(
-            #    self, self.putRow, putCol + 1, QtCore.Qt.AlignLeft)
             self.nameEdit.setDisabled(False)
 
             self.parent.statusBar().showMessage("已成功建立方塊", msgDuration)
@@ -126,18 +149,5 @@ class block(QtWidgets.QWidget):
             return None
 
         return row
-
-
-    ## Get col index to put
-
-    #def __getGridCol(self, row, gridLayout):
-    #    col = 0
-    #    while True:
-    #        item = gridLayout.itemAtPosition(row, col)
-    #        if item is None:
-    #            break;
-    #        col += 1
-
-    #    return col
 
 

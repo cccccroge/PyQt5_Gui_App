@@ -43,6 +43,8 @@ class blockMenu(QtWidgets.QMenu):
             blk = dataBlock.dataBlock(self.parent, self.field)
         elif id == 2:
             blk = condDataBlock.condDataBlock(self.parent, self.field)
+        else:
+            return
 
         blk.setParent(self.field)
 

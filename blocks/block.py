@@ -56,18 +56,18 @@ class block(QtWidgets.QWidget):
         gridLayout = QtWidgets.QGridLayout()
         self.settingDialog.setLayout(gridLayout)
 
-        settingLayout = QtWidgets.QVBoxLayout()
+        self.settingLayout = QtWidgets.QVBoxLayout()
         buttonLayout = QtWidgets.QHBoxLayout()
-        gridLayout.addLayout(settingLayout, 0, 0)
+        gridLayout.addLayout(self.settingLayout, 0, 0)
         gridLayout.addLayout(buttonLayout, 1, 0, 
                              QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom)
 
         okBtn = QtWidgets.QPushButton()
         okBtn.setText("確定")
-        okBtn.pressed.connect(lambda: self.settingDialog.accepted.emit())
+        okBtn.pressed.connect(lambda: self.settingDialog.accept())
         cancelBtn = QtWidgets.QPushButton()
         cancelBtn.setText("取消")
-        cancelBtn.pressed.connect(lambda: self.settingDialog.rejected.emit())
+        cancelBtn.pressed.connect(lambda: self.settingDialog.reject())
         buttonLayout.addWidget(okBtn)
         buttonLayout.addWidget(cancelBtn)
 

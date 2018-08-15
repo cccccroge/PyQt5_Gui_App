@@ -12,7 +12,8 @@ class condDataBlock(block.block):
         self.settingDialog.rejected.connect(self.on_settingDialog_rejected)
 
         # Dialog conetent
-        
+        self.le = QtWidgets.QLineEdit(self.settingDialog)
+        self.settingLayout.addWidget(self.le)
 
 
     ####################
@@ -22,19 +23,23 @@ class condDataBlock(block.block):
     # Popup setting window for condData block
 
     def on_settingBtn_pressed(self):
+        
+        self.__leStr = self.le.text()
         self.settingDialog.exec()
 
 
     # Confirm setting window
 
     def on_settingDialog_accepted(self):
-        self.settingDialog.hide()
+        pass
 
 
     # Cancel setting window
 
     def on_settingDialog_rejected(self):
-        self.settingDialog.hide()
+        # Reset to old values
+        self.le.setText(self.__leStr)
+        
 
 
         

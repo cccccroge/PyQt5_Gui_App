@@ -27,6 +27,7 @@ class condDataBlock(block.block):
         self.radioBtnGroup = QtWidgets.QButtonGroup()
         self.radioBtnGroup.addButton(radioBtnExist, 0)
         self.radioBtnGroup.addButton(radioBtnVal, 1)
+        self.radioBtnGroup.buttonClicked[int].connect(self.on_radioBtnGroup_buttonClicked)
 
         groupBoxDatatypeLayout.addWidget(radioBtnExist)
         groupBoxDatatypeLayout.addWidget(radioBtnVal)
@@ -35,7 +36,6 @@ class condDataBlock(block.block):
         self.groupBoxMaprules = QtWidgets.QGroupBox(self.tr("對應值"))
         groupBoxMaprulesLayout = QtWidgets.QGridLayout()
         self.groupBoxMaprules.setLayout(groupBoxMaprulesLayout)
-        #self.settingLayout.addWidget(groupBoxMaprules)
 
         yesLabel = QtWidgets.QLabel(self.tr("是"))
         mapIcon1 = QtWidgets.QLabel(self.tr("=>"))
@@ -107,4 +107,14 @@ class condDataBlock(block.block):
             btn = self.radioBtnGroup.button(oldId)
             btn.setChecked(True)
 
+
+    def on_radioBtnGroup_buttonClicked(self, id):
+        ret = self.settingLayout.findChild(QtWidgets.QGroupBox, "groupBoxMaprules")
+        if self.settingLayout.widget() != None:
+            self.settingLayout.s
+
+        if id == 0:
+            self.settingLayout.addWidget(self.groupBoxMaprules)
+        elif id == 1:
+            self.settingLayout.addWidget(self.groupBoxMaprules2)
 

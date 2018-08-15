@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 import block
 
 class condDataBlock(block.block):
@@ -36,6 +36,8 @@ class condDataBlock(block.block):
         self.groupBoxMaprules = QtWidgets.QGroupBox(self.tr("對應值"))
         groupBoxMaprulesLayout = QtWidgets.QGridLayout()
         self.groupBoxMaprules.setLayout(groupBoxMaprulesLayout)
+        self.settingLayout.addWidget(self.groupBoxMaprules)
+        self.groupBoxMaprules.hide()
 
         yesLabel = QtWidgets.QLabel(self.tr("是"))
         mapIcon1 = QtWidgets.QLabel(self.tr("=>"))
@@ -55,7 +57,8 @@ class condDataBlock(block.block):
         self.groupBoxMaprules2 = QtWidgets.QGroupBox(self.tr("對應值"))
         groupBoxMaprulesLayout2 = QtWidgets.QGridLayout()
         self.groupBoxMaprules2.setLayout(groupBoxMaprulesLayout2)
-        #self.settingLayout.addWidget(groupBoxMaprules2)
+        self.settingLayout.addWidget(self.groupBoxMaprules2)
+        self.groupBoxMaprules2.hide()
 
         for i in range(5):
             lineEditfrom = QtWidgets.QLineEdit()
@@ -95,26 +98,20 @@ class condDataBlock(block.block):
 
     def on_settingDialog_rejected(self):
         oldId = self.__idOld
-        newId = self.radioBtnGroup.checkedId()
 
-        if oldId == -1:
-            if newId != -1:
-                btn = self.radioBtnGroup.button(newId)
-                self.radioBtnGroup.setExclusive(False)
-                btn.setChecked(False)
-                self.radioBtnGroup.setExclusive(True)
-        else:
+        if oldId != -1:
             btn = self.radioBtnGroup.button(oldId)
             btn.setChecked(True)
+            self.radioBtnGroup.buttonClicked[int].emit(oldId)
 
 
     def on_radioBtnGroup_buttonClicked(self, id):
-        ret = self.settingLayout.findChild(QtWidgets.QGroupBox, "groupBoxMaprules")
-        if self.settingLayout.widget() != None:
-            self.settingLayout.s
-
         if id == 0:
-            self.settingLayout.addWidget(self.groupBoxMaprules)
+            self.groupBoxMaprules.show()
+            if not self.groupBoxMaprules2.isHidden():
+                self.groupBoxMaprules2.hide()
         elif id == 1:
-            self.settingLayout.addWidget(self.groupBoxMaprules2)
+            self.groupBoxMaprules2.show()
+            if not self.groupBoxMaprules.isHidden():
+                self.groupBoxMaprules.hide()
 

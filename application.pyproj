@@ -31,6 +31,9 @@
     <Compile Include="blocks\dataFilterBlock.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="blocks\numberBlock.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="central.py">
       <SubType>Code</SubType>
     </Compile>

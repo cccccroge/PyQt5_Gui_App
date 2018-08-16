@@ -5,6 +5,7 @@ sys.path.append("./blocks")
 import dataBlock
 import condDataBlock
 import dataFilterBlock
+import numberBlock
 
 class blockMenu(QtWidgets.QMenu):
     def __init__(self, parent, field, **kwargs):
@@ -46,6 +47,8 @@ class blockMenu(QtWidgets.QMenu):
             blk = condDataBlock.condDataBlock(self.parent, self.field)
         elif id == 3:
             blk = dataFilterBlock.dataFilterBlock(self.parent, self.field)
+        elif id == 4:
+            blk = numberBlock.numberBlock(self.parent, self.field)
         else:
             return
 

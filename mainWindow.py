@@ -19,6 +19,7 @@ class mainWindow(QtWidgets.QMainWindow):
         self.actions = {}
         self.colNamesSet = {}
         self.relatedGraph = nx.DiGraph()
+        self.srcFiles = {}
 
         self.setWindowTitle(self.tr("工研院技轉中心服務程式"))
         self.init_ui()
@@ -73,33 +74,37 @@ class mainWindow(QtWidgets.QMainWindow):
         isDuplicated = False
 
         for i in range(len(excelPaths)):
-            print("analyzing sheet numbers of a file...")
-            sheetNames = pd.ExcelFile(excelPaths[i]).sheet_names
-            print("finish analyzing")
+            print("reading a file to obj...")
+            fileObj = pd.ExcelFile(excelPaths[i])
+            sheetNames = fileObj.sheet_names
+            print("finish reading")
             if (len(sheetNames) == 1):
                 # No sheet name provided, use file name as key
                 path = excelPaths[i]
                 pos1 = path.rfind("/")
                 pos2 = excelPaths[i].rfind(".xls")
-                name = path[pos1 + 1 : pos2]
-                if name in self.colNamesSet.keys():
+                fileName = path[pos1 + 1 : pos2]
+                if fileName in self.colNamesSet.keys():
                     isDuplicated = True
                 else:
-                    newKeys.append(name)
-                    self.colNamesSet[name] = self.load_excel_columns(excelPaths[i], 0)
+                    newKeys.append(fileName)
+                    self.colNamesSet[fileName] = \
+                        self.load_excel_and_return_columns(fileObj, fileName, 0)
             else:
                 # Multiple sheets, use (file ： sheet) name as key
-                for name in sheetNames:
+                for sheetName in sheetNames:
                     path = excelPaths[i]
                     pos1 = path.rfind("/")
                     pos2 = excelPaths[i].rfind(".xls")
-                    keyName = path[pos1 + 1 : pos2] + " ： " + name
+                    fileName = path[pos1 + 1 : pos2]
+                    keyName = fileName + " ： " + sheetName
 
                     if keyName in self.colNamesSet.keys():
                         isDuplicated = True
                     else:
                         newKeys.append(keyName)
-                        self.colNamesSet[keyName] = self.load_excel_columns(excelPaths[i], name)
+                        self.colNamesSet[keyName] = \
+                            self.load_excel_and_return_columns(fileObj, fileName, sheetName)
 
             self.progressBar.setValue(i + 1)
 
@@ -117,7 +122,6 @@ class mainWindow(QtWidgets.QMainWindow):
             self.statusBar().showMessage("檔案讀取成功", msgDuration)
         
 
-
     def export_excel(self):
         # Select save file path
         fileName = QtWidgets.QFileDialog.getSaveFileName(
@@ -125,7 +129,6 @@ class mainWindow(QtWidgets.QMainWindow):
             , "All Files (*);;Excel Files (*xlsx);;Excel 97-2003 Files(*xls)"
             , "Excel Files (*xlsx)")
 
-        print(fileName)
         if fileName[0] == "":
             self.statusBar().showMessage("取消儲存檔案", msgDuration)
             return
@@ -137,7 +140,7 @@ class mainWindow(QtWidgets.QMainWindow):
         self.progressBar.setVisible(True)
 
         # Empty dataframe
-        outputDf = pd.DataFrame(np.random.randint(0, 10, size=(5, 5)))
+        outputDf = pd.DataFrame()
 
         # Fill all output column names
 
@@ -206,14 +209,13 @@ class mainWindow(QtWidgets.QMainWindow):
     # Helper functions
     ####################
 
-    def load_excel_columns(self, _path, _sheetname):
-
-        # Load only first row (column names)
-        print("read a sheet of the file...")
-        df = pd.read_excel(_path, _sheetname, nrows=0)
+    def load_excel_and_return_columns(self, _fileObj, _fileName, _sheetname):
+        print("reading sheet of the file from obj...")
+        self.srcFiles[(_fileName, _sheetname)] = pd.read_excel(_fileObj, _sheetname)
+        cols = self.srcFiles[(_fileName, _sheetname)].head(0)
         print("finish reading")
 
-        return df
+        return cols
         
         
         

@@ -5,11 +5,12 @@ class condDataBlock(block.block):
     def __init__(self, parent, field, **kwargs):
         super().__init__(parent, field, **kwargs)
 
+        self.nameEdit.setText("條件資料")
+
         self.settingData["dataType"] = ""
         self.settingData["mapRules"] = []
 
         self.enableSettingDialog()
-
         self.settingBtn.pressed.connect(self.on_settingBtn_pressed)
         self.settingDialog.accepted.connect(self.on_settingDialog_accepted)
         self.settingDialog.rejected.connect(self.on_settingDialog_rejected)

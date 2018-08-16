@@ -5,6 +5,8 @@ class dataBlock(block.block):
     def __init__(self, parent, field, **kwargs):
         super().__init__(parent, field, **kwargs)
 
+        self.nameEdit.setText("資料")
+
         self.disableBtn()
         self.setAcceptDrops(True)
 

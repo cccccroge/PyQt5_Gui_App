@@ -21,6 +21,7 @@ class block(QtWidgets.QWidget):
 
         self.nameEdit = QtWidgets.QLineEdit()
         self.nameEdit.setFixedSize(100, fieldRowHeight)
+        self.nameEdit.setAlignment(QtCore.Qt.AlignCenter)
         self.nameEdit.setAcceptDrops(False)
         self.nameEdit.setDisabled(True)
         self.settingBtn = QtWidgets.QPushButton()

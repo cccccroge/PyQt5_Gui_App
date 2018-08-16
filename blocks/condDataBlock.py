@@ -34,10 +34,10 @@ class condDataBlock(block.block):
 
         # map values for existence
         self.groupBoxMaprules = QtWidgets.QGroupBox(self.tr("對應值"))
-        groupBoxMaprulesLayout = QtWidgets.QGridLayout()
-        self.groupBoxMaprules.setLayout(groupBoxMaprulesLayout)
-        self.settingLayout.addWidget(self.groupBoxMaprules)
+        self.groupBoxMaprulesLayout = QtWidgets.QGridLayout()
+        self.groupBoxMaprules.setLayout(self.groupBoxMaprulesLayout)
         self.groupBoxMaprules.hide()
+        self.settingLayout.addWidget(self.groupBoxMaprules)
 
         yesLabel = QtWidgets.QLabel(self.tr("是"))
         mapIcon1 = QtWidgets.QLabel(self.tr("=>"))
@@ -46,28 +46,31 @@ class condDataBlock(block.block):
         mapIcon2 = QtWidgets.QLabel(self.tr("=>"))
         self.lineEditNo = QtWidgets.QLineEdit()
 
-        groupBoxMaprulesLayout.addWidget(yesLabel, 0, 0)
-        groupBoxMaprulesLayout.addWidget(mapIcon1, 0, 1)
-        groupBoxMaprulesLayout.addWidget(self.lineEditYes, 0, 2)
-        groupBoxMaprulesLayout.addWidget(noLabel, 1, 0)
-        groupBoxMaprulesLayout.addWidget(mapIcon2, 1, 1)
-        groupBoxMaprulesLayout.addWidget(self.lineEditNo, 1, 2)
+        self.groupBoxMaprulesLayout.addWidget(yesLabel, 0, 0)
+        self.groupBoxMaprulesLayout.addWidget(mapIcon1, 0, 1)
+        self.groupBoxMaprulesLayout.addWidget(self.lineEditYes, 0, 2)
+        self.groupBoxMaprulesLayout.addWidget(noLabel, 1, 0)
+        self.groupBoxMaprulesLayout.addWidget(mapIcon2, 1, 1)
+        self.groupBoxMaprulesLayout.addWidget(self.lineEditNo, 1, 2)
 
         # map values for value
         self.groupBoxMaprules2 = QtWidgets.QGroupBox(self.tr("對應值"))
-        groupBoxMaprulesLayout2 = QtWidgets.QGridLayout()
-        self.groupBoxMaprules2.setLayout(groupBoxMaprulesLayout2)
-        self.settingLayout.addWidget(self.groupBoxMaprules2)
+        self.groupBoxMaprulesLayout2 = QtWidgets.QGridLayout()
+        self.groupBoxMaprules2.setLayout(self.groupBoxMaprulesLayout2)
         self.groupBoxMaprules2.hide()
+        self.settingLayout.addWidget(self.groupBoxMaprules2)
 
         for i in range(5):
             lineEditfrom = QtWidgets.QLineEdit()
             mapIcon = QtWidgets.QLabel(self.tr("=>"))
             lineEditTo = QtWidgets.QLineEdit()
 
-            groupBoxMaprulesLayout2.addWidget(lineEditfrom, i, 0)
-            groupBoxMaprulesLayout2.addWidget(mapIcon, i, 1)
-            groupBoxMaprulesLayout2.addWidget(lineEditTo, i, 2)
+            self.groupBoxMaprulesLayout2.addWidget(lineEditfrom, i, 0)
+            self.groupBoxMaprulesLayout2.addWidget(mapIcon, i, 1)
+            self.groupBoxMaprulesLayout2.addWidget(lineEditTo, i, 2)
+
+        # stretch at the end
+        self.settingLayout.addStretch()
 
 
     ####################
@@ -79,6 +82,19 @@ class condDataBlock(block.block):
     def on_settingBtn_pressed(self):
         # Store old values in case user need to discard changes
         self.__idOld = self.radioBtnGroup.checkedId()
+
+        self.__textsOld = []
+        for row in range(self.groupBoxMaprulesLayout.rowCount()):
+            t1 = self.groupBoxMaprulesLayout.itemAtPosition(row, 0).widget().text()
+            t2 = self.groupBoxMaprulesLayout.itemAtPosition(row, 2).widget().text()
+            self.__textsOld.append((t1, t2))
+
+        self.__textsOld2 = []
+        for row in range(self.groupBoxMaprulesLayout2.rowCount()):
+            t1 = self.groupBoxMaprulesLayout2.itemAtPosition(row, 0).widget().text()
+            t2 = self.groupBoxMaprulesLayout2.itemAtPosition(row, 2).widget().text()
+            self.__textsOld2.append((t1, t2))
+
         self.settingDialog.exec()
 
 
@@ -94,24 +110,55 @@ class condDataBlock(block.block):
             self.settingData["dataType"] = "value"
 
 
+        self.settingData["mapRules"] = []
+        targetLayout = None
+        if id == -1:
+            print("settingData becomes: ")
+            print(self.settingData)
+            return
+        elif id == 0:
+            targetLayout = self.groupBoxMaprulesLayout
+        elif id == 1:
+            targetLayout = self.groupBoxMaprulesLayout2
+
+        for row in range(targetLayout.rowCount()):
+            t1 = targetLayout.itemAtPosition(row, 0).widget().text()
+            t2 = targetLayout.itemAtPosition(row, 2).widget().text()
+            if t1 == "" and t2 == "":
+                continue
+            self.settingData["mapRules"].append((t1, t2))
+
+        print("settingData becomes: ")
+        print(self.settingData)
+
     # Cancel setting window: reset to old values
 
     def on_settingDialog_rejected(self):
-        oldId = self.__idOld
-
-        if oldId != -1:
-            btn = self.radioBtnGroup.button(oldId)
+        if self.__idOld != -1:
+            btn = self.radioBtnGroup.button(self.__idOld)
             btn.setChecked(True)
-            self.radioBtnGroup.buttonClicked[int].emit(oldId)
+            self.radioBtnGroup.buttonClicked[int].emit(self.__idOld)
+
+        for row in range(self.groupBoxMaprulesLayout.rowCount()):
+            self.groupBoxMaprulesLayout.itemAtPosition(row, 0).widget() \
+                .setText(self.__textsOld[row][0])
+            self.groupBoxMaprulesLayout.itemAtPosition(row, 2).widget() \
+                .setText(self.__textsOld[row][1])
+
+        for row in range(self.groupBoxMaprulesLayout2.rowCount()):
+            self.groupBoxMaprulesLayout2.itemAtPosition(row, 0).widget() \
+                .setText(self.__textsOld2[row][0])
+            self.groupBoxMaprulesLayout2.itemAtPosition(row, 2).widget() \
+                .setText(self.__textsOld2[row][1])
 
 
     def on_radioBtnGroup_buttonClicked(self, id):
         if id == 0:
-            self.groupBoxMaprules.show()
             if not self.groupBoxMaprules2.isHidden():
                 self.groupBoxMaprules2.hide()
+            self.groupBoxMaprules.show()
         elif id == 1:
-            self.groupBoxMaprules2.show()
             if not self.groupBoxMaprules.isHidden():
                 self.groupBoxMaprules.hide()
+            self.groupBoxMaprules2.show()
 

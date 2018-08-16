@@ -1,6 +1,7 @@
 import sys
 from PyQt5 import QtWidgets, QtCore
 import pandas as pd
+import numpy as np
 import networkx as nx
 
 import menu
@@ -51,10 +52,10 @@ class mainWindow(QtWidgets.QMainWindow):
         filenames = QtWidgets.QFileDialog.getOpenFileNames(
             self, self.tr("選取檔案"), ""
             , "All Files (*);;Excel Files (*xlsx);;Excel 97-2003 Files(*xls)"
-            , "Excel Files (*xlsx)")
+            , "All Files (*)")
 
         if len(filenames) == 0:
-            self.statusBar().showMessage("取消讀取或未選取檔案")
+            self.statusBar().showMessage("取消讀取或未選取檔案", msgDuration)
             return
 
         excelPaths = []
@@ -118,7 +119,47 @@ class mainWindow(QtWidgets.QMainWindow):
 
 
     def export_excel(self):
-        print("輸出excel檔案...")
+        # Select save file path
+        fileName = QtWidgets.QFileDialog.getSaveFileName(
+            self, self.tr("儲存檔案"), ""
+            , "All Files (*);;Excel Files (*xlsx);;Excel 97-2003 Files(*xls)"
+            , "Excel Files (*xlsx)")
+
+        print(fileName)
+        if fileName[0] == "":
+            self.statusBar().showMessage("取消儲存檔案", msgDuration)
+            return
+
+
+        self.hintLabel.setText("正在輸出檔案...")
+        self.progressBar.setRange(0, 100)
+        self.progressBar.setValue(0)
+        self.progressBar.setVisible(True)
+
+        # Empty dataframe
+        outputDf = pd.DataFrame(np.random.randint(0, 10, size=(5, 5)))
+
+        # Fill all output column names
+
+        # Fill data by parsing field blocks & relation graph info
+
+        # Adjust the dataframe with specified output setting
+
+        # Output to excel
+        lpos = fileName[1].rfind("(") + 2
+        rpos = fileName[1].rfind(")")
+        ext = "." + (fileName[1])[lpos:rpos]
+        path = fileName[0]
+        if path.find(ext) == -1:
+            path = path + ext
+        writer = pd.ExcelWriter(path)
+
+        outputDf.to_excel(writer, self.tr("工作表1"), header=False, index=False)
+        writer.save()
+
+        self.hintLabel.setText("就緒")
+        self.progressBar.setVisible(False)
+
 
     def add_related_property(self):
         print("新增關聯項目")

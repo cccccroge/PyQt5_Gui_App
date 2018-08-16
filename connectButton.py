@@ -59,6 +59,7 @@ class connectButton(QtWidgets.QPushButton):
         # Consider failed conditions
         if len(self.colToConnect) != 2:
             self.colToConnect.clear()
+            self.setText(self.tr("建立聯結"))
             self.parent.statusBar().showMessage(
                 "項目連結失敗，連結項目之數目必須為兩個", msgDuration)
             return
@@ -66,10 +67,9 @@ class connectButton(QtWidgets.QPushButton):
         infoTup1 = self.colToConnect[0]
         infoTup2 = self.colToConnect[1]
 
-        sheet1 = infoTup1[1]
-        sheet2 = infoTup2[1]
-        if sheet1 == sheet2:
+        if infoTup1[0] == infoTup2[0] and infoTup1[1] == infoTup2[1]:
             self.colToConnect.clear()
+            self.setText(self.tr("建立聯結"))
             self.parent.statusBar().showMessage(
                 "項目連結失敗，兩個連結項目必須來自不同的工作表", msgDuration)
             return
@@ -88,7 +88,8 @@ class connectButton(QtWidgets.QPushButton):
 
         # Set hint to normal
         self.setText(self.tr("建立聯結"))
-
+        self.colToConnect.clear()
+        self.parent.statusBar().showMessage("項目連結成功", msgDuration)
         #print("Graph becomes:")
         #print("nodes x{0}".format(g.number_of_nodes()))
         #print("edges x{0}".format(g.number_of_edges()))

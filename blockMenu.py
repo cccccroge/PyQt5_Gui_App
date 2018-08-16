@@ -2,10 +2,8 @@ from PyQt5 import QtWidgets, QtGui
 
 import sys
 sys.path.append("./blocks")
-import dataBlock
-import condDataBlock
-import dataFilterBlock
-import numberBlock
+import targetValBlock, dataBlock, condDataBlock
+import dataFilterBlock, numberBlock, useAnotherBlock
 
 class blockMenu(QtWidgets.QMenu):
     def __init__(self, parent, field, **kwargs):
@@ -13,6 +11,9 @@ class blockMenu(QtWidgets.QMenu):
 
         self.parent = parent
         self.field = field
+
+        dataAction = self.addAction(self.tr("目標值"))
+        dataAction.triggered.connect(lambda: self.buildingBlock(0))
 
         dataAction = self.addAction(self.tr("資料"))
         dataAction.triggered.connect(lambda: self.buildingBlock(1))
@@ -29,6 +30,9 @@ class blockMenu(QtWidgets.QMenu):
         dataAction = self.addAction(self.tr("計算"))
         dataAction.triggered.connect(lambda: self.buildingBlock(5))
 
+        dataAction = self.addAction(self.tr("取其它"))
+        dataAction.triggered.connect(lambda: self.buildingBlock(6))
+
 
     ####################
     #      Slots
@@ -41,7 +45,9 @@ class blockMenu(QtWidgets.QMenu):
         # It'll be actually put into gridLayout (bodyWidget) when user press leftbutton
         blk = None
 
-        if id == 1:
+        if id == 0:
+            blk = targetValBlock.targetValBlock(self.parent, self.field)
+        elif id == 1:
             blk = dataBlock.dataBlock(self.parent, self.field)
         elif id == 2:
             blk = condDataBlock.condDataBlock(self.parent, self.field)
@@ -49,6 +55,8 @@ class blockMenu(QtWidgets.QMenu):
             blk = dataFilterBlock.dataFilterBlock(self.parent, self.field)
         elif id == 4:
             blk = numberBlock.numberBlock(self.parent, self.field)
+        elif id == 6:
+            blk = useAnotherBlock.useAnotherBlock(self.parent, self.field)
         else:
             return
 

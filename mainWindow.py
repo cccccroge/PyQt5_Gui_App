@@ -1,5 +1,5 @@
 import sys
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 import pandas as pd
 import networkx as nx
 
@@ -72,8 +72,9 @@ class mainWindow(QtWidgets.QMainWindow):
         isDuplicated = False
 
         for i in range(len(excelPaths)):
+            print("analyzing sheet numbers of a file...")
             sheetNames = pd.ExcelFile(excelPaths[i]).sheet_names
-
+            print("finish analyzing")
             if (len(sheetNames) == 1):
                 # No sheet name provided, use file name as key
                 path = excelPaths[i]
@@ -167,7 +168,10 @@ class mainWindow(QtWidgets.QMainWindow):
     def load_excel_columns(self, _path, _sheetname):
 
         # Load only first row (column names)
+        print("read a sheet of the file...")
         df = pd.read_excel(_path, _sheetname, nrows=0)
+        print("finish reading")
+
         return df
         
         

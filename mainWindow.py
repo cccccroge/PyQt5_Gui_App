@@ -10,6 +10,9 @@ import status
 import central
 from glob import msgDuration
 
+import targetValBlock, dataBlock, condDataBlock
+import dataFilterBlock, numberBlock, calculatorBlock, useAnotherBlock
+
 
 class mainWindow(QtWidgets.QMainWindow):
 
@@ -32,7 +35,7 @@ class mainWindow(QtWidgets.QMainWindow):
         menu.menu(self)
         tool.tool(self)
         status.status(self)
-        central.central(self)
+        self.central = central.central(self)
 
 
 
@@ -45,7 +48,7 @@ class mainWindow(QtWidgets.QMainWindow):
         pass
 
 
-    # Import selected excel, store columns info and excel path
+    # Import selected excel, store columns info, excel path and file dataframes
     # After import, properties list should show sets of column name
 
     def import_excel(self):
@@ -134,21 +137,86 @@ class mainWindow(QtWidgets.QMainWindow):
             return
 
 
+        # 1.Empty two-dimen list
+        outputForm = [] # will append lists into it
+
+        # 2.Fill all output column names
+        grid = self.central.fieldWidget.gridLayout
+
+        colNamesList = []
+        for row in range(grid.rowCount() - 1):
+            hboxLayout = grid.itemAtPosition(row, 0)
+            colName = hboxLayout.itemAt(0).widget().text()
+            colNamesList.append(colName)
+        outputForm.append(colNamesList)  
+
+        # 3.Fill data by parsing field blocks & relation graph info
+        # 3-1.find the tagetValBlock's info
+        valColSrc = None
+        valsList = None
+
+        num = 0
+        for row in range(grid.rowCount() - 1):
+            hboxLayout = grid.itemAtPosition(row, 0)
+            for col in range(2, hboxLayout.count(), 2):  # start from 1st block and ignore dashes
+                curBlk = hboxLayout.itemAt(col).widget()
+                if type(curBlk) == targetValBlock.targetValBlock:
+                    num += 1
+                    valColSrc = curBlk.colSource
+                    valsList = curBlk.settingData["targetVals"]
+
+        if num == 0:
+            self.statusBar().showMessage("輸出錯誤：不存在目標值方塊", msgDuration)
+            return
+        elif num > 1:
+            self.statusBar().showMessage("輸出錯誤：目標值方塊不唯一", msgDuration)
+            return
+        else:
+            if valColSrc is None:
+                self.statusBar().showMessage("輸出錯誤：沒有指定目標值欄位", msgDuration)
+                return
+
+        # 3-2.init progressBar range
         self.hintLabel.setText("正在輸出檔案...")
-        self.progressBar.setRange(0, 100)
+        self.progressBar.setRange(0, len(valsList))
         self.progressBar.setValue(0)
         self.progressBar.setVisible(True)
 
-        # Empty dataframe
-        outputDf = pd.DataFrame()
+        # 3-3.start parsing
+        for val in valsList:
+            # find start rows as beginning point
+            print("valColSrc = {0}".format(valColSrc))
+            print("valColSrc[0] = {0}".format(valColSrc[0]))
+            print("valColSrc[1] = {0}".format(valColSrc[1]))
+            print("valColSrc[2] = {0}".format(valColSrc[2]))
+            fileDf = self.srcFiles[(valColSrc[0], valColSrc[1])]
+            colName = valColSrc[2]
+            startRows = fileDf.loc[fileDf[colName] == val]
 
-        # Fill all output column names
+            # parse single row
+            for row in range(grid.rowCount() - 1):
+                hboxLayout = grid.itemAtPosition(row, 0)
+                out = startRows
+                # head block: input is start
+                i = 2
+                curBlk = hboxLayout.itemAt(i).widget()
+                if type(curBlk) == calculatorBlock:
+                    out = curBlk.generateOut(valColSrc, val, hboxLayout)
+                    pass
+                else:
+                    out = curBlk.generateOut(valColSrc, val)
+                    if out is None:
+                        #TODO: should consider useAnotherBlock
+                        pass
+                    # trail blocks
+                    else:
 
-        # Fill data by parsing field blocks & relation graph info
 
-        # Adjust the dataframe with specified output setting
 
-        # Output to excel
+
+        # 4.Adjust the dataframe with specified output setting
+
+        # 5.Output to excel: two-dimen list -> dataFrame -> excel
         lpos = fileName[1].rfind("(") + 2
         rpos = fileName[1].rfind(")")
         ext = "." + (fileName[1])[lpos:rpos]
@@ -157,11 +225,14 @@ class mainWindow(QtWidgets.QMainWindow):
             path = path + ext
         writer = pd.ExcelWriter(path)
 
+        outputDf = pd.DataFrame(outputForm)
         outputDf.to_excel(writer, self.tr("工作表1"), header=False, index=False)
         writer.save()
 
         self.hintLabel.setText("就緒")
         self.progressBar.setVisible(False)
+
+        self.statusBar().showMessage("檔案儲存成功", msgDuration)
 
 
     def add_related_property(self):
@@ -211,8 +282,14 @@ class mainWindow(QtWidgets.QMainWindow):
 
     def load_excel_and_return_columns(self, _fileObj, _fileName, _sheetname):
         print("reading sheet of the file from obj...")
-        self.srcFiles[(_fileName, _sheetname)] = pd.read_excel(_fileObj, _sheetname)
-        cols = self.srcFiles[(_fileName, _sheetname)].head(0)
+        cols = None
+        if _sheetname == 0:
+            self.srcFiles[(_fileName, "")] = pd.read_excel(_fileObj, _sheetname)
+            cols = self.srcFiles[(_fileName, "")].head(0)
+        else:
+            self.srcFiles[(_fileName, _sheetname)] = pd.read_excel(_fileObj, _sheetname)
+            cols = self.srcFiles[(_fileName, _sheetname)].head(0)
+        
         print("finish reading")
 
         return cols

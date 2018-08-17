@@ -3,7 +3,7 @@ from PyQt5 import QtWidgets, QtGui
 import sys
 sys.path.append("./blocks")
 import targetValBlock, dataBlock, condDataBlock
-import dataFilterBlock, numberBlock, useAnotherBlock
+import dataFilterBlock, numberBlock, calculatorBlock,useAnotherBlock
 
 class blockMenu(QtWidgets.QMenu):
     def __init__(self, parent, field, **kwargs):
@@ -55,6 +55,8 @@ class blockMenu(QtWidgets.QMenu):
             blk = dataFilterBlock.dataFilterBlock(self.parent, self.field)
         elif id == 4:
             blk = numberBlock.numberBlock(self.parent, self.field)
+        elif id == 5:
+            blk = calculatorBlock.calculatorBlock(self.parent, self.field)
         elif id == 6:
             blk = useAnotherBlock.useAnotherBlock(self.parent, self.field)
         else:

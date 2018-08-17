@@ -6,6 +6,7 @@ class targetValBlock(block.block):
         super().__init__(parent, field, **kwargs)
 
         self.nameEdit.setText("目標值")
+        self.settingData["targetVals"] = None
 
         self.setAcceptDrops(True)
 

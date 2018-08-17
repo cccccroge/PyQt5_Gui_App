@@ -11,7 +11,7 @@ import central
 from glob import msgDuration
 
 import targetValBlock, dataBlock, condDataBlock
-import dataFilterBlock, numberBlock, calculatorBlock, useAnotherBlock
+import dataFilterBlock, calculatorBlock, numberBlock, useAnotherBlock
 
 
 class mainWindow(QtWidgets.QMainWindow):
@@ -194,38 +194,61 @@ class mainWindow(QtWidgets.QMainWindow):
             startRows = fileDf.loc[fileDf[colName] == val]
 
             # parse single row
+            rowDataList = []
             for row in range(grid.rowCount() - 1):
                 hboxLayout = grid.itemAtPosition(row, 0)
+
+                # empty row: ignore it
+                if hboxLayout.count() == 1:
+                    continue
+
+                # start parsing...
                 out = startRows
-                # head block: input is start
-                i = 2
-                curBlk = hboxLayout.itemAt(i).widget()
-                if type(curBlk) == calculatorBlock:
-                    out = curBlk.generateOut(valColSrc, val, hboxLayout)
-                    pass
-                else:
-                    out = curBlk.generateOut(valColSrc, val)
+                for col in range(2, hboxLayout.count(), 2):
+                    curBlk = hboxLayout.itemAt(col).widget()
+
+                    # input is nothing: failed to gen valid out if no 'UAB' trailed behind
                     if out is None:
-                        #TODO: should consider useAnotherBlock
-                        pass
-                    # trail blocks
+                        if type(curBlk) != useAnotherBlock.useAnotherBlock:
+                            print("None val for this row!")
+                            break
+                        else:
+                            out = startRows
+                            continue
+                    # input has valid values: generate output as next input
                     else:
+                        if type(curBlk) == targetValBlock.targetValBlock: # should be alone
+                            out = val
+                            break
+                        if type(curBlk) == calculatorBlock.calculatorBlock: # assume alone
+                            out = curBlk.generateOut(out, hboxLayout, self.relatedGraph)
+                            break
+                        if type(curBlk) == useAnotherBlock.useAnotherBlock:
+                            break
+                        else:
+                            out = curBlk.generateOut(out, self.relatedGraph)
+                
+                # append final output val to get row list
+                data = out if (out is not None) else "" # leave empty as invalid val
+                rowDataList.append(data)
 
+            # append whole row list to get form matrix
+            outputForm.append(rowDataList)
 
+        # 4.Transfer to df for post edit: two-dimen list -> dataFrame
+        outputDf = pd.DataFrame(outputForm)
 
+        # 5.Adjust the dataframe with specified output setting
 
-        # 4.Adjust the dataframe with specified output setting
-
-        # 5.Output to excel: two-dimen list -> dataFrame -> excel
+        # 6.Output to excel: dataFrame -> excel
         lpos = fileName[1].rfind("(") + 2
         rpos = fileName[1].rfind(")")
         ext = "." + (fileName[1])[lpos:rpos]
         path = fileName[0]
-        if path.find(ext) == -1:
+        if path.find(ext) == -1:    # if user didn't type extension then add for them
             path = path + ext
         writer = pd.ExcelWriter(path)
 
-        outputDf = pd.DataFrame(outputForm)
         outputDf.to_excel(writer, self.tr("工作表1"), header=False, index=False)
         writer.save()
 

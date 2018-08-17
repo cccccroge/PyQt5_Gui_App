@@ -11,6 +11,9 @@ class dataBlock(block.block):
         self.setAcceptDrops(True)
 
 
+    def generateOut(self, input, graph):
+        return "好"
+
     ####################
     #    Overloadeds
     ####################

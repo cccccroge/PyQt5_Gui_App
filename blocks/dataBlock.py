@@ -1,5 +1,6 @@
 from PyQt5 import QtWidgets
 import block
+import pandas as pd
 
 class dataBlock(block.block):
     def __init__(self, parent, field, **kwargs):
@@ -11,8 +12,30 @@ class dataBlock(block.block):
         self.setAcceptDrops(True)
 
 
-    def generateOut(self, input, graph):
-        return "好"
+    def generateOut(self, input, inputColSrc, graph):
+        # Invalid input
+        if type(input) != pd.core.frame.DataFrame \
+            and type(input) != pd.core.series.Series:
+                return None, None
+        
+        # More than one row: use first row
+        if type(input) == pd.core.frame.DataFrame:
+            input = input.iloc[0]
+
+        
+        fromNode = inputColSrc[0:2]
+        toNode = self.colSource[0:2]
+        ret = graph.shortest_path(fromNode, toNode)
+        # Not connected
+        if ret == False:
+            return None, None
+
+        # Find path from inputColSrc to the block's colSrc
+        print("find path from {0} to {1}:".format(fromNode, toNode))
+        print(ret)
+        return "好啊", None
+
+
 
     ####################
     #    Overloadeds

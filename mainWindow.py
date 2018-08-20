@@ -181,17 +181,16 @@ class mainWindow(QtWidgets.QMainWindow):
         self.progressBar.setRange(0, len(valsList))
         self.progressBar.setValue(0)
         self.progressBar.setVisible(True)
+        finishNum = 0
 
         # 3-3.start parsing
         for val in valsList:
             # find start rows as beginning point
-            print("valColSrc = {0}".format(valColSrc))
-            print("valColSrc[0] = {0}".format(valColSrc[0]))
-            print("valColSrc[1] = {0}".format(valColSrc[1]))
-            print("valColSrc[2] = {0}".format(valColSrc[2]))
             fileDf = self.srcFiles[(valColSrc[0], valColSrc[1])]
             colName = valColSrc[2]
             startRows = fileDf.loc[fileDf[colName] == val]
+            print(type(startRows))
+            print(type(startRows.iloc[0]))
 
             # parse single row
             rowDataList = []
@@ -204,6 +203,7 @@ class mainWindow(QtWidgets.QMainWindow):
 
                 # start parsing...
                 out = startRows
+                outColSrc = valColSrc
                 for col in range(2, hboxLayout.count(), 2):
                     curBlk = hboxLayout.itemAt(col).widget()
 
@@ -221,19 +221,24 @@ class mainWindow(QtWidgets.QMainWindow):
                             out = val
                             break
                         if type(curBlk) == calculatorBlock.calculatorBlock: # assume alone
-                            out = curBlk.generateOut(out, hboxLayout, self.relatedGraph)
+                            out = curBlk.generateOut(hboxLayout, out, outColSrc, self.relatedGraph)
                             break
                         if type(curBlk) == useAnotherBlock.useAnotherBlock:
                             break
                         else:
-                            out = curBlk.generateOut(out, self.relatedGraph)
+                            out, outColSrc = \
+                                curBlk.generateOut(out, outColSrc, self.relatedGraph)
                 
                 # append final output val to get row list
-                data = out if (out is not None) else "" # leave empty as invalid val
+                data = out if (out is not None) else "N/A" # leave N/A as invalid val
                 rowDataList.append(data)
 
             # append whole row list to get form matrix
             outputForm.append(rowDataList)
+
+            # finish one row
+            finishNum += 1
+            self.progressBar.setValue(finishNum)
 
         # 4.Transfer to df for post edit: two-dimen list -> dataFrame
         outputDf = pd.DataFrame(outputForm)

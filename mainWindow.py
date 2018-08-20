@@ -189,8 +189,6 @@ class mainWindow(QtWidgets.QMainWindow):
             fileDf = self.srcFiles[(valColSrc[0], valColSrc[1])]
             colName = valColSrc[2]
             startRows = fileDf.loc[fileDf[colName] == val]
-            print(type(startRows))
-            print(type(startRows.iloc[0]))
 
             # parse single row
             rowDataList = []

@@ -35,6 +35,11 @@ class dataBlock(block.block):
             print("輸出時出現檔案關聯失敗：兩個資料表間不存在有效連結")
             return None, None
 
+        if fromNode == toNode:
+            colName = self.colSource[2]
+            data = input.at[colName]
+            return data, self.colSource
+
         pathNodes = nx.shortest_path(graph, fromNode, toNode)
 
         # Find last connected row from inputColSrc to the block's colSrc
@@ -50,12 +55,11 @@ class dataBlock(block.block):
             
             preVal = curRow.at[preCol]
             postFile = self.parent.srcFiles[postNode]
-            try:
-                rows = postFile.loc[postFile[postCol] == preVal]
-            except KeyError:
+
+            rows = postFile.loc[postFile[postCol] == preVal]
+            if rows.empty:
                 print("輸出時，檔案關聯期間連結錯誤：兩個資料表的共同欄位值不同步")
                 return None, None
-
             curRow = rows.iloc[0]
 
         # Get the final value

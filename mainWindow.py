@@ -178,7 +178,7 @@ class mainWindow(QtWidgets.QMainWindow):
 
         # 3-2.init progressBar range
         self.hintLabel.setText("正在輸出檔案...")
-        self.progressBar.setRange(0, len(valsList))
+        self.progressBar.setRange(0, len(valsList) * (grid.rowCount() - 1))
         self.progressBar.setValue(0)
         self.progressBar.setVisible(True)
         finishNum = 0
@@ -205,14 +205,15 @@ class mainWindow(QtWidgets.QMainWindow):
                 for col in range(2, hboxLayout.count(), 2):
                     curBlk = hboxLayout.itemAt(col).widget()
 
-                    # input is nothing: failed to gen valid out if no 'UAB' trailed behind
+                    # input is nothing: failed to gen valid out if no UAB/CDB trailed behind
                     if out is None:
-                        if type(curBlk) != useAnotherBlock.useAnotherBlock:
+                        if type(curBlk) == useAnotherBlock.useAnotherBlock:
+                            out = startRows
+                        elif type(curBlk) == condDataBlock.condDataBlock:
+                            out = curBlk.generateOut(out)
+                        else:
                             print("None val for this row!")
                             break
-                        else:
-                            out = startRows
-                            continue
                     # input has valid values: generate output as next input
                     else:
                         if type(curBlk) == targetValBlock.targetValBlock: # should be alone
@@ -223,9 +224,15 @@ class mainWindow(QtWidgets.QMainWindow):
                             break
                         if type(curBlk) == useAnotherBlock.useAnotherBlock:
                             break
-                        else:
+
+                        if type(curBlk) == dataBlock.dataBlock:
                             out, outColSrc = \
                                 curBlk.generateOut(out, outColSrc, self.relatedGraph)
+                        elif type(curBlk) == condDataBlock.condDataBlock:
+                            out = curBlk.generateOut(out)
+                        else:
+                            out = "哈"
+                            break
                 
                 # append final output val to get row list
                 data = out if (out is not None) else "N/A" # leave N/A as invalid val

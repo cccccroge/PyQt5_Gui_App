@@ -74,6 +74,25 @@ class condDataBlock(block.block):
         self.settingLayout.addStretch()
 
 
+    def generateOut(self, input):
+        out = None
+        ruleList = self.settingData["mapRules"]
+
+        if self.settingData["dataType"] == "existence":
+            if input is None:
+                out = ruleList[1][1]
+            else:
+                out = ruleList[0][1]
+
+        elif self.settingData["dataType"] == "value":
+            # Find match
+            for tup in ruleList:
+                if input == tup[0]:
+                    out = tup[1]
+
+        return out
+                
+
     ####################
     #      Slots
     ####################
@@ -127,6 +146,7 @@ class condDataBlock(block.block):
             t2 = targetLayout.itemAtPosition(row, 2).widget().text()
             if t1 == "" and t2 == "":
                 continue
+
             self.settingData["mapRules"].append((t1, t2))
 
         print("settingData becomes: ")

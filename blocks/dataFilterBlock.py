@@ -114,20 +114,66 @@ class dataFilterBlock(block.block):
 
     def filter_str(self, input):
         condStrs = self.settingData["filterCond"].split()
+        # No filter
+        if len(condStrs) <= 1:
+            return input
+
         first = condStrs[0]
         second = condStrs[1]
+        col = self.colSource[2]
 
+        out = None
+        if first == "=":
+            out = input.loc[input[col] == second]
+
+        return out
 
 
     def filter_num(self, input):
         condStrs = self.settingData["filterCond"].split()
+        # No filter
+        if len(condStrs) <= 1:
+            return input
+
         first = condStrs[0]
         second = condStrs[1]
+        col = self.colSource[2]
+
+        out = None
+        if first == "=":
+            out = input.loc[input[col] == second]
+
+        return out
 
     def filter_date(self, input):
         condStrs = self.settingData["filterCond"].split()
+        # No filter
+        if len(condStrs) <= 1:
+            return input
+
         first = condStrs[0]
         second = condStrs[1]
+        col = self.colSource[2]
+
+        out = None
+        if second == "latest":
+            out = input.loc[input[col] == max(input[col])]
+        elif second == "earliest":
+            out = input.loc[input[col] == min(input[col])]
+        else:
+            second = int(second)
+            if first == "=":
+                out = input.loc[input[col] == second]
+            elif first == "<":
+                out = input.loc[input[col] < second]
+            elif first == "<=":
+                out = input.loc[input[col] <= second]
+            elif first == ">":
+                out = input.loc[input[col] > second]
+            elif first == ">=":
+                out = input.loc[input[col] >= second]
+
+        return out
 
 
     ####################

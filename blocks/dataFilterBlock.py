@@ -47,6 +47,88 @@ class dataFilterBlock(block.block):
         groupBoxCondLayout.addWidget(self.lineEditCond)
         
 
+    def generateOut(self, input, inputColSrc, graph):
+        # Invalid input
+        if type(input) != pd.core.frame.DataFrame \
+            and type(input) != pd.core.series.Series:
+                print("輸出時某'資料'方塊之輸入無效")
+                return None, None
+        
+        fromNode = inputColSrc[0:2]
+        toNode = self.colSource[0:2]
+        # Failed to relate
+        if (fromNode not in graph) or (toNode not in graph):
+            print("輸出時出現檔案關聯失敗：某一資料表不曾被連結")
+            return None, None
+
+        if nx.has_path(graph, fromNode, toNode) == False:
+            print("輸出時出現檔案關聯失敗：兩個資料表間不存在有效連結")
+            return None, None
+
+
+        # Same file: no need to traverse the graph
+        if fromNode == toNode:
+            data = self.filter(input)
+            return data, self.colSource
+
+        # Find second last connected row, and use filter setting to get rows or row
+        if type(input) == pd.core.frame.DataFrame:
+            input = input.iloc[0]
+        curRow = input
+
+        pathNodes = nx.shortest_path(graph, fromNode, toNode)
+        for i in range(len(pathNodes) - 1):
+            # each relationship find another row
+            preNode = pathNodes[i]
+            postNode = pathNodes[i + 1]
+            pre2postPath = graph[preNode][postNode]["common"]
+            print("pre2postPath = {0}".format(pre2postPath))
+            preCol = pre2postPath[0]
+            postCol = pre2postPath[1]
+            
+            preVal = curRow.at[preCol]
+            postFile = self.parent.srcFiles[postNode]
+
+            rows = postFile.loc[postFile[postCol] == preVal]
+            if rows.empty:
+                print("輸出時，檔案關聯期間連結錯誤：兩個資料表的共同欄位值不同步")
+                return None, None
+            # don't cut in last round
+            if i != len(pathNodes) - 2:
+                curRow = rows.iloc[0]
+
+        # Get the final rows/row
+        data = self.filter(curRow)
+        return data, self.colSource
+
+
+    def filter(self, input):
+        # Identify the data type
+        type = self.settingData["dataType"]
+        if type == "str":
+            self.filter_str(input)
+        elif  type == "num":
+            self.filter_num(input)
+        elif type == "date":
+            self.filter_date(input)
+
+    def filter_str(self, input):
+        condStrs = self.settingData["filterCond"].split()
+        first = condStrs[0]
+        second = condStrs[1]
+
+
+
+    def filter_num(self, input):
+        condStrs = self.settingData["filterCond"].split()
+        first = condStrs[0]
+        second = condStrs[1]
+
+    def filter_date(self, input):
+        condStrs = self.settingData["filterCond"].split()
+        first = condStrs[0]
+        second = condStrs[1]
+
 
     ####################
     #    Overloadeds

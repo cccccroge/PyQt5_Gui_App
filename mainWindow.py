@@ -199,6 +199,7 @@ class mainWindow(QtWidgets.QMainWindow):
                 if hboxLayout.count() == 1:
                     continue
 
+                print("\n row = {0}".format(row))
                 # start parsing...
                 out = startRows
                 outColSrc = valColSrc
@@ -209,6 +210,7 @@ class mainWindow(QtWidgets.QMainWindow):
                     if out is None:
                         if type(curBlk) == useAnotherBlock.useAnotherBlock:
                             out = startRows
+                            outColSrc = valColSrc
                         elif type(curBlk) == condDataBlock.condDataBlock:
                             out = curBlk.generateOut(out)
                         else:

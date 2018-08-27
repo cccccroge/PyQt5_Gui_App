@@ -1,4 +1,6 @@
 from PyQt5 import QtWidgets
+import pandas as pd
+import networkx as nx
 import block
 
 class dataFilterBlock(block.block):
@@ -96,6 +98,8 @@ class dataFilterBlock(block.block):
             # don't cut in last round
             if i != len(pathNodes) - 2:
                 curRow = rows.iloc[0]
+            else:
+                curRow = rows
 
         # Get the final rows/row
         data = self.filter(curRow)
@@ -105,12 +109,15 @@ class dataFilterBlock(block.block):
     def filter(self, input):
         # Identify the data type
         type = self.settingData["dataType"]
+        print("entering filter func...")
+        print("type = {0}".format(type))
         if type == "str":
-            self.filter_str(input)
-        elif  type == "num":
-            self.filter_num(input)
+            return self.filter_str(input)
+        elif type == "num":
+            return self.filter_num(input)
         elif type == "date":
-            self.filter_date(input)
+            return self.filter_date(input)
+
 
     def filter_str(self, input):
         condStrs = self.settingData["filterCond"].split()
@@ -124,7 +131,13 @@ class dataFilterBlock(block.block):
 
         out = None
         if first == "=":
+            print("filter_str input:")
+            print(input)
             out = input.loc[input[col] == second]
+            print("filter_str out:")
+            print(out)
+        elif first == "!=":
+            out = input.loc[input[col] != second]
 
         return out
 
@@ -140,12 +153,29 @@ class dataFilterBlock(block.block):
         col = self.colSource[2]
 
         out = None
-        if first == "=":
-            out = input.loc[input[col] == second]
+
+        if second == "max":
+            out = input.loc[input[col] == max(input[col])]
+        elif second == "min":
+            out = input.loc[input[col] == min(input[col])]
+        else:
+            second = int(second)    # assume it's int
+            if first == "=":
+                out = input.loc[input[col] == second]
+            elif first == "<":
+                out = input.loc[input[col] < second]
+            elif first == "<=":
+                out = input.loc[input[col] <= second]
+            elif first == ">":
+                out = input.loc[input[col] > second]
+            elif first == ">=":
+                out = input.loc[input[col] >= second]
 
         return out
 
+
     def filter_date(self, input):
+        print("entering filter_date func...")
         condStrs = self.settingData["filterCond"].split()
         # No filter
         if len(condStrs) <= 1:
@@ -154,16 +184,16 @@ class dataFilterBlock(block.block):
         first = condStrs[0]
         second = condStrs[1]
         col = self.colSource[2]
+        print("first = {0}, second = {1}".format(first, second))
 
         out = None
         if second == "latest":
-            out = input.loc[input[col] == max(input[col])]
+            out = input.tail(1)  # assume last row is latest
         elif second == "earliest":
-            out = input.loc[input[col] == min(input[col])]
+            out = input.iloc[0]
         else:
-            second = int(second)
             if first == "=":
-                out = input.loc[input[col] == second]
+                out = input.loc[input[col] == second]   # assume data is string
             elif first == "<":
                 out = input.loc[input[col] < second]
             elif first == "<=":

@@ -232,6 +232,9 @@ class mainWindow(QtWidgets.QMainWindow):
                                 curBlk.generateOut(out, outColSrc, self.relatedGraph)
                         elif type(curBlk) == condDataBlock.condDataBlock:
                             out = curBlk.generateOut(out)
+                        elif type(curBlk) == dataFilterBlock.dataFilterBlock:
+                            out, outColSrc = \
+                                curBlk.generateOut(out, outColSrc, self.relatedGraph)
                         else:
                             out = "哈"
                             break

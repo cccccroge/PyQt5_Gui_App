@@ -211,13 +211,12 @@ class mainWindow(QtWidgets.QMainWindow):
                         if type(curBlk) == useAnotherBlock.useAnotherBlock:
                             out = startRows
                             outColSrc = valColSrc
-                        elif type(curBlk) == condDataBlock.condDataBlock:
+                        elif type(curBlk) == condDataBlock.condDataBlock:   # should not be 3rd
                             out = curBlk.generateOut(out)
                         elif type(curBlk) == numberBlock.numberBlock:
                             out = curBlk.generateOut(out)
                         else:
-                            print("None val for this row!")
-                            break
+                            continue
                     # input has valid values: generate output as next input
                     else:
                         if type(curBlk) == targetValBlock.targetValBlock: # should be alone

@@ -53,8 +53,12 @@ class dataFilterBlock(block.block):
         # Invalid input
         if type(input) != pd.core.frame.DataFrame \
             and type(input) != pd.core.series.Series:
-                print("輸出時某'資料'方塊之輸入無效")
+                print("輸出時某'資料篩選'方塊之輸入無效")
                 return None, None
+        # No data
+        if input.empty:
+            print("輸出時某'資料篩選'方塊的輸入為空")
+            return None, None
         
         fromNode = inputColSrc[0:2]
         toNode = self.colSource[0:2]

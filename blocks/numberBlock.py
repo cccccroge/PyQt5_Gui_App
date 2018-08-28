@@ -6,3 +6,13 @@ class numberBlock(block.block):
 
         self.nameEdit.setText("數量")
         self.disableBtn()
+
+    def generateOut(self, input):
+        out = None
+
+        if input is None:
+            out = 0
+        else:
+            out = len(input.index)  # input has to be dataframe
+
+        return out

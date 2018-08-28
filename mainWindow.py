@@ -213,6 +213,8 @@ class mainWindow(QtWidgets.QMainWindow):
                             outColSrc = valColSrc
                         elif type(curBlk) == condDataBlock.condDataBlock:
                             out = curBlk.generateOut(out)
+                        elif type(curBlk) == numberBlock.numberBlock:
+                            out = curBlk.generateOut(out)
                         else:
                             print("None val for this row!")
                             break
@@ -231,6 +233,8 @@ class mainWindow(QtWidgets.QMainWindow):
                             out, outColSrc = \
                                 curBlk.generateOut(out, outColSrc, self.relatedGraph)
                         elif type(curBlk) == condDataBlock.condDataBlock:
+                            out = curBlk.generateOut(out)
+                        elif type(curBlk) == numberBlock.numberBlock:
                             out = curBlk.generateOut(out)
                         elif type(curBlk) == dataFilterBlock.dataFilterBlock:
                             out, outColSrc = \

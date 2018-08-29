@@ -110,13 +110,18 @@ class condDataBlock(block.block):
             else:
                 out = ruleList[0][1]
 
-        elif self.settingData["dataType"] == "value" \
-            or self.settingData["dataType"] == "useform":
+        elif self.settingData["dataType"] == "value":
             # Find match
             for tup in ruleList:
                 if input == tup[0]:
                     out = tup[1]
-
+        elif self.settingData["dataType"] == "useform": # hack a bit bcz failed to get orig type in excel
+            for tup in ruleList:
+                if input == int(tup[0]):
+                    out = tup[1]
+        
+        print("CDB input = {0}".format(input))
+        print("CDB out = {0}".format(out))
         return out
                 
 

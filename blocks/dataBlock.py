@@ -1,6 +1,7 @@
 from PyQt5 import QtWidgets
 import block
 import pandas as pd
+import numpy as np
 import networkx as nx
 
 class dataBlock(block.block):
@@ -13,7 +14,8 @@ class dataBlock(block.block):
         self.setAcceptDrops(True)
 
 
-    def generateOut(self, input, inputColSrc, graph):
+    def generateOut(self, input, inputColSrc, graph
+                    ):
         # Invalid input
         if type(input) != pd.core.frame.DataFrame \
             and type(input) != pd.core.series.Series:
@@ -27,6 +29,19 @@ class dataBlock(block.block):
         
         fromNode = inputColSrc[0:2]
         toNode = self.colSource[0:2]
+
+        if fromNode == toNode:
+            colName = self.colSource[2]
+
+            #isStr = pd.api.types.is_string_dtype(input[colName])
+            #print("DB isStr = {0}".format(isStr))
+            #if isStr:
+            #    data = str(input.at[colName])
+            #else:
+            data = input.at[colName]
+
+            return data, self.colSource
+
         if (fromNode not in graph) or (toNode not in graph):
             print("輸出時出現檔案關聯失敗：某一資料表不曾被連結")
             return None, None
@@ -34,11 +49,6 @@ class dataBlock(block.block):
         if nx.has_path(graph, fromNode, toNode) == False:
             print("輸出時出現檔案關聯失敗：兩個資料表間不存在有效連結")
             return None, None
-
-        if fromNode == toNode:
-            colName = self.colSource[2]
-            data = input.at[colName]
-            return data, self.colSource
 
         pathNodes = nx.shortest_path(graph, fromNode, toNode)
 
@@ -64,7 +74,14 @@ class dataBlock(block.block):
 
         # Get the final value
         blkColSrc = self.colSource[2]
+
+        #isStr = pd.api.types.is_string_dtype(curRow[blkColSrc])
+        #print("DB isStr = {0}".format(isStr))
+        #if isStr:
+        #    data = str(curRow.at[blkColSrc])
+        #else:
         data = curRow.at[blkColSrc]
+
         return data, self.colSource
 
 

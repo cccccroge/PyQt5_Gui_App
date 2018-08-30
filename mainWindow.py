@@ -3,6 +3,7 @@ from PyQt5 import QtWidgets, QtCore
 import pandas as pd
 import numpy as np
 import networkx as nx
+import pickle
 
 import menu
 import tool
@@ -280,10 +281,52 @@ class mainWindow(QtWidgets.QMainWindow):
         print("新增關聯項目")
 
     def load_template(self):
-        print("讀取樣板...")
+        # Select file to open
+        fileNamesObj = QtWidgets.QFileDialog.getOpenFileNames(
+            self, self.tr("讀取樣板"), "",
+            self.tr("Excel In Blocks (*.ieb);;All Files (*)"),
+            self.tr("Excel In Blocks (*.ieb)"))
+
+        if len(fileNamesObj) == 0:
+            self.statusBar().showMessage("取消儲存或未命名檔案", msgDuration)
+            return
+
+        path = fileNamesObj[0][0]   # fileNamesObj[0] is list of paths
+        if path.rfind(".ieb") == -1:
+            path = path + ".ieb"
+
+        loadFile = open(path, "rb")
+
+        # Take out objs from .ieb
+        objsList = pickle.load(loadFile)
+        print(objsList)
+        self.statusBar().showMessage("成功讀取樣板", msgDuration)
+
+
 
     def save_template(self):
-        print("儲存樣板...")
+        # Save a file with extension '.ieb(Excel In Blocks)'
+        saveFile = QtWidgets.QFileDialog.getSaveFileName(
+            self, self.tr("儲存樣板"), "", 
+            self.tr("Excel In Blocks (*.ieb);;All Files (*)"),
+            self.tr("Excel In Blocks (*.ieb)"))
+
+        if saveFile[0] =="":
+            self.statusBar().showMessage(self.tr("取消儲存樣板"), msgDuration)
+            return
+
+        # Write data to this file
+        path = saveFile[0]
+        if path.rfind(".ieb") == -1:
+            path = path + ".ieb"
+
+        openedFile = open(path, 'wb')
+        testVar = [1, "str", (2, 3)]
+        pickle.dump(testVar, openedFile)
+
+        openedFile.close()
+        self.statusBar().showMessage(self.tr("成功儲存樣板"), msgDuration)
+            
 
     def view_excel(self):
         print("檢視excel...")

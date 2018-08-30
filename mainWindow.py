@@ -439,11 +439,18 @@ class mainWindow(QtWidgets.QMainWindow):
 
                 isWidget = False
                 widget = None
+                j = 0
                 for col in range(0, hboxLayout.count()):
                     if not isWidget:
-                        widget = hboxLayout.itemAt(0).widget()  # always delete first
+                        widget = hboxLayout.itemAt(j).widget()
                     else:
-                        widget = hboxLayout.itemAt(0)
+                        widget = hboxLayout.itemAt(j)
 
+                    if type(widget) == QtWidgets.QLabel:
+                        j += 1
+                        continue
                     hboxLayout.removeWidget(widget)
                     widget.deleteLater()
+
+        # Rebuild blocks using data
+

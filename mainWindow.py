@@ -9,7 +9,7 @@ import menu
 import tool
 import status
 import central
-from glob import msgDuration
+from glob import msgDuration, fieldRowHeight
 
 import targetValBlock, dataBlock, condDataBlock
 import dataFilterBlock, calculatorBlock, numberBlock, useAnotherBlock
@@ -301,6 +301,8 @@ class mainWindow(QtWidgets.QMainWindow):
         objsList = pickle.load(loadFile)
         graphTemplate = objsList[0]
         blksDataTemplate = objsList[1]
+        print("extract data:")
+        print(blksDataTemplate)
 
         # Replace current setting
         self.relatedGraph = graphTemplate
@@ -446,11 +448,73 @@ class mainWindow(QtWidgets.QMainWindow):
                     else:
                         widget = hboxLayout.itemAt(j)
 
-                    if type(widget) == QtWidgets.QLabel:
+                    if type(widget) == QtWidgets.QLabel:    # don't delete dashes
                         j += 1
                         continue
                     hboxLayout.removeWidget(widget)
                     widget.deleteLater()
 
         # Rebuild blocks using data
+        for key, val in data.items():
+            print("key is {0}".format(key))
+            print("val is {0}".format(val))
 
+            row = key[0]
+            col = key[1]
+            dataDict = val
+
+            # not block, is lineEdit
+            if "blkType" not in dataDict:
+                le = QtWidgets.QLineEdit()
+                le.setPlaceholderText(self.tr("欄位名稱"))
+                le.setText(dataDict["colText"])
+                le.setFixedSize(QtCore.QSize(125, fieldRowHeight))
+                hboxLayout = grid.itemAtPosition(row, 0)
+                hboxLayout.insertWidget(0, le, 0, QtCore.Qt.AlignLeft)
+                continue
+
+            # is block, create corresponding block
+            blk = None
+            if dataDict["blkType"] == "targetValBlock":
+                blk = self.buildBlock(dataDict["blkType"])
+            elif dataDict["blkType"] == "dataBlock":
+                blk = self.buildBlock(dataDict["blkType"])
+            elif dataDict["blkType"] == "condDataBlock":
+                blk = self.buildBlock(dataDict["blkType"])
+            elif dataDict["blkType"] == "dataFilterBlock":
+                blk = self.buildBlock(dataDict["blkType"])
+            elif dataDict["blkType"] == "numberBlock":
+                blk = self.buildBlock(dataDict["blkType"])
+            elif dataDict["blkType"] == "calculatorBlock":
+                blk = self.buildBlock(dataDict["blkType"])
+            elif dataDict["blkType"] == "useAnotherBlock":
+                blk = self.buildBlock(dataDict["blkType"])
+            
+            hboxLayout = grid.itemAtPosition(row, 0)
+            hboxLayout.insertWidget(col, blk, 0, QtCore.Qt.AlignLeft)
+
+
+    def buildBlock(self, type):
+        blk = None
+
+        if type == "targetValBlock":
+            blk = targetValBlock.targetValBlock(self, self.central.fieldWidget)
+        elif type == "dataBlock":
+            blk = dataBlock.dataBlock(self, self.central.fieldWidget)
+        elif type == "condDataBlock":
+            blk = condDataBlock.condDataBlock(self, self.central.fieldWidget)
+        elif type == "dataFilterBlock":
+            blk = dataFilterBlock.dataFilterBlock(self, self.central.fieldWidget)
+        elif type == "numberBlock":
+            blk = numberBlock.numberBlock(self, self.central.fieldWidget)
+        elif type == "calculatorBlock":
+            blk = calculatorBlock.calculatorBlock(self, self.central.fieldWidget)
+        elif type == "useAnotherBlock":
+            blk = useAnotherBlock.useAnotherBlock(self, self.central.fieldWidget)
+        else:
+            return
+
+        blk.setMouseTracking(True)
+        blk.nameEdit.setDisabled(False)
+
+        return blk

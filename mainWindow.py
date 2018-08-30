@@ -287,7 +287,7 @@ class mainWindow(QtWidgets.QMainWindow):
             self.tr("Excel In Blocks (*.ieb);;All Files (*)"),
             self.tr("Excel In Blocks (*.ieb)"))
 
-        if len(fileNamesObj) == 0:
+        if len(fileNamesObj[0]) == 0:
             self.statusBar().showMessage("取消儲存或未命名檔案", msgDuration)
             return
 
@@ -299,7 +299,13 @@ class mainWindow(QtWidgets.QMainWindow):
 
         # Take out objs from .ieb
         objsList = pickle.load(loadFile)
-        print(objsList)
+        graphTemplate = objsList[0]
+        gridLayoutTemplate = objsList[1]
+
+        # Replace current setting
+        self.relatedGraph = graphTemplate
+        self.central.fieldWidget.gridLayout = gridLayoutTemplate
+
         self.statusBar().showMessage("成功讀取樣板", msgDuration)
 
 
@@ -315,14 +321,16 @@ class mainWindow(QtWidgets.QMainWindow):
             self.statusBar().showMessage(self.tr("取消儲存樣板"), msgDuration)
             return
 
-        # Write data to this file
         path = saveFile[0]
         if path.rfind(".ieb") == -1:
             path = path + ".ieb"
-
         openedFile = open(path, 'wb')
-        testVar = [1, "str", (2, 3)]
-        pickle.dump(testVar, openedFile)
+
+        # Write data to this file: current graph and gridLayout
+        objsList = []
+        objsList.append(self.relatedGraph)
+        objsList.append(self.central.fieldWidget.gridLayout)
+        pickle.dump(objsList, openedFile)
 
         openedFile.close()
         self.statusBar().showMessage(self.tr("成功儲存樣板"), msgDuration)

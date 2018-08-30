@@ -300,11 +300,11 @@ class mainWindow(QtWidgets.QMainWindow):
         # Take out objs from .ieb
         objsList = pickle.load(loadFile)
         graphTemplate = objsList[0]
-        gridLayoutTemplate = objsList[1]
+        blksDataTemplate = objsList[1]
 
         # Replace current setting
         self.relatedGraph = graphTemplate
-        self.central.fieldWidget.gridLayout = gridLayoutTemplate
+        self.buildBlocksUseData(blksDataTemplate)
 
         self.statusBar().showMessage("成功讀取樣板", msgDuration)
 
@@ -329,7 +329,8 @@ class mainWindow(QtWidgets.QMainWindow):
         # Write data to this file: current graph and gridLayout
         objsList = []
         objsList.append(self.relatedGraph)
-        objsList.append(self.central.fieldWidget.gridLayout)
+        blocks = self.getBlocksRawData(self.central.fieldWidget.gridLayout)
+        objsList.append(blocks)
         pickle.dump(objsList, openedFile)
 
         openedFile.close()
@@ -385,6 +386,64 @@ class mainWindow(QtWidgets.QMainWindow):
         print("finish reading")
 
         return cols
+
+    def getBlocksRawData(self, gridLayout):
+        # Convert blocks data in gridLayout into packlible format
+        data = {}
+        for row in range(gridLayout.rowCount() - 1):
+                hboxLayout = gridLayout.itemAtPosition(row, 0)
+                for col in range(0, hboxLayout.count(), 2):
+                    data[(row, col)] = {}   # 'position' map to 'data dict'
+                    curBlk = hboxLayout.itemAt(col).widget()
+
+                    # fill data dict depends on its type
+                    dict = data[(row, col)]
+                    if type(curBlk) == targetValBlock.targetValBlock:
+                        dict["blkType"] = "targetValBlock"
+                        dict["colSource"] = curBlk.colSource
+                        dict["settingData"] = curBlk.settingData
+                        dict["text"] = curBlk.textEdit.toPlainText()
+                    elif type(curBlk) == dataBlock.dataBlock:
+                        dict["blkType"] = "dataBlock"
+                        dict["colSource"] = curBlk.colSource
+                    elif type(curBlk) == condDataBlock.condDataBlock:
+                        dict["blkType"] = "condDataBlock"
+                        dict["settingData"] = curBlk.settingData
+                        dict["formData"] = (curBlk.limitEdit.colSource, 
+                                            curBlk.limitEdit.text(),
+                                            curBlk.fromEdit.colSource,
+                                            curBlk.toEdit.colSource)
+                    elif type(curBlk) == dataFilterBlock.dataFilterBlock:
+                        dict["blkType"] = "dataFilterBlock"
+                        dict["colSource"] = curBlk.colSource
+                        dict["settingData"] = curBlk.settingData
+                    elif type(curBlk) == numberBlock.numberBlock:
+                        dict["blkType"] = "numberBlock"
+                    elif type(curBlk) == calculatorBlock.calculatorBlock:   # TODO
+                        dict["blkType"] = "calculatorBlock"
+                    elif type(curBlk) == useAnotherBlock.useAnotherBlock:
+                        dict["blkType"] = "useAnotherBlock"
+                    else:
+                        dict["colText"] = curBlk.text() # first col (lineEdit)
+
+        return data
         
         
-        
+
+    def buildBlocksUseData(self, data):
+        # Clear current gridLayout
+        grid = self.central.fieldWidget.gridLayout
+
+        for row in range(grid.rowCount() - 1):
+                hboxLayout = grid.itemAtPosition(row, 0)
+
+                isWidget = False
+                widget = None
+                for col in range(0, hboxLayout.count()):
+                    if not isWidget:
+                        widget = hboxLayout.itemAt(0).widget()  # always delete first
+                    else:
+                        widget = hboxLayout.itemAt(0)
+
+                    hboxLayout.removeWidget(widget)
+                    widget.deleteLater()

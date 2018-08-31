@@ -348,10 +348,10 @@ class mainWindow(QtWidgets.QMainWindow):
     def toggle_toolbar(self):
         if (self.toolBar.isVisible()):
             self.toolBar.setVisible(False)
-            self.statusBar().showMessage("已關閉工具列", 2000)
+            self.statusBar().showMessage("已關閉工具列", msgDuration)
         else:
             self.toolBar.setVisible(True)
-            self.statusBar().showMessage("已開啟工作列", 2000)
+            self.statusBar().showMessage("已開啟工作列", msgDuration)
 
     def toggle_main_panel(self):
         # Find main panel
@@ -400,32 +400,49 @@ class mainWindow(QtWidgets.QMainWindow):
 
                     # fill data dict depends on its type
                     dict = data[(row, col)]
+                    print("converting blk to raw data: ({0}, {1})".format(row, col))
                     if type(curBlk) == targetValBlock.targetValBlock:
+                        print("type: targetValBlock")
                         dict["blkType"] = "targetValBlock"
                         dict["colSource"] = curBlk.colSource
                         dict["settingData"] = curBlk.settingData
                         dict["text"] = curBlk.textEdit.toPlainText()
                     elif type(curBlk) == dataBlock.dataBlock:
+                        print("type: dataBlock")
                         dict["blkType"] = "dataBlock"
                         dict["colSource"] = curBlk.colSource
                     elif type(curBlk) == condDataBlock.condDataBlock:
+                        print("type: condDataBlock")
                         dict["blkType"] = "condDataBlock"
                         dict["settingData"] = curBlk.settingData
+                        dict["existData"] = (curBlk.lineEditYes.text(),
+                                             curBlk.lineEditNo.text())
+                        dict["valData"] = []
+                        grid = curBlk.groupBoxMaprulesLayout2
+                        for row in range(grid.rowCount()):
+                            fromText = grid.itemAtPosition(row, 0).widget().text()
+                            toText = grid.itemAtPosition(row, 2).widget().text()
+                            dict["valData"].append((fromText, toText))
+
                         dict["formData"] = (curBlk.limitEdit.colSource, 
                                             curBlk.limitEdit.text(),
                                             curBlk.fromEdit.colSource,
                                             curBlk.toEdit.colSource)
                     elif type(curBlk) == dataFilterBlock.dataFilterBlock:
+                        print("type: dataFilterBlock")
                         dict["blkType"] = "dataFilterBlock"
                         dict["colSource"] = curBlk.colSource
                         dict["settingData"] = curBlk.settingData
                     elif type(curBlk) == numberBlock.numberBlock:
+                        print("type: numberBlock")
                         dict["blkType"] = "numberBlock"
                     elif type(curBlk) == calculatorBlock.calculatorBlock:   # TODO
                         dict["blkType"] = "calculatorBlock"
                     elif type(curBlk) == useAnotherBlock.useAnotherBlock:
+                        print("type: useAnotherBlock")
                         dict["blkType"] = "useAnotherBlock"
                     else:
+                        print("type: lineEdit")
                         dict["colText"] = curBlk.text() # first col (lineEdit)
 
         return data
@@ -522,11 +539,13 @@ class mainWindow(QtWidgets.QMainWindow):
                 if hboxLayout.count() == 1:
                     continue
 
-                for col in range(1, hboxLayout.count() + 1, 2):
+                col = 1
+                while col != hboxLayout.count(): 
                     lineLabel = QtWidgets.QLabel()
                     lineLabel.setText("──")
                     lineLabel.setFixedHeight(fieldRowHeight)
                     hboxLayout.insertWidget(col, lineLabel, 0, QtCore.Qt.AlignLeft)
+                    col += 2
 
 
     def buildBlock(self, dataDict):
@@ -550,22 +569,38 @@ class mainWindow(QtWidgets.QMainWindow):
                 id = 0 if dataType == "existence" else (1 if dataType == "value" else 2)
                 radioBtn = blk.radioBtnGroup.button(id)
                 radioBtn.setChecked(True)
-            blk.lineEditYes.setText(dataDict["settingData"]["mapRules"][0][1])
-            blk.lineEditNo.setText(dataDict["settingData"]["mapRules"][1][1])
+                # remember enable the groupBox
+                if id == 0:     
+                    blk.groupBoxMaprules2.hide()
+                    blk.groupBoxMapUseform.hide()
+                    blk.groupBoxMaprules.show()
+                elif id == 1:
+                    blk.groupBoxMaprules.hide()
+                    blk.groupBoxMapUseform.hide()
+                    blk.groupBoxMaprules2.show()
+                elif id == 2:
+                    blk.groupBoxMaprules.hide()
+                    blk.groupBoxMaprules2.hide()
+                    blk.groupBoxMapUseform.show()
+
+            blk.lineEditYes.setText(dataDict["existData"][0])
+            blk.lineEditNo.setText(dataDict["existData"][1])
 
             layoutOfVals = blk.groupBoxMaprulesLayout2
-            for row in range(len(dataDict["settingData"]["mapRules"])):
-                text1 = dataDict["settingData"]["mapRules"][row][0]
-                text2 = dataDict["settingData"]["mapRules"][row][1]
+            for row in range(len(dataDict["valData"])):
+                text1 = dataDict["valData"][row][0]
+                text2 = dataDict["valData"][row][1]
                 layoutOfVals.itemAtPosition(row, 0).widget().setText(text1)
                 layoutOfVals.itemAtPosition(row, 2).widget().setText(text2)
             
             blk.limitEdit.colSource = dataDict["formData"][0]
             blk.limitEdit.setText(dataDict["formData"][1])
             blk.fromEdit.colSource = dataDict["formData"][2]
-            blk.fromEdit.setText(dataDict["formData"][2])
+            if dataDict["formData"][2] is not None:
+                blk.fromEdit.setText(dataDict["formData"][2][2])
             blk.toEdit.colSource = dataDict["formData"][3]
-            blk.toEdit.setText(dataDict["formData"][3])
+            if dataDict["formData"][3] is not None:
+                blk.toEdit.setText(dataDict["formData"][3][2])
 
         elif type == "dataFilterBlock":
             blk = dataFilterBlock.dataFilterBlock(self, self.central.fieldWidget)

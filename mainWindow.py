@@ -441,16 +441,12 @@ class mainWindow(QtWidgets.QMainWindow):
 
                 isWidget = False
                 widget = None
-                j = 0
                 for col in range(0, hboxLayout.count()):
                     if not isWidget:
-                        widget = hboxLayout.itemAt(j).widget()
+                        widget = hboxLayout.itemAt(0).widget()
                     else:
-                        widget = hboxLayout.itemAt(j)
+                        widget = hboxLayout.itemAt(0)
 
-                    if type(widget) == QtWidgets.QLabel:    # don't delete dashes
-                        j += 1
-                        continue
                     hboxLayout.removeWidget(widget)
                     widget.deleteLater()
 
@@ -465,46 +461,120 @@ class mainWindow(QtWidgets.QMainWindow):
 
             # not block, is lineEdit
             if "blkType" not in dataDict:
-                le = QtWidgets.QLineEdit()
-                le.setPlaceholderText(self.tr("欄位名稱"))
-                le.setText(dataDict["colText"])
-                le.setFixedSize(QtCore.QSize(125, fieldRowHeight))
-                hboxLayout = grid.itemAtPosition(row, 0)
-                hboxLayout.insertWidget(0, le, 0, QtCore.Qt.AlignLeft)
+                hboxLayout = None
+                if type(grid.itemAtPosition(row, 0)) == \
+                    QtWidgets.QHBoxLayout:
+                    hboxLayout = grid.itemAtPosition(row, 0)
+                else:
+                    hboxLayout = QtWidgets.QHBoxLayout()
+                    hboxLayout.setContentsMargins(0, 0, 0, 0)
+                    hboxLayout.setSpacing(0)
+                    addColBtn = grid.itemAtPosition(row, 0).widget()
+                    grid.addLayout(hboxLayout, row, 0, QtCore.Qt.AlignLeft)
+                    grid.addWidget(addColBtn, row + 1, QtCore.Qt.AlignLeft)
+
+                    le = QtWidgets.QLineEdit()
+                    le.setPlaceholderText(self.tr("欄位名稱"))
+                    le.setText(dataDict["colText"])
+                    le.setFixedSize(QtCore.QSize(125, fieldRowHeight))
+                    hboxLayout.insertWidget(0, le, 0, QtCore.Qt.AlignLeft)
+
                 continue
 
             # is block, create corresponding block
             blk = None
             if dataDict["blkType"] == "targetValBlock":
-                blk = self.buildBlock(dataDict["blkType"])
+                blk = self.buildBlock(dataDict)
             elif dataDict["blkType"] == "dataBlock":
-                blk = self.buildBlock(dataDict["blkType"])
+                blk = self.buildBlock(dataDict)
             elif dataDict["blkType"] == "condDataBlock":
-                blk = self.buildBlock(dataDict["blkType"])
+                blk = self.buildBlock(dataDict)
             elif dataDict["blkType"] == "dataFilterBlock":
-                blk = self.buildBlock(dataDict["blkType"])
+                blk = self.buildBlock(dataDict)
             elif dataDict["blkType"] == "numberBlock":
-                blk = self.buildBlock(dataDict["blkType"])
+                blk = self.buildBlock(dataDict)
             elif dataDict["blkType"] == "calculatorBlock":
-                blk = self.buildBlock(dataDict["blkType"])
+                blk = self.buildBlock(dataDict)
             elif dataDict["blkType"] == "useAnotherBlock":
-                blk = self.buildBlock(dataDict["blkType"])
+                blk = self.buildBlock(dataDict)
             
-            hboxLayout = grid.itemAtPosition(row, 0)
-            hboxLayout.insertWidget(col, blk, 0, QtCore.Qt.AlignLeft)
+            if type(grid.itemAtPosition(row, 0)) == \
+                    QtWidgets.QHBoxLayout:
+                hboxLayout = grid.itemAtPosition(row, 0)
+            else:
+                hboxLayout = QtWidgets.QHBoxLayout()
+                hboxLayout.setContentsMargins(0, 0, 0, 0)
+                hboxLayout.setSpacing(0)
+                addColBtn = grid.itemAtPosition(row, 0).widget()
+                grid.addLayout(hboxLayout, row, 0, QtCore.Qt.AlignLeft)
+                grid.addWidget(addColBtn, row + 1, QtCore.Qt.AlignLeft)
+
+                hboxLayout.insertWidget(col, blk, 0, QtCore.Qt.AlignLeft)
+
+        # Add back dashes
+        for row in range(grid.rowCount() - 1):
+                hboxLayout = grid.itemAtPosition(row, 0)
+
+                # don't need dash if no trailing blks
+                if hboxLayout.count() == 1:
+                    continue
+
+                for col in range(1, hboxLayout.count() + 1, 2):
+                    lineLabel = QtWidgets.QLabel()
+                    lineLabel.setText("──")
+                    lineLabel.setFixedHeight(fieldRowHeight)
+                    hboxLayout.insertWidget(col, lineLabel, 0, QtCore.Qt.AlignLeft)
 
 
-    def buildBlock(self, type):
+    def buildBlock(self, dataDict):
         blk = None
+        type = dataDict["blkType"]
 
         if type == "targetValBlock":
             blk = targetValBlock.targetValBlock(self, self.central.fieldWidget)
+            blk.colSource = dataDict["colSource"]
+            blk.settingData = dataDict["settingData"]
+            blk.textEdit.setText(dataDict["text"])
+
         elif type == "dataBlock":
             blk = dataBlock.dataBlock(self, self.central.fieldWidget)
+            blk.colSource = dataDict["colSource"]
         elif type == "condDataBlock":
             blk = condDataBlock.condDataBlock(self, self.central.fieldWidget)
+            blk.settingData = dataDict["settingData"]
+            dataType = dataDict["settingData"]["dataType"]
+            if dataType != "":
+                id = 0 if dataType == "existence" else (1 if dataType == "value" else 2)
+                radioBtn = blk.radioBtnGroup.button(id)
+                radioBtn.setChecked(True)
+            blk.lineEditYes.setText(dataDict["settingData"]["mapRules"][0][1])
+            blk.lineEditNo.setText(dataDict["settingData"]["mapRules"][1][1])
+
+            layoutOfVals = blk.groupBoxMaprulesLayout2
+            for row in range(len(dataDict["settingData"]["mapRules"])):
+                text1 = dataDict["settingData"]["mapRules"][row][0]
+                text2 = dataDict["settingData"]["mapRules"][row][1]
+                layoutOfVals.itemAtPosition(row, 0).widget().setText(text1)
+                layoutOfVals.itemAtPosition(row, 2).widget().setText(text2)
+            
+            blk.limitEdit.colSource = dataDict["formData"][0]
+            blk.limitEdit.setText(dataDict["formData"][1])
+            blk.fromEdit.colSource = dataDict["formData"][2]
+            blk.fromEdit.setText(dataDict["formData"][2])
+            blk.toEdit.colSource = dataDict["formData"][3]
+            blk.toEdit.setText(dataDict["formData"][3])
+
         elif type == "dataFilterBlock":
             blk = dataFilterBlock.dataFilterBlock(self, self.central.fieldWidget)
+            blk.colSource = dataDict["colSource"]
+            blk.settingData = dataDict["settingData"]
+            dataType = dataDict["settingData"]["dataType"]
+            if dataType != "":
+                id = 0 if dataType == "str" else (1 if dataType == "num" else 2)
+            radioBtn = blk.radioBtnGroup.button(id)
+            radioBtn.setChecked(True)
+            blk.lineEditCond.setText(dataDict["settingData"]["filterCond"])
+
         elif type == "numberBlock":
             blk = numberBlock.numberBlock(self, self.central.fieldWidget)
         elif type == "calculatorBlock":

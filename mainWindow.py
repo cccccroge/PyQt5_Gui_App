@@ -461,22 +461,24 @@ class mainWindow(QtWidgets.QMainWindow):
 
             # not block, is lineEdit
             if "blkType" not in dataDict:
+                le = QtWidgets.QLineEdit()
+                le.setPlaceholderText(self.tr("欄位名稱"))
+                le.setText(dataDict["colText"])
+                le.setFixedSize(QtCore.QSize(125, fieldRowHeight))
+
                 hboxLayout = None
                 if type(grid.itemAtPosition(row, 0)) == \
                     QtWidgets.QHBoxLayout:
                     hboxLayout = grid.itemAtPosition(row, 0)
-                else:
+                    hboxLayout.insertWidget(0, le, 0, QtCore.Qt.AlignLeft)
+                else:   # this row is addColBtn
                     hboxLayout = QtWidgets.QHBoxLayout()
                     hboxLayout.setContentsMargins(0, 0, 0, 0)
                     hboxLayout.setSpacing(0)
                     addColBtn = grid.itemAtPosition(row, 0).widget()
                     grid.addLayout(hboxLayout, row, 0, QtCore.Qt.AlignLeft)
-                    grid.addWidget(addColBtn, row + 1, QtCore.Qt.AlignLeft)
+                    grid.addWidget(addColBtn, row + 1, 0, QtCore.Qt.AlignLeft)
 
-                    le = QtWidgets.QLineEdit()
-                    le.setPlaceholderText(self.tr("欄位名稱"))
-                    le.setText(dataDict["colText"])
-                    le.setFixedSize(QtCore.QSize(125, fieldRowHeight))
                     hboxLayout.insertWidget(0, le, 0, QtCore.Qt.AlignLeft)
 
                 continue
@@ -501,6 +503,7 @@ class mainWindow(QtWidgets.QMainWindow):
             if type(grid.itemAtPosition(row, 0)) == \
                     QtWidgets.QHBoxLayout:
                 hboxLayout = grid.itemAtPosition(row, 0)
+                hboxLayout.insertWidget(col, blk, 0, QtCore.Qt.AlignLeft)
             else:
                 hboxLayout = QtWidgets.QHBoxLayout()
                 hboxLayout.setContentsMargins(0, 0, 0, 0)

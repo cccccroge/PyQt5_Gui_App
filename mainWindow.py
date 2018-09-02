@@ -455,6 +455,8 @@ class mainWindow(QtWidgets.QMainWindow):
 
         for row in range(grid.rowCount() - 1):
                 hboxLayout = grid.itemAtPosition(row, 0)
+                if hboxLayout is None:
+                    continue
 
                 isWidget = False
                 widget = None
@@ -468,11 +470,13 @@ class mainWindow(QtWidgets.QMainWindow):
                     widget.deleteLater()
 
         # Rebuild blocks using data
+        lastRow = -1    # use later in removing trailing rows
         for key, val in data.items():
             print("key is {0}".format(key))
             print("val is {0}".format(val))
 
             row = key[0]
+            lastRow = row
             col = key[1]
             dataDict = val
 
@@ -531,8 +535,31 @@ class mainWindow(QtWidgets.QMainWindow):
 
                 hboxLayout.insertWidget(col, blk, 0, QtCore.Qt.AlignLeft)
 
-        # Add back dashes
-        for row in range(grid.rowCount() - 1):
+        print("before removing rows: {0}".format(grid.rowCount()))
+        print("before removing widgets: {0}".format(grid.count()))
+        # Remove trailing rows
+        hboxLayout = None
+        if grid.rowCount() - 2 > lastRow:
+            for row in range(lastRow + 1, grid.rowCount() - 1): # don't remove addBtn
+                hboxLayout = grid.itemAtPosition(row, 0)
+
+                isWidget = False
+                widget = None
+                for col in range(0, hboxLayout.count()):
+                    if not isWidget:
+                        widget = hboxLayout.itemAt(0).widget()
+                    else:
+                        widget = hboxLayout.itemAt(0)
+
+                    hboxLayout.removeWidget(widget)
+                    widget.deleteLater()
+                grid.removeItem(hboxLayout)
+                hboxLayout.deleteLater()
+        print("before removing rows: {0}".format(grid.rowCount()))
+        print("after removing widgets: {0}".format(grid.count()))
+
+        ## Add back dashes
+        for row in range(grid.count() - 1): # should be rowCount, but rowCount doesn't update after deleting some rows
                 hboxLayout = grid.itemAtPosition(row, 0)
 
                 # don't need dash if no trailing blks
@@ -546,6 +573,7 @@ class mainWindow(QtWidgets.QMainWindow):
                     lineLabel.setFixedHeight(fieldRowHeight)
                     hboxLayout.insertWidget(col, lineLabel, 0, QtCore.Qt.AlignLeft)
                     col += 2
+                    print("whatup")
 
 
     def buildBlock(self, dataDict):
@@ -609,8 +637,8 @@ class mainWindow(QtWidgets.QMainWindow):
             dataType = dataDict["settingData"]["dataType"]
             if dataType != "":
                 id = 0 if dataType == "str" else (1 if dataType == "num" else 2)
-            radioBtn = blk.radioBtnGroup.button(id)
-            radioBtn.setChecked(True)
+                radioBtn = blk.radioBtnGroup.button(id)
+                radioBtn.setChecked(True)
             blk.lineEditCond.setText(dataDict["settingData"]["filterCond"])
 
         elif type == "numberBlock":

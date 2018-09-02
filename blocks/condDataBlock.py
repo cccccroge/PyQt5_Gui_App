@@ -80,7 +80,7 @@ class condDataBlock(block.block):
         self.groupBoxMapUseform.hide()
         self.settingLayout.addWidget(self.groupBoxMapUseform)
 
-        limitLabel = QtWidgets.QLabel(self.tr("限制"))
+        limitLabel = QtWidgets.QLabel(self.tr("使用表格/欄位限制"))
         self.limitEdit = dropEdit.dropEdit(False)
         mapLabel = QtWidgets.QLabel(self.tr("對應"))
         self.fromEdit = dropEdit.dropEdit(True)
@@ -246,6 +246,9 @@ class condDataBlock(block.block):
         if self.limitEdit.text() != "":
             limitVal = self.limitEdit.text()    # limitVal should be int
             df2 = df.loc[df[limitName] == int(limitVal)]    # df[] will lost dtype
+        else:
+            df2 = df
+
 
         # Get rule tuples
         fromCol = self.fromEdit.text()

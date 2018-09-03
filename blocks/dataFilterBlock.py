@@ -83,7 +83,7 @@ class dataFilterBlock(block.block):
 
 
         if nx.has_path(graph, fromNode, toNode) == False:
-            return None, None, absence1 + "和" + absence2 + "之間不存在有效連結"
+            return None, None, "-->" + absence1 + "和" + absence2 + "之間不存在有效連結"
 
         # Find second last connected row, and use filter setting to get rows or row
         if type(input) == pd.core.frame.DataFrame:
@@ -105,7 +105,7 @@ class dataFilterBlock(block.block):
 
             rows = postFile.loc[postFile[postCol] == preVal]
             if rows.empty:
-                return None, None, "連結中斷，檔案" + str(postNode) + "中的'" \
+                return None, None, "-->連結中斷，檔案" + str(postNode) + "中的'" \
                     + str(postCol) + "'欄位找不到此值: " + str(preVal)
 
             # don't cut in last round
@@ -145,6 +145,9 @@ class dataFilterBlock(block.block):
             out = input.loc[input[col] == second]
         elif first == "!=":
             out = input.loc[input[col] != second]
+        elif first == "contains":
+            string = self.formulaToString(second)
+            out = input.loc[input[col].str.contains(string) == True]
         else:
             return None, "-->條件式非法: 出現未知的運算子"
 
@@ -314,6 +317,7 @@ class dataFilterBlock(block.block):
         print("settingData becomes: ")
         print(self.settingData)
 
+
     # Cancel setting window: reset to old values
 
     def on_settingDialog_rejected(self):
@@ -322,5 +326,13 @@ class dataFilterBlock(block.block):
             btn.setChecked(True)
 
         self.lineEditCond.setText(self.__textOld)
+    
+
+    ####################
+    # Helper functions
+    ####################
+
+    def formulaToString(self, formula):
+        pass
 
 

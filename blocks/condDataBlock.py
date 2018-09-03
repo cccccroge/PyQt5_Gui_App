@@ -244,6 +244,10 @@ class condDataBlock(block.block):
             self.groupBoxMapUseform.show()
 
 
+    ####################
+    # Helper functions
+    ####################
+
     def getMapRulesUseform(self):
         colSrc = self.limitEdit.colSource
         if colSrc is None:

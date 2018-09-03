@@ -104,25 +104,38 @@ class condDataBlock(block.block):
         out = None
         ruleList = self.settingData["mapRules"]
 
+        # No rules
+        if (ruleList is None) or len(ruleList) == 0:
+            return None, "-->對應規則為空"
+
+        # if is existence, must has out
         if self.settingData["dataType"] == "existence":
             if input is None:
                 out = ruleList[1][1]
             else:
                 out = ruleList[0][1]
 
-        elif self.settingData["dataType"] == "value":
+            return out, ""
+
+        # No data
+        if input is None:
+            return None, "-->使用值/表格值來對應但資料為空"
+
+
+        isFind = False
+        if self.settingData["dataType"] == "value":
             # Find match
             for tup in ruleList:
                 if input == tup[0]:
+                    isFind = True
                     out = tup[1]
         elif self.settingData["dataType"] == "useform": # hack a bit bcz failed to get orig type in excel
             for tup in ruleList:
                 if input == int(tup[0]):
+                    isFind = True
                     out = tup[1]
         
-        print("CDB input = {0}".format(input))
-        print("CDB out = {0}".format(out))
-        return out
+        return out, ("" if isFind else "-->該項目找不到對應規則")
                 
 
     ####################

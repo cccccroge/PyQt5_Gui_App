@@ -176,6 +176,9 @@ class mainWindow(QtWidgets.QMainWindow):
             if valColSrc is None:
                 self.statusBar().showMessage("輸出錯誤：沒有指定目標值欄位", msgDuration)
                 return
+            if (valsList is None) or len(valsList) == 0:
+                self.statusBar().showMessage("輸出錯誤：沒有指定目標值", msgDuration)
+                return
 
         # 3-2.init progressBar range
         self.hintLabel.setText("正在輸出檔案...")
@@ -204,47 +207,57 @@ class mainWindow(QtWidgets.QMainWindow):
                 # start parsing...
                 out = startRows
                 outColSrc = valColSrc
+                errorMsg = ""
+                errorPos = ()
+
                 for col in range(2, hboxLayout.count(), 2):
                     curBlk = hboxLayout.itemAt(col).widget()
 
-                    # input is nothing: failed to gen valid out if no UAB/CDB trailed behind
-                    if out is None:
-                        if type(curBlk) == useAnotherBlock.useAnotherBlock:
-                            out = startRows
-                            outColSrc = valColSrc
-                        elif type(curBlk) == condDataBlock.condDataBlock:   # should not be 3rd
-                            out = curBlk.generateOut(out)
-                        elif type(curBlk) == numberBlock.numberBlock:
-                            out = curBlk.generateOut(out)
+                    if type(curBlk) == useAnotherBlock.useAnotherBlock:
+                        out, outColSrc, newMsg = curBlk.generateOut(out, startRows, valColSrc)
+                        if outColSrc is None:   # has value, use this val
+                            errorMsg = newMsg
+                            break
                         else:
-                            continue
-                    # input has valid values: generate output as next input
-                    else:
-                        if type(curBlk) == targetValBlock.targetValBlock: # should be alone
-                            out = val
-                            break
-                        if type(curBlk) == calculatorBlock.calculatorBlock: # assume alone
-                            out = curBlk.generateOut(hboxLayout, out, outColSrc, self.relatedGraph)
-                            break
-                        if type(curBlk) == useAnotherBlock.useAnotherBlock:
-                            break
+                            errorMsg += ("\n" + newMsg)
+                            errorPos = (row, col)
+                            continue    # no value, consider next
+                    elif type(curBlk) == condDataBlock.condDataBlock:
+                        out, errorMsg = curBlk.generateOut(out)
+                        if out is None:
+                            errorPos = (row, col)
 
-                        if type(curBlk) == dataBlock.dataBlock:
-                            out, outColSrc = \
-                                curBlk.generateOut(out, outColSrc, self.relatedGraph)
-                        elif type(curBlk) == condDataBlock.condDataBlock:
-                            out = curBlk.generateOut(out)
-                        elif type(curBlk) == numberBlock.numberBlock:
-                            out = curBlk.generateOut(out)
-                        elif type(curBlk) == dataFilterBlock.dataFilterBlock:
-                            out, outColSrc = \
-                                curBlk.generateOut(out, outColSrc, self.relatedGraph)
-                        else:
-                            out = "哈"
-                            break
+                    elif type(curBlk) == numberBlock.numberBlock:
+                        out = curBlk.generateOut(out)
+                    elif type(curBlk) == targetValBlock.targetValBlock: # should be alone
+                        out = val
+                        break
+                    elif type(curBlk) == calculatorBlock.calculatorBlock: # assume alone
+                        out = curBlk.generateOut(hboxLayout, out, outColSrc, self.relatedGraph)
+                        break
+                    elif type(curBlk) == dataBlock.dataBlock:
+                        out, outColSrc, newMsg = \
+                            curBlk.generateOut(out, outColSrc, self.relatedGraph)
+                        if out is None:
+                            errorMsg += ("\n" + newMsg)
+                            errorPos = (row, col)
+                    elif type(curBlk) == dataFilterBlock.dataFilterBlock:
+                        out, outColSrc, newMsg = \
+                            curBlk.generateOut(out, outColSrc, self.relatedGraph)
+                        if out is None:
+                            errorMsg += ("\n" + newMsg)
+                            errorPos = (row, col)
+                    else:
+                        out = "you're not using any valid blocks, Bro"
+                        break
                 
                 # append final output val to get row list
-                data = out if (out is not None) else "N/A" # leave N/A as invalid val
+                data = None
+                if out is not None:
+                    data = out
+                else:
+                    data = "N/A" + "\n最後錯誤發生在" \
+                        + str(errorPos) + ":\n" + errorMsg  # leave N/A + reasons
                 rowDataList.append(data)
 
             # append whole row list to get form matrix

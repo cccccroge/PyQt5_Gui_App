@@ -7,3 +7,10 @@ class useAnotherBlock(block.block):
         self.nameEdit.setText("取其它")
 
         self.disableBtn()
+
+
+    def generateOut(self, input, oriInput, oriColSrc):
+        if input is None:
+            return oriInput, oriColSrc, "-->前者資料為空"
+        else:
+            return input, None, ""

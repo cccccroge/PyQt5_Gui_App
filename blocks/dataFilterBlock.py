@@ -1,5 +1,6 @@
 from PyQt5 import QtWidgets
 import pandas as pd
+import numpy as np
 import networkx as nx
 import block
 
@@ -50,32 +51,39 @@ class dataFilterBlock(block.block):
         
 
     def generateOut(self, input, inputColSrc, graph):
+        # No input
+        if input is None:
+            return None, None, "-->資料輸入為空"
+
         # Invalid input
         if type(input) != pd.core.frame.DataFrame \
             and type(input) != pd.core.series.Series:
-                print("輸出時某'資料篩選'方塊之輸入無效")
-                return None, None
+                return None, None, "-->資料不是'表格'或'列'"
         # No data
         if input.empty:
-            print("輸出時某'資料篩選'方塊的輸入為空")
-            return None, None
+            return None, None, "-->資料表(/列)為空表(/列)"
         
         fromNode = inputColSrc[0:2]
         toNode = self.colSource[0:2]
+
+        # Same file: don't care graph
+        if fromNode == toNode:
+            data, msg = self.filter(input)
+            return data, self.colSource, msg
+
         # Failed to relate
-        if (fromNode not in graph) or (toNode not in graph):
-            print("輸出時出現檔案關聯失敗：某一資料表不曾被連結")
-            return None, None
+        absence1 = str(fromNode) if (fromNode not in graph) else ""
+        absence2 = str(tomNode) if (toNode not in graph) else ""
+        if absence1 == "" and absence2 != "":
+            return None, None, "-->" + absence2 + "不曾被連結"
+        if absence1 != "" and absence2 == "":
+            return None, None, "-->" + absence1 + "不曾被連結"
+        if absence1 != "" and absence2 != "":
+            return None, None, "-->" + absence1 + "和" + absence2 + "皆不曾被連結"
+
 
         if nx.has_path(graph, fromNode, toNode) == False:
-            print("輸出時出現檔案關聯失敗：兩個資料表間不存在有效連結")
-            return None, None
-
-
-        # Same file: no need to traverse the graph
-        if fromNode == toNode:
-            data = self.filter(input)
-            return data, self.colSource
+            return None, None, absence1 + "和" + absence2 + "之間不存在有效連結"
 
         # Find second last connected row, and use filter setting to get rows or row
         if type(input) == pd.core.frame.DataFrame:
@@ -97,8 +105,9 @@ class dataFilterBlock(block.block):
 
             rows = postFile.loc[postFile[postCol] == preVal]
             if rows.empty:
-                print("輸出時，檔案關聯期間連結錯誤：兩個資料表的共同欄位值不同步")
-                return None, None
+                return None, None, "連結中斷，檔案" + str(postNode) + "中的'" \
+                    + str(postCol) + "'欄位找不到此值: " + str(preVal)
+
             # don't cut in last round
             if i != len(pathNodes) - 2:
                 curRow = rows.iloc[0]
@@ -106,15 +115,13 @@ class dataFilterBlock(block.block):
                 curRow = rows
 
         # Get the final rows/row
-        data = self.filter(curRow)
-        return data, self.colSource
+        data, msg = self.filter(curRow)
+        return data, self.colSource, msg
 
 
     def filter(self, input):
         # Identify the data type
         type = self.settingData["dataType"]
-        print("entering filter func...")
-        print("type = {0}".format(type))
         if type == "str":
             return self.filter_str(input)
         elif type == "num":
@@ -127,7 +134,7 @@ class dataFilterBlock(block.block):
         condStrs = self.settingData["filterCond"].split()
         # No filter
         if len(condStrs) <= 1:
-            return input
+            return None, "-->條件式非法: 沒有空格分開"
 
         first = condStrs[0]
         second = condStrs[1]
@@ -135,22 +142,20 @@ class dataFilterBlock(block.block):
 
         out = None
         if first == "=":
-            print("filter_str input:")
-            print(input)
             out = input.loc[input[col] == second]
-            print("filter_str out:")
-            print(out)
         elif first == "!=":
             out = input.loc[input[col] != second]
+        else:
+            return None, "-->條件式非法: 出現未知的運算子"
 
-        return out
+        return out, ""
 
 
     def filter_num(self, input):
         condStrs = self.settingData["filterCond"].split()
         # No filter
         if len(condStrs) <= 1:
-            return input
+            return None, "-->條件式非法: 沒有空格分開"
 
         first = condStrs[0]
         second = condStrs[1]
@@ -158,44 +163,22 @@ class dataFilterBlock(block.block):
 
         out = None
 
-        if second == "max":
-            out = input.loc[input[col] == max(input[col])]
-        elif second == "min":
-            out = input.loc[input[col] == min(input[col])]
-        else:
-            second = int(second)    # assume it's int
-            if first == "=":
+        if first == "=":
+            if second == "max:":
+                out = input.loc[input[col] == max(input[col])]
+            elif second == "min":
+                out = input.loc[input[col] == min(input[col])]
+            elif second.isdigit():
+                second = int(second)
                 out = input.loc[input[col] == second]
-            elif first == "<":
-                out = input.loc[input[col] < second]
-            elif first == "<=":
-                out = input.loc[input[col] <= second]
-            elif first == ">":
-                out = input.loc[input[col] > second]
-            elif first == ">=":
-                out = input.loc[input[col] >= second]
+            else:
+                return None, "-->條件式非法: 第二項不是非負整數"
 
-        return out
-
-
-    def filter_date(self, input):
-        print("entering filter_date func...")
-        condStrs = self.settingData["filterCond"].split()
-        # No filter
-        if len(condStrs) <= 1:
-            return input
-
-        first = condStrs[0]
-        second = condStrs[1]
-        col = self.colSource[2]
-        print("first = {0}, second = {1}".format(first, second))
-
-        out = None
-        if second == "latest":
-            out = input.tail(1)  # assume last row is latest
-        elif second == "earliest":
-            out = input.iloc[0]
         else:
+            if not second.isdigit():
+                return None, "-->條件式非法: 第二項不是非負整數"
+            
+            second = int(second)
             if first == "=":
                 out = input.loc[input[col] == second]   # assume data is string
             elif first == "<":
@@ -206,8 +189,62 @@ class dataFilterBlock(block.block):
                 out = input.loc[input[col] > second]
             elif first == ">=":
                 out = input.loc[input[col] >= second]
+            else:
+                return None, "-->條件式非法: 出現未知的運算子"
 
-        return out
+        if out.empty:
+            return None, "-->找不到符合此條件式之項目: " \
+                + str(self.colSource) + " " + self.settingData["filterCond"]
+        else:
+            return out, ""
+
+
+    def filter_date(self, input):
+        condStrs = self.settingData["filterCond"].split()
+        # No filter
+        if len(condStrs) <= 1:
+            return None, "-->條件式非法: 沒有空格分開"
+
+        first = condStrs[0]
+        second = condStrs[1]
+        col = self.colSource[2]
+
+        out = None
+
+        if first == "=":
+            if second == "latest":
+                out = input.loc[input[col] == max(input[col])]
+            elif second == "earliest":
+                out = input.loc[input[col] == min(input[col])]
+            elif second.isdigit():
+                second = int(second)
+                out = input.loc[input[col] == second]
+            else:
+                return None, "-->條件式非法: 第二項不是合法日期格式"
+
+        else:
+            if not second.isdigit():
+                return None, "-->條件式非法: 第二項不是合法日期格式"
+            
+            second = int(second)
+            if first == "=":
+                out = input.loc[input[col] == second]   # assume data is string
+            elif first == "<":
+                out = input.loc[input[col] < second]
+            elif first == "<=":
+                out = input.loc[input[col] <= second]
+            elif first == ">":
+                out = input.loc[input[col] > second]
+            elif first == ">=":
+                out = input.loc[input[col] >= second]
+            else:
+                return None, "-->條件式非法: 出現未知的運算子"
+
+        if out.empty:
+            return None, "-->找不到符合此條件式之項目: " \
+                + str(self.colSource) + " " + self.settingData["filterCond"]
+        else:
+            return out, ""
 
 
     ####################

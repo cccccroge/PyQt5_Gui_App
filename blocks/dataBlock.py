@@ -14,14 +14,20 @@ class dataBlock(block.block):
         self.setAcceptDrops(True)
 
 
-    def generateOut(self, input, inputColSrc, graph
-                    ):
+    def generateOut(self, input, inputColSrc, graph):
+        # No input
+        if input is None:
+            return None, None, "-->資料輸入為空"
+
         # Invalid input
         if type(input) != pd.core.frame.DataFrame \
             and type(input) != pd.core.series.Series:
-                print("輸出時某'資料'方塊之輸入無效")
-                return None, None
+                return None, None, "-->資料不是'表格'或'列'"
         
+        # No data
+        if input.empty:
+            return None, None, "-->資料表(/列)為空表(/列)"
+
         # More than one row: use first row
         if type(input) == pd.core.frame.DataFrame:
             input = input.iloc[0]
@@ -30,6 +36,7 @@ class dataBlock(block.block):
         fromNode = inputColSrc[0:2]
         toNode = self.colSource[0:2]
 
+        # Same file: don't care graph
         if fromNode == toNode:
             colName = self.colSource[2]
 
@@ -40,19 +47,26 @@ class dataBlock(block.block):
             #else:
             data = input.at[colName]
 
-            return data, self.colSource
+            return data, self.colSource, ""
 
-        if (fromNode not in graph) or (toNode not in graph):
-            print("輸出時出現檔案關聯失敗：某一資料表不曾被連結")
-            return None, None
+        # Failed to relate
+        absence1 = str(fromNode) if (fromNode not in graph) else ""
+        absence2 = str(tomNode) if (toNode not in graph) else ""
+        if absence1 == "" and absence2 != "":
+            return None, None, "-->" + absence2 + "不曾被連結"
+        if absence1 != "" and absence2 == "":
+            return None, None, "-->" + absence1 + "不曾被連結"
+        if absence1 != "" and absence2 != "":
+            return None, None, "-->" + absence1 + "和" + absence2 + "皆不曾被連結"
+
 
         if nx.has_path(graph, fromNode, toNode) == False:
-            print("輸出時出現檔案關聯失敗：兩個資料表間不存在有效連結")
-            return None, None
+            return None, None, "-->" + absence1 + "和" + absence2 + "之間不存在有效連結"
 
-        pathNodes = nx.shortest_path(graph, fromNode, toNode)
 
         # Find last connected row from inputColSrc to the block's colSrc
+        pathNodes = nx.shortest_path(graph, fromNode, toNode)
+
         curRow = input
         for i in range(len(pathNodes) - 1):
             # each relationship find another row
@@ -68,8 +82,8 @@ class dataBlock(block.block):
 
             rows = postFile.loc[postFile[postCol] == preVal]
             if rows.empty:
-                print("輸出時，檔案關聯期間連結錯誤：兩個資料表的共同欄位值不同步")
-                return None, None
+                return None, None, "連結中斷，檔案" + str(postNode) + "中的'" \
+                    + str(postCol) + "'欄位找不到此值: " + str(preVal)
             curRow = rows.iloc[0]
 
         # Get the final value
@@ -82,7 +96,7 @@ class dataBlock(block.block):
         #else:
         data = curRow.at[blkColSrc]
 
-        return data, self.colSource
+        return data, self.colSource, ""
 
 
     ####################

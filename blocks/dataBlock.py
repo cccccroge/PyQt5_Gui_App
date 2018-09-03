@@ -51,7 +51,7 @@ class dataBlock(block.block):
 
         # Failed to relate
         absence1 = str(fromNode) if (fromNode not in graph) else ""
-        absence2 = str(tomNode) if (toNode not in graph) else ""
+        absence2 = str(toNode) if (toNode not in graph) else ""
         if absence1 == "" and absence2 != "":
             return None, None, "-->" + absence2 + "不曾被連結"
         if absence1 != "" and absence2 == "":

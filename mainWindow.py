@@ -24,6 +24,7 @@ class mainWindow(QtWidgets.QMainWindow):
         self.colNamesSet = {}
         self.relatedGraph = nx.DiGraph()
         self.srcFiles = {}
+        self.tempData = {}  # use to store intermediate data, providing user to drag to others
 
         self.setWindowTitle(self.tr("工研院技轉中心服務程式"))
         self.init_ui()
@@ -251,13 +252,15 @@ class mainWindow(QtWidgets.QMainWindow):
                         out = "you're not using any valid blocks, Bro"
                         break
                 
-                # append final output val to get row list
+                # append final output val to get row list, and store to temp data dict
                 data = None
                 if out is not None:
                     data = out
+                    self.tempData[str(row)] = data
                 else:
                     data = "N/A" + "\n最後錯誤發生在" \
                         + str(errorPos) + ":\n" + errorMsg  # leave N/A + reasons
+                    self.tempData[str(row)] = None
                 rowDataList.append(data)
 
             # append whole row list to get form matrix

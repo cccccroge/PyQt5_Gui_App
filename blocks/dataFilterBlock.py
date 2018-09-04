@@ -66,6 +66,8 @@ class dataFilterBlock(block.block):
         fromNode = inputColSrc[0:2]
         toNode = self.colSource[0:2]
 
+        # Use original file checked: don't care graph
+
         # Same file: don't care graph
         if fromNode == toNode:
             data, msg = self.filter(input)
@@ -147,7 +149,7 @@ class dataFilterBlock(block.block):
             out = input.loc[input[col] != second]
         elif first == "contains":
             string = self.formulaToString(second)
-            out = input.loc[input[col].str.contains(string) == True]
+            out = input[input[col].str.contains(string) == True]
         else:
             return None, "-->條件式非法: 出現未知的運算子"
 
@@ -333,6 +335,29 @@ class dataFilterBlock(block.block):
     ####################
 
     def formulaToString(self, formula):
-        pass
+        curFormula = formula
+
+        while True:
+            leftSqBrc = curFormula.find("<")
+
+            # All temp variables are replaced
+            if leftSqBrc == -1:
+                break
+
+            rightSqBrc = curFormula.find(">")
+
+            # Get actual data and replace it
+            row = curFormula[leftSqBrc + 1]
+            data = self.parent.tempData[row]
+
+            toReplaced = "<" + row + ">"
+            print("toReplaced = {0}, data = {1}".format(toReplaced, data))
+            curFormula = curFormula.replace(toReplaced, "'" + data + "'")
+            print("curFormula becomes: {0}".format(curFormula))
+            print("result: {0}".format(eval(curFormula)))
+
+        return eval(curFormula)
+
+
 
 

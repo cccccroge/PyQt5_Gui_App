@@ -26,6 +26,7 @@ class dataBlock(block.block):
         
         # No data
         if input.empty:
+            print("in dataBlock: input is {0}".format(input))
             return None, None, "-->資料表(/列)為空表(/列)"
 
         # More than one row: use first row

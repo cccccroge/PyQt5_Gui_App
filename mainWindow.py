@@ -628,6 +628,7 @@ class mainWindow(QtWidgets.QMainWindow):
             blk.colSource = dataDict["colSource"]
             blk.settingData = dataDict["settingData"]
             dataType = dataDict["settingData"]["dataType"]
+            blk.origCheckbox.setChecked(dataDict["settingData"]["origChecked"])
             if dataType != "":
                 id = 0 if dataType == "str" else (1 if dataType == "num" else 2)
                 radioBtn = blk.radioBtnGroup.button(id)

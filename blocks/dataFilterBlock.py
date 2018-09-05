@@ -36,6 +36,11 @@ class dataFilterBlock(block.block):
         self.radioBtnGroup.addButton(radioBtnNum, 1)
         self.radioBtnGroup.addButton(radioBtnDate, 2)
 
+        # use original checkbox
+        self.origCheckbox = QtWidgets.QCheckBox(self.tr("使用原檔案"))
+        groupBoxDataTypeLayout.addWidget(self.origCheckbox)
+        groupBoxDataTypeLayout.addSpacing(10)
+
         groupBoxDataTypeLayout.addWidget(radioBtnStr)
         groupBoxDataTypeLayout.addWidget(radioBtnNum)
         groupBoxDataTypeLayout.addWidget(radioBtnDate)
@@ -67,6 +72,10 @@ class dataFilterBlock(block.block):
         toNode = self.colSource[0:2]
 
         # Use original file checked: don't care graph
+        if self.settingData["origChecked"] == True:
+            origFile = self.parent.srcFiles[toNode]
+            data, msg = self.filter(origFile)
+            return data, self.colSource, msg
 
         # Same file: don't care graph
         if fromNode == toNode:
@@ -292,6 +301,7 @@ class dataFilterBlock(block.block):
         # Store old values in case user need to discard changes
         self.__idOld = self.radioBtnGroup.checkedId()
         self.__textOld = self.lineEditCond.text()
+        self.__checkedOld = self.origCheckbox.isChecked()
 
         self.settingDialog.exec()
 
@@ -308,6 +318,8 @@ class dataFilterBlock(block.block):
             self.settingData["dataType"] = "num"
         elif id == 2:
             self.settingData["dataType"] = "date"
+
+        self.settingData["origChecked"] = self.origCheckbox.isChecked()
 
         self.settingData["filterCond"] = ""
         if id == -1:
@@ -328,6 +340,7 @@ class dataFilterBlock(block.block):
             btn.setChecked(True)
 
         self.lineEditCond.setText(self.__textOld)
+        self.origCheckbox.setChecked(self.__checkedOld)
     
 
     ####################

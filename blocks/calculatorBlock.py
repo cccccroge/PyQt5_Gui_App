@@ -60,15 +60,15 @@ class calculatorBlock(block.block):
         groupboxApproxLayout.addWidget(digitLabel)
 
 
-    def generateOut(self, round): # need to know round index, in case use excel formula
+    def generateOut(self, valRow): # need to know round index, in case use excel formula
         result = 0
 
         if self.settingData["useExcelFormula"] == True:
-            result = self.formulaToExcelForm(self.settingData["formula"], round)
+            result = self.formulaToExcelForm(self.settingData["formula"], valRow)
+            return result, ""
 
-        else:
-            result = self.formulaToVal(self.settingData["formula"])
 
+        result = self.formulaToVal(self.settingData["formula"])
         # Consider approx
         m = self.settingData["approxMethod"]
         d = self.settingData["approxDigit"]
@@ -185,7 +185,7 @@ class calculatorBlock(block.block):
 
         return eval(curFormula)
 
-    def formulaToExcelForm(self, formula, round):
+    def formulaToExcelForm(self, formula, valRow):
         curFormula = "= " + formula
 
         while True:
@@ -208,7 +208,7 @@ class calculatorBlock(block.block):
                 index = self.numToAlph(second)
             else:
                 index = self.numToAlph(first) + self.numToAlph(second)
-            index += str(round + 1)   # becomes cell position
+            index += str(valRow + 1)   # becomes cell position
             print("toString should be {0}".format(index))
             # Replace it
             toReplaced = "<" + curFormula[leftSqBrc + 1] + ">"

@@ -189,9 +189,9 @@ class mainWindow(QtWidgets.QMainWindow):
         finishNum = 0
 
         # 3-3.start parsing
-        round = 0   # used in calculatorBlk
+        valRow = 0   # used in calculatorBlk
         for val in valsList:
-            round += 1
+            valRow += 1
             # find start rows as beginning point
             fileDf = self.srcFiles[(valColSrc[0], valColSrc[1])]
             colName = valColSrc[2]
@@ -236,7 +236,7 @@ class mainWindow(QtWidgets.QMainWindow):
                         out = val
                         break
                     elif type(curBlk) == calculatorBlock.calculatorBlock: # assume alone
-                        out, errorMsg = curBlk.generateOut(round)
+                        out, errorMsg = curBlk.generateOut(valRow)
                     elif type(curBlk) == dataBlock.dataBlock:
                         out, outColSrc, newMsg = \
                             curBlk.generateOut(out, outColSrc, self.relatedGraph)

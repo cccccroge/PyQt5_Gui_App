@@ -153,6 +153,10 @@ class dataFilterBlock(block.block):
 
         out = None
         if first == "=":
+            if second.find("<") != -1 and second.find(">") != -1:   # use another val
+                row = second[second.find("<") + 1]
+                second = str(self.parent.tempData[row])
+                print("second str after = is: {0}".format(second))
             out = input.loc[input[col] == second]
         elif first == "!=":
             out = input.loc[input[col] != second]

@@ -35,6 +35,9 @@
     <Compile Include="blocks\dropEdit.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="blocks\multiDataBlock.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="blocks\numberBlock.py">
       <SubType>Code</SubType>
     </Compile>

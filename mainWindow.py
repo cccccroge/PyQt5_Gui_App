@@ -11,7 +11,7 @@ import status
 import central
 from glob import msgDuration, fieldRowHeight
 
-import targetValBlock, dataBlock, condDataBlock
+import targetValBlock, dataBlock, multiDataBlock, condDataBlock
 import dataFilterBlock, calculatorBlock, numberBlock, useAnotherBlock
 
 
@@ -189,7 +189,9 @@ class mainWindow(QtWidgets.QMainWindow):
         finishNum = 0
 
         # 3-3.start parsing
+        round = 0   # used in calculatorBlk
         for val in valsList:
+            round += 1
             # find start rows as beginning point
             fileDf = self.srcFiles[(valColSrc[0], valColSrc[1])]
             colName = valColSrc[2]
@@ -234,9 +236,14 @@ class mainWindow(QtWidgets.QMainWindow):
                         out = val
                         break
                     elif type(curBlk) == calculatorBlock.calculatorBlock: # assume alone
-                        out = curBlk.generateOut(hboxLayout, out, outColSrc, self.relatedGraph)
-                        break
+                        out, errorMsg = curBlk.generateOut(round)
                     elif type(curBlk) == dataBlock.dataBlock:
+                        out, outColSrc, newMsg = \
+                            curBlk.generateOut(out, outColSrc, self.relatedGraph)
+                        if out is None:
+                            errorMsg += ("\n" + newMsg)
+                            errorPos = (row, col)
+                    elif type(curBlk) == multiDataBlock.multiDataBlock:
                         out, outColSrc, newMsg = \
                             curBlk.generateOut(out, outColSrc, self.relatedGraph)
                         if out is None:
@@ -427,6 +434,10 @@ class mainWindow(QtWidgets.QMainWindow):
                         print("type: dataBlock")
                         dict["blkType"] = "dataBlock"
                         dict["colSource"] = curBlk.colSource
+                    elif type(curBlk) == multiDataBlock.multiDataBlock:
+                        print("type: multiDataBlock")
+                        dict["blkType"] = "multiDataBlock"
+                        dict["colSource"] = curBlk.colSource
                     elif type(curBlk) == condDataBlock.condDataBlock:
                         print("type: condDataBlock")
                         dict["blkType"] = "condDataBlock"
@@ -452,8 +463,10 @@ class mainWindow(QtWidgets.QMainWindow):
                     elif type(curBlk) == numberBlock.numberBlock:
                         print("type: numberBlock")
                         dict["blkType"] = "numberBlock"
-                    elif type(curBlk) == calculatorBlock.calculatorBlock:   # TODO
+                    elif type(curBlk) == calculatorBlock.calculatorBlock:
+                        print("type: calculatorBlock")
                         dict["blkType"] = "calculatorBlock"
+                        dict["settingData"] = curBlk.settingData
                     elif type(curBlk) == useAnotherBlock.useAnotherBlock:
                         print("type: useAnotherBlock")
                         dict["blkType"] = "useAnotherBlock"
@@ -526,6 +539,8 @@ class mainWindow(QtWidgets.QMainWindow):
                 blk = self.buildBlock(dataDict)
             elif dataDict["blkType"] == "dataBlock":
                 blk = self.buildBlock(dataDict)
+            elif dataDict["blkType"] == "multiDataBlock":
+                blk = self.buildBlock(dataDict)
             elif dataDict["blkType"] == "condDataBlock":
                 blk = self.buildBlock(dataDict)
             elif dataDict["blkType"] == "dataFilterBlock":
@@ -581,6 +596,9 @@ class mainWindow(QtWidgets.QMainWindow):
 
         elif type == "dataBlock":
             blk = dataBlock.dataBlock(self, self.central.fieldWidget)
+            blk.colSource = dataDict["colSource"]
+        elif type == "multiDataBlock":
+            blk = multiDataBlock.multiDataBlock(self, self.central.fieldWidget)
             blk.colSource = dataDict["colSource"]
         elif type == "condDataBlock":
             blk = condDataBlock.condDataBlock(self, self.central.fieldWidget)
@@ -639,6 +657,20 @@ class mainWindow(QtWidgets.QMainWindow):
             blk = numberBlock.numberBlock(self, self.central.fieldWidget)
         elif type == "calculatorBlock":
             blk = calculatorBlock.calculatorBlock(self, self.central.fieldWidget)
+            blk.settingData = dataDict["settingData"]
+            blk.useExcelCheckbox.setChecked(dataDict["settingData"]["useExcelFormula"])
+            blk.formulaEdit.setText(dataDict["settingData"]["formula"])
+
+            method = dataDict["settingData"]["approxMethod"]
+            if method == "round":
+                blk.approxMethodCombo.setCurrentIndex(0)
+            elif method == "ceil":
+                blk.approxMethodCombo.setCurrentIndex(1)
+            elif method == "floor":
+                blk.approxMethodCombo.setCurrentIndex(2)
+
+            blk.approxDigitSpin.setValue(dataDict["settingData"]["approxDigit"])
+
         elif type == "useAnotherBlock":
             blk = useAnotherBlock.useAnotherBlock(self, self.central.fieldWidget)
         else:

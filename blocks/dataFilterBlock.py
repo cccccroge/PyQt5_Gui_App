@@ -12,6 +12,7 @@ class dataFilterBlock(block.block):
 
         self.settingData["dataType"] = ""
         self.settingData["filterCond"] = ""
+        self.settingData["origChecked"] = False
 
         self.setAcceptDrops(True)
 
@@ -364,7 +365,7 @@ class dataFilterBlock(block.block):
             rightSqBrc = curFormula.find(">")
 
             # Get actual data and replace it
-            row = curFormula[leftSqBrc + 1]
+            row = curFormula[leftSqBrc + 1:rightSqBrc]
             data = self.parent.tempData[row]
 
             toReplaced = "<" + row + ">"

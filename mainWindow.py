@@ -534,23 +534,7 @@ class mainWindow(QtWidgets.QMainWindow):
                 continue
 
             # is block, create corresponding block
-            blk = None
-            if dataDict["blkType"] == "targetValBlock":
-                blk = self.buildBlock(dataDict)
-            elif dataDict["blkType"] == "dataBlock":
-                blk = self.buildBlock(dataDict)
-            elif dataDict["blkType"] == "multiDataBlock":
-                blk = self.buildBlock(dataDict)
-            elif dataDict["blkType"] == "condDataBlock":
-                blk = self.buildBlock(dataDict)
-            elif dataDict["blkType"] == "dataFilterBlock":
-                blk = self.buildBlock(dataDict)
-            elif dataDict["blkType"] == "numberBlock":
-                blk = self.buildBlock(dataDict)
-            elif dataDict["blkType"] == "calculatorBlock":
-                blk = self.buildBlock(dataDict)
-            elif dataDict["blkType"] == "useAnotherBlock":
-                blk = self.buildBlock(dataDict)
+            blk = self.buildBlock(dataDict)
             
             if type(grid.itemAtPosition(row, 0)) == \
                     QtWidgets.QHBoxLayout:
@@ -581,7 +565,6 @@ class mainWindow(QtWidgets.QMainWindow):
                     lineLabel.setFixedHeight(fieldRowHeight)
                     hboxLayout.insertWidget(col, lineLabel, 0, QtCore.Qt.AlignLeft)
                     col += 2
-                    print("whatup")
 
 
     def buildBlock(self, dataDict):

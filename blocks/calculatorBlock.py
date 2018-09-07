@@ -154,7 +154,7 @@ class calculatorBlock(block.block):
             rightSqBrc = curFormula.find(">")
 
             # Get actual data and replace it
-            row = curFormula[leftSqBrc + 1]
+            row = curFormula[leftSqBrc + 1:rightSqBrc]
             data = self.parent.tempData[row]
 
             # is multiData, convert to list
@@ -199,7 +199,7 @@ class calculatorBlock(block.block):
             rightSqBrc = curFormula.find(">")
 
             # Calculate the number iterm of excel index
-            row = int(curFormula[leftSqBrc + 1])
+            row = int(curFormula[leftSqBrc + 1:rightSqBrc])
             first, second = divmod(row + 1, 26)    # excel's 1 is A, not 0
             print("first = {0}, second = {1}".format(first, second))
 
@@ -211,7 +211,7 @@ class calculatorBlock(block.block):
             index += str(valRow + 1)   # becomes cell position
             print("toString should be {0}".format(index))
             # Replace it
-            toReplaced = "<" + curFormula[leftSqBrc + 1] + ">"
+            toReplaced = "<" + curFormula[leftSqBrc + 1:rightSqBrc] + ">"
             curFormula = curFormula.replace(toReplaced, index)
             print("After replacement: {0}".format(curFormula))
 

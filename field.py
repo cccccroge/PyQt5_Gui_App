@@ -75,7 +75,7 @@ class field(QtWidgets.QWidget):
 
         # default cols
         for i in range(5):    
-            rowLayout = self.__create_row_hBoxLayout()
+            rowLayout = self.__create_row_hBoxLayout(i + 1)
             self.gridLayout.addLayout(rowLayout, i, 0, QtCore.Qt.AlignLeft)
 
         # add col button
@@ -101,7 +101,7 @@ class field(QtWidgets.QWidget):
         lastRow = self.gridLayout.rowCount() - 1;
 
         addColBtn = self.gridLayout.itemAtPosition(lastRow, 0).widget()
-        rowLayout = self.__create_row_hBoxLayout()
+        rowLayout = self.__create_row_hBoxLayout(lastRow + 1)
         
         self.gridLayout.addLayout(rowLayout, lastRow, 0, QtCore.Qt.AlignLeft)
         self.gridLayout.addWidget(addColBtn, lastRow + 1, 0, QtCore.Qt.AlignLeft)
@@ -119,11 +119,18 @@ class field(QtWidgets.QWidget):
         le.setFixedSize(QtCore.QSize(125, fieldRowHeight))
         return le
 
-    def __create_row_hBoxLayout(self):
+    def __create_row_hBoxLayout(self, id):
         col = self.__create_default_col()
         rowLayout = QtWidgets.QHBoxLayout()
         rowLayout.setContentsMargins(0, 0, 0, 0)
         rowLayout.setSpacing(0)
+
+        idEdit = QtWidgets.QLineEdit()
+        idEdit.setText(str(id))
+        idEdit.setAlignment(QtCore.Qt.AlignCenter)
+        idEdit.setFixedSize(25, fieldRowHeight)
+        idEdit.setReadOnly(True)
+        rowLayout.addWidget(idEdit, 0, QtCore.Qt.AlignLeft)
         rowLayout.addWidget(col, 0, QtCore.Qt.AlignLeft)
         #rowLayout.addStretch(-1)
         return rowLayout

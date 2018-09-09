@@ -148,7 +148,7 @@ class mainWindow(QtWidgets.QMainWindow):
         colNamesList = []
         for row in range(grid.rowCount() - 1):
             hboxLayout = grid.itemAtPosition(row, 0)
-            colName = hboxLayout.itemAt(0).widget().text()
+            colName = hboxLayout.itemAt(1).widget().text()
             colNamesList.append(colName)
         outputForm.append(colNamesList)  
 
@@ -160,7 +160,7 @@ class mainWindow(QtWidgets.QMainWindow):
         num = 0
         for row in range(grid.rowCount() - 1):
             hboxLayout = grid.itemAtPosition(row, 0)
-            for col in range(2, hboxLayout.count(), 2):  # start from 1st block and ignore dashes
+            for col in range(3, hboxLayout.count(), 2):  # start from 1st block and ignore dashes
                 curBlk = hboxLayout.itemAt(col).widget()
                 if type(curBlk) == targetValBlock.targetValBlock:
                     num += 1
@@ -202,9 +202,9 @@ class mainWindow(QtWidgets.QMainWindow):
             for row in range(grid.rowCount() - 1):
                 hboxLayout = grid.itemAtPosition(row, 0)
 
-                # empty row: ignore it
-                if hboxLayout.count() == 1:
-                    continue
+                ## empty row: ignore it
+                #if hboxLayout.count() == 1:
+                #    continue
 
                 print("\n row = {0}".format(row))
                 # start parsing...
@@ -213,7 +213,7 @@ class mainWindow(QtWidgets.QMainWindow):
                 errorMsg = ""
                 errorPos = ()
 
-                for col in range(2, hboxLayout.count(), 2):
+                for col in range(3, hboxLayout.count(), 2):
                     curBlk = hboxLayout.itemAt(col).widget()
 
                     if type(curBlk) == useAnotherBlock.useAnotherBlock:
@@ -417,7 +417,13 @@ class mainWindow(QtWidgets.QMainWindow):
         data = {}
         for row in range(gridLayout.rowCount() - 1):
                 hboxLayout = gridLayout.itemAtPosition(row, 0)
-                for col in range(0, hboxLayout.count(), 2):
+                col = 0
+                while True:
+                    if col == 2:
+                        col -= 1
+                    if hboxLayout.itemAt(col) is None:
+                        break
+
                     data[(row, col)] = {}   # 'position' map to 'data dict'
                     curBlk = hboxLayout.itemAt(col).widget()
 
@@ -470,9 +476,11 @@ class mainWindow(QtWidgets.QMainWindow):
                     elif type(curBlk) == useAnotherBlock.useAnotherBlock:
                         print("type: useAnotherBlock")
                         dict["blkType"] = "useAnotherBlock"
-                    else:
+                    elif type(curBlk) == QtWidgets.QLineEdit:
                         print("type: lineEdit")
-                        dict["colText"] = curBlk.text() # first col (lineEdit)
+                        dict["editText"] = curBlk.text()
+
+                    col += 2
 
         return data
         
@@ -510,17 +518,24 @@ class mainWindow(QtWidgets.QMainWindow):
             dataDict = val
 
             # not block, is lineEdit
-            if "blkType" not in dataDict:
+            if "blkType" not in dataDict and col != 0:
+                idEdit = QtWidgets.QLineEdit()
+                idEdit.setText(str(row + 1))
+                idEdit.setAlignment(QtCore.Qt.AlignCenter)
+                idEdit.setFixedSize(25, fieldRowHeight)
+                idEdit.setReadOnly(True)
+
                 le = QtWidgets.QLineEdit()
                 le.setPlaceholderText(self.tr("欄位名稱"))
-                le.setText(dataDict["colText"])
+                le.setText(dataDict["editText"])
                 le.setFixedSize(QtCore.QSize(125, fieldRowHeight))
 
                 hboxLayout = None
                 if type(grid.itemAtPosition(row, 0)) == \
                     QtWidgets.QHBoxLayout:
                     hboxLayout = grid.itemAtPosition(row, 0)
-                    hboxLayout.insertWidget(0, le, 0, QtCore.Qt.AlignLeft)
+                    hboxLayout.addWidget(idEdit, 0, QtCore.Qt.AlignLeft)
+                    hboxLayout.addWidget(le, 0, QtCore.Qt.AlignLeft)
                 else:   # this row is addColBtn, extend row
                     hboxLayout = QtWidgets.QHBoxLayout()
                     hboxLayout.setContentsMargins(0, 0, 0, 0)
@@ -528,13 +543,15 @@ class mainWindow(QtWidgets.QMainWindow):
                     addColBtn = grid.itemAtPosition(row, 0).widget()
                     grid.addLayout(hboxLayout, row, 0, QtCore.Qt.AlignLeft)
                     grid.addWidget(addColBtn, row + 1, 0, QtCore.Qt.AlignLeft)
-
-                    hboxLayout.insertWidget(0, le, 0, QtCore.Qt.AlignLeft)
+                    hboxLayout.addWidget(idEdit, 0, QtCore.Qt.AlignLeft)
+                    hboxLayout.addWidget(le, 0, QtCore.Qt.AlignLeft)
 
                 continue
 
             # is block, create corresponding block
             blk = self.buildBlock(dataDict)
+            if blk is None:
+                continue
             
             if type(grid.itemAtPosition(row, 0)) == \
                     QtWidgets.QHBoxLayout:
@@ -550,7 +567,7 @@ class mainWindow(QtWidgets.QMainWindow):
 
                 hboxLayout.insertWidget(col, blk, 0, QtCore.Qt.AlignLeft)
         
-        ## Add back dashes
+        # Add back dashes
         for row in range(grid.rowCount() - 1): # should be rowCount, but rowCount doesn't update after deleting some rows
                 hboxLayout = grid.itemAtPosition(row, 0)
 
@@ -558,7 +575,7 @@ class mainWindow(QtWidgets.QMainWindow):
                 if hboxLayout.count() == 1:
                     continue
 
-                col = 1
+                col = 2
                 while col != hboxLayout.count(): 
                     lineLabel = QtWidgets.QLabel()
                     lineLabel.setText("──")
@@ -568,6 +585,9 @@ class mainWindow(QtWidgets.QMainWindow):
 
 
     def buildBlock(self, dataDict):
+        if "blkType" not in dataDict:
+            return
+
         blk = None
         type = dataDict["blkType"]
 

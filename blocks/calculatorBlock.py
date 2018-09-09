@@ -141,7 +141,9 @@ class calculatorBlock(block.block):
     ####################
 
     def formulaToVal(self, formula):
-        curFormula = formula
+        equal = formula.find("=")
+        if equal != -1:
+            curFormula = formula[equal + 1:]
         #curFormula = (curFormula.split())[1]   # user don't need to enter '='
 
         while True:
@@ -155,7 +157,7 @@ class calculatorBlock(block.block):
 
             # Get actual data and replace it
             row = curFormula[leftSqBrc + 1:rightSqBrc]
-            data = self.parent.tempData[row]
+            data = self.parent.tempData[str(int(row)-1)]
 
             # is multiData, convert to list
             if type(data) == pd.core.frame.DataFrame:  
@@ -170,18 +172,27 @@ class calculatorBlock(block.block):
                 print("conver to list {0}".format(data))
                 data = sum(data)    # hack a bit
                 print("sum is: {0}".format(data))
+
+                toReplaced = "sum(<" + row + ">)"
+                print("curFormula = {0}".format(curFormula))
+                print("toReplaced = {0}".format(toReplaced))
+                curFormula = curFormula.replace(toReplaced, str(data))
+                print("after replacement, curFormula = {0}".format(curFormula))
             elif type(data) == pd.core.frame.Series:
                 data.astype("float64")
                 data.fillna(0)
                 data = data.tolist()    # how about NaN?
                 data = sum(data)
+
+                toReplaced = "sum(<" + row + ">)"
+                curFormula = curFormula.replace(toReplaced, str(data))
+
             # normal number
             else:
                 data = float(self.parent.tempData[row]) # assume the others are float
 
-            toReplaced = "<" + row + ">"
-            curFormula = curFormula.replace(toReplaced, str(data))
-            print("curFormula becomes: {0}".format(curFormula))
+                toReplaced = "<" + row + ">"
+                curFormula = curFormula.replace(toReplaced, str(data))
 
         return eval(curFormula)
 
@@ -199,8 +210,8 @@ class calculatorBlock(block.block):
             rightSqBrc = curFormula.find(">")
 
             # Calculate the number iterm of excel index
-            row = int(curFormula[leftSqBrc + 1:rightSqBrc])
-            first, second = divmod(row + 1, 26)    # excel's 1 is A, not 0
+            row = curFormula[leftSqBrc + 1:rightSqBrc]
+            first, second = divmod(int(row), 26)    # excel's 1 is A, not 0
             print("first = {0}, second = {1}".format(first, second))
 
             index = ""
@@ -211,7 +222,7 @@ class calculatorBlock(block.block):
             index += str(valRow + 1)   # becomes cell position
             print("toString should be {0}".format(index))
             # Replace it
-            toReplaced = "<" + curFormula[leftSqBrc + 1:rightSqBrc] + ">"
+            toReplaced = "<" + row + ">"
             curFormula = curFormula.replace(toReplaced, index)
             print("After replacement: {0}".format(curFormula))
 

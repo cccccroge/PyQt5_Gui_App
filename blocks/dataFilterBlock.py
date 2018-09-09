@@ -155,8 +155,8 @@ class dataFilterBlock(block.block):
         out = None
         if first == "=":
             if second.find("<") != -1 and second.find(">") != -1:   # use another val
-                row = second[second.find("<") + 1]
-                second = str(self.parent.tempData[row])
+                row = second[second.find("<") + 1:second.find(">")]
+                second = str(self.parent.tempData[str(int(row)-1)])
                 print("second str after = is: {0}".format(second))
             out = input.loc[input[col] == second]
         elif first == "!=":
@@ -365,10 +365,10 @@ class dataFilterBlock(block.block):
             rightSqBrc = curFormula.find(">")
 
             # Get actual data and replace it
-            row = curFormula[leftSqBrc + 1:rightSqBrc]
-            data = self.parent.tempData[row]
+            row = int(curFormula[leftSqBrc + 1:rightSqBrc])
+            data = self.parent.tempData[str(row-1)]
 
-            toReplaced = "<" + row + ">"
+            toReplaced = "<" + str(row) + ">"
             print("toReplaced = {0}, data = {1}".format(toReplaced, data))
             curFormula = curFormula.replace(toReplaced, "'" + data + "'")
             print("curFormula becomes: {0}".format(curFormula))

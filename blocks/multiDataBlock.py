@@ -4,14 +4,30 @@ import pandas as pd
 import numpy as np
 import networkx as nx
 
+from glob import msgDuration
+
 class multiDataBlock(block.block):
     def __init__(self, parent, field, **kwargs):
         super().__init__(parent, field, **kwargs)
 
         self.nameEdit.setText("多重資料")
-
-        self.disableBtn()
+        self.colSource = []
         self.setAcceptDrops(True)
+
+        self.enableSettingDialog()
+        self.settingBtn.pressed.connect(self.on_settingBtn_pressed)
+        self.settingDialog.accepted.connect(self.on_settingDialog_accepted)
+        self.settingDialog.rejected.connect(self.on_settingDialog_rejected)
+
+        # List all element in colSource
+        groupBoxShowCol = QtWidgets.QGroupBox(self.tr("顯示欄位"))
+        groupBoxShowColLayout = QtWidgets.QVBoxLayout()
+        groupBoxShowCol.setLayout(groupBoxShowColLayout)
+        self.settingLayout.addWidget(groupBoxShowCol)
+
+        self.showColList = QtWidgets.QListWidget()
+        self.showColList.itemDoubleClicked.connect(self.on_showColList_itemDoubleClicked)
+        groupBoxShowColLayout.addWidget(self.showColList)
 
 
     def generateOut(self, input, inputColSrc, graph):
@@ -29,22 +45,9 @@ class multiDataBlock(block.block):
             print("in dataBlock: input is {0}".format(input))
             return None, None, "-->資料表(/列)為空表(/列)"
 
-        fromNode = inputColSrc[0:2]
-        toNode = self.colSource[0:2]
-
-        # Not same file: impossible to get multiData
-        if fromNode != toNode:
-            return None, None, "-->前者方塊必須與之相同才能抓取多筆資料"
-
         # Get the final value
-        blkColSrc = self.colSource[2]
-
-        #isStr = pd.api.types.is_string_dtype(curRow[blkColSrc])
-        #print("DB isStr = {0}".format(isStr))
-        #if isStr:
-        #    data = str(curRow.at[blkColSrc])
-        #else:
-        data = input[[blkColSrc]]
+        selectedColsList = self.colSource   # should identify if cols exist in file
+        data = input[selectedColsList]
 
         return data, self.colSource, ""
 
@@ -72,9 +75,66 @@ class multiDataBlock(block.block):
         sheetName = text[pos1+1:pos2]
         colName = text[pos2+1:]
 
-        # Store tuple to block
-        self.colSource = fileName, sheetName, colName
+        # Check if already in list
+        for e in self.colSource:
+            if colName == e:
+                self.parent.statusBar().showMessage(
+                    "該欄位已存在於多重資料方塊的列表中", msgDuration)   # this message is overwritten
+                return
+
+        # Store col to block
+        self.colSource.append(colName)
+
+        # Show item in listWidget
+        new = QtWidgets.QListWidgetItem()
+        new.setText(colName)
+        self.showColList.addItem(new)
 
         print("drop source: {0}".format(self.colSource))
         event.acceptProposedAction()
 
+
+    ####################
+    #      Slots
+    ####################
+
+    # Popup setting window for multiData block
+
+    def on_settingBtn_pressed(self):
+        # Store old values in case user need to discard changes
+        self.__listOld = self.colSource.copy()
+
+        self.settingDialog.show()
+
+
+    # Confirm setting window: store value to settingData
+
+    def on_settingDialog_accepted(self):
+        print("colSource becomes: {0}".format(self.colSource))
+
+
+    # Cancel setting window: reset to old values
+
+    def on_settingDialog_rejected(self):
+        self.colSource = self.__listOld
+
+        self.showColList.clear()
+        for col in self.colSource:
+            item = QtWidgets.QListWidgetItem()
+            item.setText(col)
+            self.showColList.addItem(item)
+
+        print("colSource becomes: {0}".format(self.colSource))
+
+
+    # Remove item when user double click on it
+
+    def on_showColList_itemDoubleClicked(self, item):
+        text = item.text()
+        print("item to be removed is {0}".format(item))
+        print("text to be removed is {0}".format(text))
+        self.colSource.remove(text)
+
+        index = self.showColList.row(item)
+        ret = self.showColList.takeItem(index)
+        del ret

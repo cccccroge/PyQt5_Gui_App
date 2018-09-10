@@ -154,11 +154,12 @@ class dataFilterBlock(block.block):
 
         out = None
         if first == "=":
-            if second.find("<") != -1 and second.find(">") != -1:   # use another val
-                row = second[second.find("<") + 1:second.find(">")]
-                second = str(self.parent.tempData[str(int(row)-1)])
-                print("second str after = is: {0}".format(second))
-            out = input.loc[input[col] == second]
+            #if second.find("<") != -1 and second.find(">") != -1:   # use another val
+            #    row = second[second.find("<") + 1:second.find(">")]
+            #    second = str(self.parent.tempData[str(int(row)-1)])
+            #    print("second str after = is: {0}".format(second))
+            string = self.formulaToString(second)
+            out = input.loc[input[col] == string.strip()]
         elif first == "!=":
             out = input.loc[input[col] != second]
         elif first == "contains":
@@ -367,6 +368,8 @@ class dataFilterBlock(block.block):
             # Get actual data and replace it
             row = int(curFormula[leftSqBrc + 1:rightSqBrc])
             data = self.parent.tempData[str(row-1)]
+            if data is None:
+                data = ""
 
             toReplaced = "<" + str(row) + ">"
             print("toReplaced = {0}, data = {1}".format(toReplaced, data))

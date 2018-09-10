@@ -268,6 +268,12 @@ class mainWindow(QtWidgets.QMainWindow):
                     data = "N/A" + "\n最後錯誤發生在" \
                         + str(errorPos) + ":\n" + errorMsg  # leave N/A + reasons
                     self.tempData[str(row)] = None
+
+                if type(data) == pd.core.frame.DataFrame \
+                    or type(data) == pd.core.frame.Series:     
+                    data = data.reset_index()
+                    del data["index"]
+
                 rowDataList.append(data)
 
             # append whole row list to get form matrix
@@ -603,6 +609,10 @@ class mainWindow(QtWidgets.QMainWindow):
         elif type == "multiDataBlock":
             blk = multiDataBlock.multiDataBlock(self, self.central.fieldWidget)
             blk.colSource = dataDict["colSource"]
+            for e in blk.colSource:
+                item = QtWidgets.QListWidgetItem()
+                item.setText(e)
+                blk.showColList.addItem(item)
         elif type == "condDataBlock":
             blk = condDataBlock.condDataBlock(self, self.central.fieldWidget)
             blk.settingData = dataDict["settingData"]

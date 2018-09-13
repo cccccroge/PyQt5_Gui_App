@@ -161,23 +161,15 @@ class calculatorBlock(block.block):
 
             # is multiData, convert to list
             if type(data) == pd.core.frame.DataFrame:  
-                print("data from others: {0}".format(data))
                 data.astype("float64")
-                print("convert to float: {0}".format(data))
                 data = data.fillna(0)
-                print("fill Nan: {0}".format(data))
                 data = data.iloc[:,0]   # convert to series
-                print("conver to series: {0}".format(data))
                 data = data.tolist()
-                print("conver to list {0}".format(data))
                 data = sum(data)    # hack a bit
-                print("sum is: {0}".format(data))
 
                 toReplaced = "sum(<" + row + ">)"
-                print("curFormula = {0}".format(curFormula))
-                print("toReplaced = {0}".format(toReplaced))
                 curFormula = curFormula.replace(toReplaced, str(data))
-                print("after replacement, curFormula = {0}".format(curFormula))
+                print("is DataFrame, curFormula becomes: {0}".format(curFormula))
             elif type(data) == pd.core.frame.Series:
                 data.astype("float64")
                 data.fillna(0)
@@ -186,13 +178,18 @@ class calculatorBlock(block.block):
 
                 toReplaced = "sum(<" + row + ">)"
                 curFormula = curFormula.replace(toReplaced, str(data))
+                print("is Series, curFormula becomes: {0}".format(curFormula))
 
             # normal number
             else:
-                data = float(self.parent.tempData[row]) # assume the others are float
+                if data is None:
+                    return 0
+                else:
+                    data = float(self.parent.tempData[row]) # assume the others are float
 
                 toReplaced = "<" + row + ">"
                 curFormula = curFormula.replace(toReplaced, str(data))
+                print("either DataFrame or Series, curFormula becomes: {0}".format(curFormula))
 
         return eval(curFormula)
 
@@ -218,7 +215,12 @@ class calculatorBlock(block.block):
             if first == 0:
                 index = self.numToAlph(second)
             else:
-                index = self.numToAlph(first) + self.numToAlph(second)
+                if first == 1 and second == 0:
+                    index = "Z"
+                elif first != 1 and second == 0:
+                    index = self.numToAlph(first - 1) + "Z"
+                else:
+                    index = self.numToAlph(first) + self.numToAlph(second)
             index += str(valRow + 1)   # becomes cell position
             print("toString should be {0}".format(index))
             # Replace it

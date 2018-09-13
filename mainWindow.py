@@ -258,21 +258,25 @@ class mainWindow(QtWidgets.QMainWindow):
                     else:
                         out = "you're not using any valid blocks, Bro"
                         break
-                
+
                 # append final output val to get row list, and store to temp data dict
                 data = None
-                if out is not None:
-                    data = out
+                if hboxLayout.count() == 2: # no trailing blocks
+                    data = ""
                     self.tempData[str(row)] = data
                 else:
-                    data = "N/A" + "\n最後錯誤發生在" \
-                        + str(errorPos) + ":\n" + errorMsg  # leave N/A + reasons
-                    self.tempData[str(row)] = None
+                    if out is not None:
+                        data = out
+                        self.tempData[str(row)] = data
+                    else:
+                        data = "N/A" + "\n最後錯誤發生在" \
+                            + str(errorPos) + ":\n" + errorMsg  # leave N/A + reasons
+                        self.tempData[str(row)] = None
 
-                if type(data) == pd.core.frame.DataFrame \
-                    or type(data) == pd.core.frame.Series:     
-                    data = data.reset_index()
-                    del data["index"]
+                    if type(data) == pd.core.frame.DataFrame \
+                        or type(data) == pd.core.frame.Series:     
+                        data = data.reset_index()
+                        del data["index"]
 
                 rowDataList.append(data)
 

@@ -64,7 +64,7 @@ class condDataBlock(block.block):
         self.groupBoxMaprules2.hide()
         self.settingLayout.addWidget(self.groupBoxMaprules2)
 
-        for i in range(5):
+        for i in range(10):
             lineEditfrom = QtWidgets.QLineEdit()
             mapIcon = QtWidgets.QLabel(self.tr("=>"))
             lineEditTo = QtWidgets.QLineEdit()
@@ -126,16 +126,37 @@ class condDataBlock(block.block):
         if self.settingData["dataType"] == "value":
             # Find match
             for tup in ruleList:
-                if input == tup[0]:
-                    isFind = True
-                    out = tup[1]
+                fromVal = tup[0]
+                # is a single data
+                if len(fromVal.split()) == 1:   
+                    if input == tup[0]:
+                        isFind = True
+                        out = tup[1]
+                        break
+                # is a condition
+                else:
+                    if self.numSatisfy(input, fromVal) == True:
+                        isFind = True
+                        out = tup[1]
+                        break
+
         elif self.settingData["dataType"] == "useform": # hack a bit bcz failed to get orig type in excel
             for tup in ruleList:
                 if input == int(tup[0]):
                     isFind = True
                     out = tup[1]
+                    break
         
-        return out, ("" if isFind else "-->該項目找不到對應規則")
+        if isFind == False:
+            for tup in ruleList:
+                if tup[0] == "others":
+                    out = tup[1]
+                    break
+
+        if out is None:
+            return out, "-->該項目找不到對應規則"
+
+        return out, ""
                 
 
     ####################
@@ -281,4 +302,10 @@ class condDataBlock(block.block):
             ruleTuples.append(tup)
 
         return ruleTuples
+
+
+    def numSatisfy(self, num, cond):
+        num = str(float(num))
+        return eval(num + cond)
+
 

@@ -97,10 +97,10 @@ class dataFilterBlock(block.block):
         if nx.has_path(graph, fromNode, toNode) == False:
             return None, None, "-->" + absence1 + "和" + absence2 + "之間不存在有效連結"
 
-        # Find second last connected row, and use filter setting to get rows or row
-        if type(input) == pd.core.frame.DataFrame:
-            input = input.iloc[0]
-        curRow = input
+        ## Find second last connected row, and use filter setting to get rows or row
+        #if type(input) == pd.core.frame.DataFrame:
+        #    input = input.iloc[0]
+        curRow = input  # curRow is df
 
         pathNodes = nx.shortest_path(graph, fromNode, toNode)
         for i in range(len(pathNodes) - 1):
@@ -112,10 +112,15 @@ class dataFilterBlock(block.block):
             preCol = pre2postPath[0]
             postCol = pre2postPath[1]
             
-            preVal = curRow.at[preCol]
-            postFile = self.parent.srcFiles[postNode]
+            preVal = curRow[preCol] # preVal is Series
+            print("preVal series is {0}".format(preVal))
+            #preVal = preVal.iloc[:,0]
+            li = preVal.tolist()
 
-            rows = postFile.loc[postFile[postCol] == preVal]
+            postFile = self.parent.srcFiles[postNode]
+            rows = postFile[postFile[postCol].isin(li)]
+            print("rows is: {0}".format(rows))
+
             if rows.empty:
                 return None, None, "-->連結中斷，檔案" + str(postNode) + "中的'" \
                     + str(postCol) + "'欄位找不到此值: " + str(preVal)
@@ -134,6 +139,8 @@ class dataFilterBlock(block.block):
     def filter(self, input):
         # Identify the data type
         type = self.settingData["dataType"]
+        if type == "":
+            return input, ""
         if type == "str":
             return self.filter_str(input)
         elif type == "num":
@@ -158,8 +165,17 @@ class dataFilterBlock(block.block):
             #    row = second[second.find("<") + 1:second.find(">")]
             #    second = str(self.parent.tempData[str(int(row)-1)])
             #    print("second str after = is: {0}".format(second))
-            string = self.formulaToString(second)
-            out = input.loc[input[col] == string.strip()]
+            orPos = second.find("OR")
+            if orPos == -1:
+                string = self.formulaToString(second)
+                out = input.loc[input[col] == string]
+            else:   # assume only one OR
+                second1 = second[0:orPos]
+                second2 = second[orPos + 2:]
+                string1 = self.formulaToString(second1)
+                string2 = self.formulaToString(second2)
+                stringList = [string1, string2]
+                out = input[input[col].isin(stringList)]
         elif first == "!=":
             out = input.loc[input[col] != second]
         elif first == "contains":
@@ -373,11 +389,14 @@ class dataFilterBlock(block.block):
 
             toReplaced = "<" + str(row) + ">"
             print("toReplaced = {0}, data = {1}".format(toReplaced, data))
-            curFormula = curFormula.replace(toReplaced, "'" + data + "'")
+            curFormula = curFormula.replace(toReplaced, "'" + str(data) + "'")
             print("curFormula becomes: {0}".format(curFormula))
             print("result: {0}".format(eval(curFormula)))
 
-        return eval(curFormula)
+        if curFormula.isdigit():
+            return float(curFormula)
+        else:
+            return (eval(curFormula).strip())
 
 
 

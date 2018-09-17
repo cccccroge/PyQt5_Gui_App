@@ -10,7 +10,7 @@ class useAnotherBlock(block.block):
 
 
     def generateOut(self, input, oriInput, oriColSrc):
-        if input is None:
-            return oriInput, oriColSrc, "-->前者資料為空"
+        if (input is None) or (input == ""):
+            return oriInput, oriColSrc, "-->前者資料為無或空字串"
         else:
             return input, None, ""

@@ -12,7 +12,7 @@ import central
 from glob import msgDuration, fieldRowHeight
 
 import targetValBlock, dataBlock, multiDataBlock, condDataBlock
-import dataFilterBlock, calculatorBlock, numberBlock, useAnotherBlock
+import dataFilterBlock, calculatorBlock, numberBlock, useAnotherBlock, defaultBlock
 
 
 class mainWindow(QtWidgets.QMainWindow):
@@ -255,6 +255,8 @@ class mainWindow(QtWidgets.QMainWindow):
                         if out is None:
                             errorMsg += ("\n" + newMsg)
                             errorPos = (row, col)
+                    elif type(curBlk) == defaultBlock.defaultBlock:
+                        out, errorMsg = curBlk.generateOut()
                     else:
                         out = "you're not using any valid blocks, Bro"
                         break
@@ -486,6 +488,10 @@ class mainWindow(QtWidgets.QMainWindow):
                     elif type(curBlk) == useAnotherBlock.useAnotherBlock:
                         print("type: useAnotherBlock")
                         dict["blkType"] = "useAnotherBlock"
+                    elif type(curBlk) == defaultBlock.defaultBlock:
+                        print("type: defaultBlock")
+                        dict["blkType"] = "defaultBlock"
+                        dict["settingData"] = curBlk.settingData
                     elif type(curBlk) == QtWidgets.QLineEdit:
                         print("type: lineEdit")
                         dict["editText"] = curBlk.text()
@@ -690,6 +696,10 @@ class mainWindow(QtWidgets.QMainWindow):
 
         elif type == "useAnotherBlock":
             blk = useAnotherBlock.useAnotherBlock(self, self.central.fieldWidget)
+        elif type == "defaultBlock":
+            blk = defaultBlock.defaultBlock(self, self.central.fieldWidget)
+            blk.useNumber.setChecked(dataDict["settingData"]["useNum"])
+            blk.valEdit.setText(dataDict["settingData"]["val"])
         else:
             return
 

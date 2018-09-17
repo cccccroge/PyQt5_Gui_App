@@ -32,6 +32,9 @@
     <Compile Include="blocks\dataFilterBlock.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="blocks\defaultBlock.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="blocks\dropEdit.py">
       <SubType>Code</SubType>
     </Compile>

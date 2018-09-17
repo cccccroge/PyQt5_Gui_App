@@ -3,7 +3,7 @@ from PyQt5 import QtWidgets, QtGui
 import sys
 sys.path.append("./blocks")
 import targetValBlock, dataBlock, multiDataBlock, condDataBlock
-import dataFilterBlock, numberBlock, calculatorBlock,useAnotherBlock
+import dataFilterBlock, numberBlock, calculatorBlock, useAnotherBlock, defaultBlock
 
 class blockMenu(QtWidgets.QMenu):
     def __init__(self, parent, field, **kwargs):
@@ -36,6 +36,9 @@ class blockMenu(QtWidgets.QMenu):
         dataAction = self.addAction(self.tr("取其它"))
         dataAction.triggered.connect(lambda: self.buildingBlock(7))
 
+        dataAction = self.addAction(self.tr("預設值"))
+        dataAction.triggered.connect(lambda: self.buildingBlock(8))
+
 
     ####################
     #      Slots
@@ -64,6 +67,8 @@ class blockMenu(QtWidgets.QMenu):
             blk = calculatorBlock.calculatorBlock(self.parent, self.field)
         elif id == 7:
             blk = useAnotherBlock.useAnotherBlock(self.parent, self.field)
+        elif id == 8:
+            blk = defaultBlock.defaultBlock(self.parent, self.field)
         else:
             return
 

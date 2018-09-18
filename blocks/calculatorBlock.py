@@ -185,7 +185,7 @@ class calculatorBlock(block.block):
                 if data is None:
                     return 0
                 else:
-                    data = float(self.parent.tempData[row]) # assume the others are float
+                    data = float(data) # assume the others are float
 
                 toReplaced = "<" + row + ">"
                 curFormula = curFormula.replace(toReplaced, str(data))

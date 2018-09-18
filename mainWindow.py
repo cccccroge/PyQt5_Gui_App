@@ -698,6 +698,7 @@ class mainWindow(QtWidgets.QMainWindow):
             blk = useAnotherBlock.useAnotherBlock(self, self.central.fieldWidget)
         elif type == "defaultBlock":
             blk = defaultBlock.defaultBlock(self, self.central.fieldWidget)
+            blk.settingData = dataDict["settingData"]
             blk.useNumber.setChecked(dataDict["settingData"]["useNum"])
             blk.valEdit.setText(dataDict["settingData"]["val"])
         else:

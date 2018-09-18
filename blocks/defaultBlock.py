@@ -1,5 +1,6 @@
 import block
 from PyQt5 import QtWidgets
+import datetime
 
 class defaultBlock(block.block):
     def __init__(self, parent, field, **kwargs):
@@ -34,9 +35,9 @@ class defaultBlock(block.block):
 
         isNum = self.settingData["useNum"]
         if isNum:
-            out = float(self.settingData["val"])
+            out = float(self.formulaToVal(self.settingData["val"]))
         else:
-            out = self.settingData["val"]
+            out = self.formulaToVal(self.settingData["val"])
 
         return out, ""
 
@@ -72,3 +73,74 @@ class defaultBlock(block.block):
         self.useNumber.setChecked(self.__useNum)
 
 
+    ####################
+    # Helper functions
+    ####################
+
+    def formulaToVal(self, formula):
+        curFormula = formula
+
+        while True:
+            leftSqBrc = curFormula.find("<")
+
+            # All temp variables are replaced
+            if leftSqBrc == -1:
+                break
+
+            rightSqBrc = curFormula.find(">")
+
+            # Get actual data and replace it
+            row = curFormula[leftSqBrc + 1:rightSqBrc]
+            data = self.parent.tempData[str(int(row)-1)]
+
+            # is multiData, convert to list
+            if type(data) == pd.core.frame.DataFrame:  
+                data.astype("float64")
+                data = data.fillna(0)
+                data = data.iloc[:,0]   # convert to series
+                data = data.tolist()
+                data = sum(data)    # hack a bit
+
+                toReplaced = "sum(<" + row + ">)"
+                curFormula = curFormula.replace(toReplaced, str(data))
+                print("is DataFrame, curFormula becomes: {0}".format(curFormula))
+            elif type(data) == pd.core.frame.Series:
+                data.astype("float64")
+                data.fillna(0)
+                data = data.tolist()    # how about NaN?
+                data = sum(data)
+
+                toReplaced = "sum(<" + row + ">)"
+                curFormula = curFormula.replace(toReplaced, str(data))
+                print("is Series, curFormula becomes: {0}".format(curFormula))
+
+            # normal number
+            else:
+                if data is None:
+                    data = ""
+                else:
+                    if data.isdigit():
+                        data = float(data)
+                    else:
+                        data = "'" + data + "'"
+
+                toReplaced = "<" + row + ">"
+                curFormula = curFormula.replace(toReplaced, str(data))
+                print("either DataFrame or Series, curFormula becomes: {0}".format(curFormula))
+
+        while True:
+            todayPos = curFormula.find("TODAY")
+            if todayPos == -1:
+                break
+
+            todayStr = datetime.datetime.now().strftime("%Y%m%d")
+            curFormula = curFormula.replace("TODAY", str(todayStr))
+
+        if curFormula.isdigit():
+            print("digit")
+            curFormula = float(curFormula)
+        else:
+            print("not digit")
+            curFormula = "'" + curFormula + "'"
+
+        return eval(str(curFormula))

@@ -1,4 +1,5 @@
 import block
+import numpy as np
 
 class useAnotherBlock(block.block):
     def __init__(self, parent, field, **kwargs):
@@ -10,7 +11,7 @@ class useAnotherBlock(block.block):
 
 
     def generateOut(self, input, oriInput, oriColSrc):
-        if (input is None) or (input == ""):
+        if (input is None) or (input == "") or (np.isnan(input)):
             return oriInput, oriColSrc, "-->前者資料為無或空字串"
         else:
             return input, None, ""

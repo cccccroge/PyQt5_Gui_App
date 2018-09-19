@@ -216,8 +216,23 @@ class dataFilterBlock(block.block):
         elif first == "!=":
             out = input.loc[input[col] != second]
         elif first == "contains":
-            string = self.formulaToString(second)
-            out = input[input[col].str.contains(string) == True]
+            string = str(self.formulaToString(second))
+            containList = []
+            # Get all vals into list
+            while True:
+                orPos = string.find("OR")
+                if orPos == -1:
+                    containList.append(string)
+                    break
+                else:
+                    e = string[:orPos]
+                    containList.append(e)
+                    string = string[orPos + 2:]
+
+            pattern = "|".join(containList)
+            out = input[input[col].str.contains(pattern) == True]
+
+            print("out = {0}".format(out))
         else:
             return None, "-->條件式非法: 出現未知的運算子"
 
@@ -441,6 +456,12 @@ class dataFilterBlock(block.block):
         if curFormula.isdigit():
             return float(curFormula)
         else:
-            return (eval(curFormula).strip())
+            needToAdd = True if (curFormula[0] != "'" and curFormula[0] != "\"") else False
+            if needToAdd:
+                toEval = "\"" + curFormula.strip() + "\""
+            else:
+                toEval = curFormula.strip()
+
+            return eval(toEval)
 
 

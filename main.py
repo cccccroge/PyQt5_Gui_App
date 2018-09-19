@@ -2,25 +2,9 @@ import sys
 from PyQt5 import QtWidgets, QtCore
 import mainWindow
 
-#import datetime
-#curFormula = "TODAY"
-
-#while True:
-#    todayPos = curFormula.find("TODAY")
-#    if todayPos == -1:
-#        break
-
-#    todayStr = datetime.datetime.now().strftime("%Y%m%d")
-#    curFormula = curFormula.replace("TODAY", str(todayStr))
-
-#if curFormula.isdigit():
-#    print("digit")
-#    curFormula = float(curFormula)
-#else:
-#    print("not digit")
-#    curFormula = "'" + curFormula + "'"
-
-#print(eval(str(curFormula)))
+#string2 = """ 'F301AA5172'[0:6]+'0000' """
+#string = """ "'F301AA5172'[0:6]+'0000'" """
+#print(eval(string))
 
 
 

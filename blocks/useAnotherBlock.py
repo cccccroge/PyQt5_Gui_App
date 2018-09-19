@@ -11,7 +11,14 @@ class useAnotherBlock(block.block):
 
 
     def generateOut(self, input, oriInput, oriColSrc):
-        if (input is None) or (input == "") or (np.isnan(input)):
-            return oriInput, oriColSrc, "-->前者資料為無或空字串"
+        if (input is None) or (input == ""):
+            return oriInput, oriColSrc, "-->前者資料為空"
+
         else:
-            return input, None, ""
+            try:
+                if np.isnan(input):
+                    return oriInput, oriColSrc, "-->前者資料為無"
+                else:
+                    return input, None, ""
+            except TypeError:
+                return input, None, ""

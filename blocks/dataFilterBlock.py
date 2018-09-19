@@ -444,14 +444,3 @@ class dataFilterBlock(block.block):
             return (eval(curFormula).strip())
 
 
-    def shouldBeFiltered(self):
-        satisfyStr = self.settingData["satisfyCond"]
-
-        if satisfyStr == "":
-            return True
-        else:
-
-
-
-
-

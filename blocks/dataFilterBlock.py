@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import networkx as nx
 import block
+import dropEdit
 
 class dataFilterBlock(block.block):
     def __init__(self, parent, field, **kwargs):
@@ -10,6 +11,8 @@ class dataFilterBlock(block.block):
 
         self.nameEdit.setText("資料篩選")
 
+        self.settingData["satisfyCol"] = ()
+        self.settingData["satisfyCond"] = ""
         self.settingData["dataType"] = ""
         self.settingData["filterCond"] = ""
         self.settingData["origChecked"] = False
@@ -22,6 +25,15 @@ class dataFilterBlock(block.block):
         self.settingDialog.rejected.connect(self.on_settingDialog_rejected)
 
         # Dialog content
+        # satisfied condition
+        groupBoxSatisfy = QtWidgets.QGroupBox(self.tr("滿足條件"))
+        groupBoxSatisfyLayout = QtWidgets.QVBoxLayout()
+        groupBoxSatisfy.setLayout(groupBoxSatisfyLayout)
+        self.settingLayout.addWidget(groupBoxSatisfy)
+
+        self.lineEditSatisfy = dropEdit.dropEdit(False)
+        groupBoxSatisfyLayout.addWidget(self.lineEditSatisfy)
+
         # filtered data type
         groupBoxDataType = QtWidgets.QGroupBox(self.tr("篩選項目"))
         groupBoxDataTypeLayout = QtWidgets.QVBoxLayout()
@@ -75,11 +87,28 @@ class dataFilterBlock(block.block):
         # Use original file checked: don't care graph
         if self.settingData["origChecked"] == True:
             origFile = self.parent.srcFiles[toNode]
+
+            # check should be filtered
+            satCond = self.settingData["satisfyCond"]
+            if satCond != "":
+                satCol = self.settingData["satisfyCol"][2]
+                satDf = origFile.loc[origFile[satCol] == satCond]
+                if satDf.empty:
+                    return input, inputColSrc, ""
+
             data, msg = self.filter(origFile)
             return data, self.colSource, msg
 
         # Same file: don't care graph
         if fromNode == toNode:
+            # check should be filtered
+            satCond = self.settingData["satisfyCond"]
+            if satCond != "":
+                satCol = self.settingData["satisfyCol"][2]
+                satDf = input.loc[input[satCol] == satCond]
+                if satDf.empty:
+                    return input, inputColSrc, ""
+
             data, msg = self.filter(input)
             return data, self.colSource, msg
 
@@ -132,6 +161,14 @@ class dataFilterBlock(block.block):
                 curRow = rows
 
         # Get the final rows/row
+        # check should be filtered
+        satCond = self.settingData["satisfyCond"]
+        if satCond != "":
+            satCol = self.settingData["satisfyCol"][2]
+            satDf = curRow.loc[curRow[satCol] == satCond]
+            if satDf.empty:
+                return input, inputColSrc, ""
+
         data, msg = self.filter(curRow)
         return data, self.colSource, msg
 
@@ -321,16 +358,21 @@ class dataFilterBlock(block.block):
 
     def on_settingBtn_pressed(self):
         # Store old values in case user need to discard changes
+        self.__satColOld = self.lineEditSatisfy.colSource
+        self.__satCondOld = self.lineEditSatisfy.text()
         self.__idOld = self.radioBtnGroup.checkedId()
         self.__textOld = self.lineEditCond.text()
         self.__checkedOld = self.origCheckbox.isChecked()
 
-        self.settingDialog.exec()
+        self.settingDialog.show()
 
 
     # Confirm setting window: store value to settingData
 
     def on_settingDialog_accepted(self):
+        self.settingData["satisfyCol"] = self.lineEditSatisfy.colSource
+        self.settingData["satisfyCond"] = self.lineEditSatisfy.text()
+
         id = self.radioBtnGroup.checkedId()
         if id == -1:
             self.settingData["dataType"] = ""
@@ -357,6 +399,9 @@ class dataFilterBlock(block.block):
     # Cancel setting window: reset to old values
 
     def on_settingDialog_rejected(self):
+        self.lineEditSatisfy.colSource = self.__satColOld
+        self.lineEditSatisfy.setText(self.__satCondOld)
+
         if self.__idOld != -1:
             btn = self.radioBtnGroup.button(self.__idOld)
             btn.setChecked(True)
@@ -397,6 +442,15 @@ class dataFilterBlock(block.block):
             return float(curFormula)
         else:
             return (eval(curFormula).strip())
+
+
+    def shouldBeFiltered(self):
+        satisfyStr = self.settingData["satisfyCond"]
+
+        if satisfyStr == "":
+            return True
+        else:
+
 
 
 

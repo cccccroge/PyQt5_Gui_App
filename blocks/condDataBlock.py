@@ -3,6 +3,7 @@ import block, dropEdit
 import datetime
 import pandas as pd
 import numpy as np
+import glob
 
 class condDataBlock(block.block):
     def __init__(self, parent, field, **kwargs):
@@ -354,7 +355,7 @@ class condDataBlock(block.block):
                 if data is None:
                     data = ""
                 else:
-                    if data.isdigit():
+                    if glob.is_number(data):
                         data = float(data)
                     else:
                         data = "'" + data + "'"
@@ -371,13 +372,16 @@ class condDataBlock(block.block):
             todayStr = datetime.datetime.now().strftime("%Y%m%d")
             curFormula = curFormula.replace("TODAY", str(todayStr))
 
-        if (type(curFormula).__module__ == np.__name__) or curFormula.isdigit():
-            print("digit")
-            curFormula = float(curFormula)
-        else:
-            print("not digit")
-            curFormula = "'" + curFormula + "'"
+        #if (type(curFormula).__module__ == np.__name__) or curFormula.isdigit():
+        #    print("digit")
+        #    curFormula = float(curFormula)
+        #else:
+        #    print("not digit")
+        #    curFormula = "'" + curFormula + "'"
 
-        return eval(str(curFormula))
+        try:
+            return eval(str(curFormula))
+        except NameError:
+            return eval("'" + str(curFormula) + "'")    # it is not computable string
 
 

@@ -668,6 +668,9 @@ class mainWindow(QtWidgets.QMainWindow):
             blk = dataFilterBlock.dataFilterBlock(self, self.central.fieldWidget)
             blk.colSource = dataDict["colSource"]
             blk.settingData = dataDict["settingData"]
+
+            blk.lineEditSatisfy.colSource = dataDict["settingData"]["satisfyCol"]
+            blk.lineEditSatisfy.setText(dataDict["settingData"]["satisfyCond"])
             dataType = dataDict["settingData"]["dataType"]
             blk.origCheckbox.setChecked(dataDict["settingData"]["origChecked"])
             if dataType != "":

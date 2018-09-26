@@ -1,5 +1,6 @@
 import block
 from PyQt5 import QtWidgets
+import pandas as pd
 import datetime
 
 class defaultBlock(block.block):
@@ -37,7 +38,7 @@ class defaultBlock(block.block):
         if isNum:
             out = float(self.formulaToVal(self.settingData["val"]))
         else:
-            out = self.formulaToVal(self.settingData["val"])
+            out = self.formulaToDf(self.settingData["val"])
 
         return out, ""
 
@@ -144,3 +145,28 @@ class defaultBlock(block.block):
             curFormula = "'" + curFormula + "'"
 
         return eval(str(curFormula))
+
+
+
+    def formulaToDf(self, formula):
+        curFormula = formula
+
+        while True:
+            leftSqBrc = curFormula.find("<")
+
+            # All temp variables are replaced
+            if leftSqBrc == -1:
+                break
+
+            rightSqBrc = curFormula.find(">")
+
+            # Get actual data and replace it
+            row = int(curFormula[leftSqBrc + 1:rightSqBrc])
+            data = self.parent.tempData[str(row-1)]
+            if data is None:
+                data = ""
+
+            #toReplaced = "<" + str(row) + ">"
+            #curFormula = curFormula.replace(toReplaced, "'" + str(data) + "'")
+            return data # hack a bit
+

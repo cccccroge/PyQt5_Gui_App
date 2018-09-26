@@ -132,7 +132,7 @@ class condDataBlock(block.block):
             for tup in ruleList:
                 fromVal = tup[0]
                 # is a single data
-                if len(fromVal.split()) == 1:   
+                if len(fromVal.split()) <= 1:   
                     if input == tup[0]:
                         isFind = True
                         out = self.formulaToVal(tup[1])

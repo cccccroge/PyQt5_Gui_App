@@ -8,3 +8,6 @@ def is_number(s):
         return True
     except ValueError:
         return False
+
+def make_red_font():
+    return "color: red"

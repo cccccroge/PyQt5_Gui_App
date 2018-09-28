@@ -209,6 +209,7 @@ class mainWindow(QtWidgets.QMainWindow):
                 print("\n row = {0}".format(row))
                 # start parsing...
                 out = startRows
+                style = "default"
                 outColSrc = valColSrc
                 errorMsg = ""
                 errorPos = ()
@@ -282,12 +283,13 @@ class mainWindow(QtWidgets.QMainWindow):
 
                 rowDataList.append(data)
 
+                # finish one field row
+                finishNum += 1
+                self.progressBar.setValue(finishNum)
+
             # append whole row list to get form matrix
             outputForm.append(rowDataList)
-
-            # finish one row
-            finishNum += 1
-            self.progressBar.setValue(finishNum)
+            
 
         # 4.Transfer to df for post edit: two-dimen list -> dataFrame
         outputDf = pd.DataFrame(outputForm)

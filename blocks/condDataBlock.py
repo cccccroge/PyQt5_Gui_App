@@ -114,7 +114,7 @@ class condDataBlock(block.block):
 
         # if is existence, must has out
         if self.settingData["dataType"] == "existence":
-            if input is None:
+            if (input is None): # TODO
                 out = self.formulaToVal(ruleList[1][1])
             else:
                 out = self.formulaToVal(ruleList[0][1])

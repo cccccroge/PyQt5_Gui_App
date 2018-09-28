@@ -13,6 +13,7 @@ from glob import msgDuration, fieldRowHeight
 
 import targetValBlock, dataBlock, multiDataBlock, condDataBlock
 import dataFilterBlock, calculatorBlock, numberBlock, useAnotherBlock, defaultBlock
+import styleBlock
 
 
 class mainWindow(QtWidgets.QMainWindow):
@@ -217,6 +218,7 @@ class mainWindow(QtWidgets.QMainWindow):
                 for col in range(3, hboxLayout.count(), 2):
                     curBlk = hboxLayout.itemAt(col).widget()
 
+                    # change out data
                     if type(curBlk) == useAnotherBlock.useAnotherBlock:
                         out, outColSrc, newMsg = curBlk.generateOut(out, startRows, valColSrc)
                         if outColSrc is None:   # has value, use this val
@@ -258,9 +260,17 @@ class mainWindow(QtWidgets.QMainWindow):
                             errorPos = (row, col)
                     elif type(curBlk) == defaultBlock.defaultBlock:
                         out, errorMsg = curBlk.generateOut()
+                    elif type(curBlk) == styleBlock.styleBlock:
+                        pass
                     else:
                         out = "you're not using any valid blocks, Bro"
                         break
+
+                    # change style
+                    if style != "red" and type(curBlk) == styleBlock.styleBlock:
+                        style = "red"
+                    elif style != "default" and type(curBlk) != styleBlock.styleBlock:
+                        style = "default"
 
                 # append final output val to get row list, and store to temp data dict
                 data = None

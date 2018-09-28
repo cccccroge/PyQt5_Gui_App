@@ -44,6 +44,9 @@
     <Compile Include="blocks\numberBlock.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="blocks\styleBlock.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="blocks\targetValBlock.py">
       <SubType>Code</SubType>
     </Compile>

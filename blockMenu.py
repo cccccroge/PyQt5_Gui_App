@@ -4,6 +4,7 @@ import sys
 sys.path.append("./blocks")
 import targetValBlock, dataBlock, multiDataBlock, condDataBlock
 import dataFilterBlock, numberBlock, calculatorBlock, useAnotherBlock, defaultBlock
+import styleBlock
 
 class blockMenu(QtWidgets.QMenu):
     def __init__(self, parent, field, **kwargs):
@@ -39,6 +40,9 @@ class blockMenu(QtWidgets.QMenu):
         dataAction = self.addAction(self.tr("預設值"))
         dataAction.triggered.connect(lambda: self.buildingBlock(8))
 
+        dataAction = self.addAction(self.tr("樣式"))
+        dataAction.triggered.connect(lambda: self.buildingBlock(9))
+
 
     ####################
     #      Slots
@@ -69,6 +73,8 @@ class blockMenu(QtWidgets.QMenu):
             blk = useAnotherBlock.useAnotherBlock(self.parent, self.field)
         elif id == 8:
             blk = defaultBlock.defaultBlock(self.parent, self.field)
+        elif id == 9:
+            blk = styleBlock.styleBlock(self.parent, self.field)
         else:
             return
 

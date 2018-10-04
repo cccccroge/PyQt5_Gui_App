@@ -13,6 +13,8 @@ class numberBlock(block.block):
         if input is None:
             out = 0
         else:
-            out = len(input.index)  # input has to be dataframe
+            print("type of input is:")
+            print(type(input))
+            out = len(input)  # input has to be dataframe
 
         return out

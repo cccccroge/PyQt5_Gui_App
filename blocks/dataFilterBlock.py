@@ -4,6 +4,7 @@ import numpy as np
 import networkx as nx
 import block
 import dropEdit
+import datetime
 
 class dataFilterBlock(block.block):
     def __init__(self, parent, field, **kwargs):
@@ -236,7 +237,11 @@ class dataFilterBlock(block.block):
         else:
             return None, "-->條件式非法: 出現未知的運算子"
 
-        return out, ""
+        if out.empty:
+            return None, "-->找不到符合此條件式之項目: " \
+                + str(self.colSource) + " " + self.settingData["filterCond"]
+        else:
+            return out, ""
 
 
     def filter_num(self, input):
@@ -311,13 +316,15 @@ class dataFilterBlock(block.block):
                 return None, "-->條件式非法: 第二項不是合法日期格式"
 
         else:
+            # Translate TODAY to date string
+            if second == "TODAY":
+                second = datetime.datetime.now().strftime("%Y%m%d")
+
             if not second.isdigit():
                 return None, "-->條件式非法: 第二項不是合法日期格式"
-            
-            second = int(second)
-            if first == "=":
-                out = input.loc[input[col] == second]   # assume data is string
-            elif first == "<":
+            second = str(second)    # src date must be string
+
+            if first == "<":
                 out = input.loc[input[col] < second]
             elif first == "<=":
                 out = input.loc[input[col] <= second]

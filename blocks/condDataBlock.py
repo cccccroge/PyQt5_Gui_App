@@ -114,10 +114,17 @@ class condDataBlock(block.block):
 
         # if is existence, must has out
         if self.settingData["dataType"] == "existence":
-            if (input is None): # TODO
+            if input is None:
                 out = self.formulaToVal(ruleList[1][1])
             else:
-                out = self.formulaToVal(ruleList[0][1])
+                if type(input) == pd.core.frame.DataFrame \
+                    or type(input) != pd.core.series.Series:
+                    if input.empty:
+                        out = self.formulaToVal(ruleList[1][1])
+                    else:
+                        out = self.formulaToVal(ruleList[0][1])
+                else:
+                    out = self.formulaToVal(ruleList[0][1])
 
             return out, ""
 

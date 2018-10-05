@@ -71,7 +71,7 @@ class calculatorBlock(block.block):
         result = self.formulaToVal(self.settingData["formula"])
         # Consider approx
         m = self.settingData["approxMethod"]
-        d = self.settingData["approxDigit"]
+        d = self.settingData["approxDigit"] - 1
 
         if m == "round":
             quotient = round(result / pow(10, d))

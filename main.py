@@ -5,7 +5,6 @@ import mainWindow
 import math
 
 
-
 # enable unlimited col width of display forms
 pd.set_option("display.max_colwidth", -1)
 

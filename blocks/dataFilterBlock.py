@@ -5,6 +5,7 @@ import networkx as nx
 import block
 import dropEdit
 import datetime
+import glob
 
 class dataFilterBlock(block.block):
     def __init__(self, parent, field, **kwargs):
@@ -196,6 +197,14 @@ class dataFilterBlock(block.block):
         first = condStrs[0]
         second = condStrs[1]
         col = self.colSource[2]
+
+        # modify second if needed
+        if second == "special":
+            name = self.settingData["satisfyCond"]
+            planyr = self.parent.tempData['2']
+            second = glob.get_special_years(name, planyr)
+            if second is None:
+                second = ""
 
         out = None
         if first == "=":
@@ -438,6 +447,8 @@ class dataFilterBlock(block.block):
 
     def formulaToString(self, formula):
         curFormula = formula
+        if curFormula == "":
+            return curFormula
 
         while True:
             leftSqBrc = curFormula.find("<")

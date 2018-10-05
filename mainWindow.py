@@ -9,7 +9,7 @@ import menu
 import tool
 import status
 import central
-from glob import msgDuration, fieldRowHeight
+from glob import msgDuration, fieldRowHeight, make_red_font
 
 import targetValBlock, dataBlock, multiDataBlock, condDataBlock
 import dataFilterBlock, calculatorBlock, numberBlock, useAnotherBlock, defaultBlock
@@ -205,7 +205,8 @@ class mainWindow(QtWidgets.QMainWindow):
 
         # 3-3.start parsing
         valRow = 0   # used in calculatorBlk
-        for val in valsList:
+        changeStyleCells = []   # change style on these element at final stage
+        for idx, val in enumerate(valsList):
             valRow += 1
             # find start rows as beginning point
             fileDf = self.srcFiles[(valColSrc[0], valColSrc[1])]
@@ -310,6 +311,11 @@ class mainWindow(QtWidgets.QMainWindow):
                     finishNum += 1
                     self.progressBar.setValue(finishNum)
 
+                # record pos that need to change its style
+                if style == "red":
+                    pos = (idx + 1, row)    # first add one: consider cols header
+                    changeStyleCells.append(pos)
+
             # append whole row list to get form matrix
             outputForm.append(rowDataList)
             
@@ -319,6 +325,11 @@ class mainWindow(QtWidgets.QMainWindow):
             outputDf = pd.DataFrame(outputForm)
 
         # 5.Adjust the dataframe with specified output setting
+        # 5-1 Change style for some cells
+        print("changing style...")
+        for pos in changeStyleCells:
+            outputDf.style.apply(make_red_font, i=pos[0], j=pos[1])
+        # 5-2 Sort df
 
         # 6.Output to excel: dataFrame -> excel
         lpos = fileName[1].rfind("(") + 2
@@ -460,75 +471,78 @@ class mainWindow(QtWidgets.QMainWindow):
         # Convert blocks data in gridLayout into packlible format
         data = {}
         for row in range(gridLayout.rowCount() - 1):
-                hboxLayout = gridLayout.itemAtPosition(row, 0)
-                col = 0
-                while True:
-                    if col == 2:
-                        col -= 1
-                    if hboxLayout.itemAt(col) is None:
-                        break
+            hboxLayout = gridLayout.itemAtPosition(row, 0)
+            col = 0
+            while True:
+                if col == 2:
+                    col -= 1
+                if hboxLayout.itemAt(col) is None:
+                    break
 
-                    data[(row, col)] = {}   # 'position' map to 'data dict'
-                    curBlk = hboxLayout.itemAt(col).widget()
+                data[(row, col)] = {}   # 'position' map to 'data dict'
+                curBlk = hboxLayout.itemAt(col).widget()
 
-                    # fill data dict depends on its type
-                    dict = data[(row, col)]
-                    print("converting blk to raw data: ({0}, {1})".format(row, col))
-                    if type(curBlk) == targetValBlock.targetValBlock:
-                        print("type: targetValBlock")
-                        dict["blkType"] = "targetValBlock"
-                        dict["colSource"] = curBlk.colSource
-                        dict["settingData"] = curBlk.settingData
-                        dict["text"] = curBlk.textEdit.toPlainText()
-                    elif type(curBlk) == dataBlock.dataBlock:
-                        print("type: dataBlock")
-                        dict["blkType"] = "dataBlock"
-                        dict["colSource"] = curBlk.colSource
-                    elif type(curBlk) == multiDataBlock.multiDataBlock:
-                        print("type: multiDataBlock")
-                        dict["blkType"] = "multiDataBlock"
-                        dict["colSource"] = curBlk.colSource
-                    elif type(curBlk) == condDataBlock.condDataBlock:
-                        print("type: condDataBlock")
-                        dict["blkType"] = "condDataBlock"
-                        dict["settingData"] = curBlk.settingData
-                        dict["existData"] = (curBlk.lineEditYes.text(),
-                                             curBlk.lineEditNo.text())
-                        dict["valData"] = []
-                        grid = curBlk.groupBoxMaprulesLayout2
-                        for row in range(grid.rowCount()):
-                            fromText = grid.itemAtPosition(row, 0).widget().text()
-                            toText = grid.itemAtPosition(row, 2).widget().text()
-                            dict["valData"].append((fromText, toText))
+                # fill data dict depends on its type
+                dict = data[(row, col)]
+                print("converting blk to raw data: ({0}, {1})".format(row, col))
+                if type(curBlk) == targetValBlock.targetValBlock:
+                    print("type: targetValBlock")
+                    dict["blkType"] = "targetValBlock"
+                    dict["colSource"] = curBlk.colSource
+                    dict["settingData"] = curBlk.settingData
+                    dict["text"] = curBlk.textEdit.toPlainText()
+                elif type(curBlk) == dataBlock.dataBlock:
+                    print("type: dataBlock")
+                    dict["blkType"] = "dataBlock"
+                    dict["colSource"] = curBlk.colSource
+                elif type(curBlk) == multiDataBlock.multiDataBlock:
+                    print("type: multiDataBlock")
+                    dict["blkType"] = "multiDataBlock"
+                    dict["colSource"] = curBlk.colSource
+                elif type(curBlk) == condDataBlock.condDataBlock:
+                    print("type: condDataBlock")
+                    dict["blkType"] = "condDataBlock"
+                    dict["settingData"] = curBlk.settingData
+                    dict["existData"] = (curBlk.lineEditYes.text(),
+                                            curBlk.lineEditNo.text())
+                    dict["valData"] = []
+                    grid = curBlk.groupBoxMaprulesLayout2
+                    for row in range(grid.rowCount()):
+                        fromText = grid.itemAtPosition(row, 0).widget().text()
+                        toText = grid.itemAtPosition(row, 2).widget().text()
+                        dict["valData"].append((fromText, toText))
 
-                        dict["formData"] = (curBlk.limitEdit.colSource, 
-                                            curBlk.limitEdit.text(),
-                                            curBlk.fromEdit.colSource,
-                                            curBlk.toEdit.colSource)
-                    elif type(curBlk) == dataFilterBlock.dataFilterBlock:
-                        print("type: dataFilterBlock")
-                        dict["blkType"] = "dataFilterBlock"
-                        dict["colSource"] = curBlk.colSource
-                        dict["settingData"] = curBlk.settingData
-                    elif type(curBlk) == numberBlock.numberBlock:
-                        print("type: numberBlock")
-                        dict["blkType"] = "numberBlock"
-                    elif type(curBlk) == calculatorBlock.calculatorBlock:
-                        print("type: calculatorBlock")
-                        dict["blkType"] = "calculatorBlock"
-                        dict["settingData"] = curBlk.settingData
-                    elif type(curBlk) == useAnotherBlock.useAnotherBlock:
-                        print("type: useAnotherBlock")
-                        dict["blkType"] = "useAnotherBlock"
-                    elif type(curBlk) == defaultBlock.defaultBlock:
-                        print("type: defaultBlock")
-                        dict["blkType"] = "defaultBlock"
-                        dict["settingData"] = curBlk.settingData
-                    elif type(curBlk) == QtWidgets.QLineEdit:
-                        print("type: lineEdit")
-                        dict["editText"] = curBlk.text()
+                    dict["formData"] = (curBlk.limitEdit.colSource, 
+                                        curBlk.limitEdit.text(),
+                                        curBlk.fromEdit.colSource,
+                                        curBlk.toEdit.colSource)
+                elif type(curBlk) == dataFilterBlock.dataFilterBlock:
+                    print("type: dataFilterBlock")
+                    dict["blkType"] = "dataFilterBlock"
+                    dict["colSource"] = curBlk.colSource
+                    dict["settingData"] = curBlk.settingData
+                elif type(curBlk) == numberBlock.numberBlock:
+                    print("type: numberBlock")
+                    dict["blkType"] = "numberBlock"
+                elif type(curBlk) == calculatorBlock.calculatorBlock:
+                    print("type: calculatorBlock")
+                    dict["blkType"] = "calculatorBlock"
+                    dict["settingData"] = curBlk.settingData
+                elif type(curBlk) == useAnotherBlock.useAnotherBlock:
+                    print("type: useAnotherBlock")
+                    dict["blkType"] = "useAnotherBlock"
+                elif type(curBlk) == defaultBlock.defaultBlock:
+                    print("type: defaultBlock")
+                    dict["blkType"] = "defaultBlock"
+                    dict["settingData"] = curBlk.settingData
+                elif type(curBlk) == styleBlock.styleBlock:
+                    print("type: styleBlock")
+                    dict["blkType"] = "styleBlock"
+                elif type(curBlk) == QtWidgets.QLineEdit:
+                    print("type: lineEdit")
+                    dict["editText"] = curBlk.text()
 
-                    col += 2
+                col += 2
 
         return data
         
@@ -736,6 +750,8 @@ class mainWindow(QtWidgets.QMainWindow):
             blk.settingData = dataDict["settingData"]
             blk.useNumber.setChecked(dataDict["settingData"]["useNum"])
             blk.valEdit.setText(dataDict["settingData"]["val"])
+        elif type == "styleBlock":
+            blk = styleBlock.styleBlock(self, self.central.fieldWidget)
         else:
             return
 

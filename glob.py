@@ -1,3 +1,6 @@
+import pandas as pd
+import numpy as np
+
 # All globals stored in here
 msgDuration = 5000
 fieldRowHeight = 25
@@ -10,8 +13,12 @@ def is_number(s):
         return False
 
 
-def make_red_font():
-    return "color: red"
+def make_red_font(dummyDf, i, j):
+    style = "color: red"
+    formatDf = pd.DataFrame('', index=dummyDf.index, columns=dummyDf.columns)
+    formatDf.iloc[i, j] = style
+
+    return formatDf
 
 
 def get_special_years(name, planyear):

@@ -142,6 +142,7 @@ class mainWindow(QtWidgets.QMainWindow):
 
         # 1.Empty two-dimen list
         outputForm = [] # will append lists into it
+        outputDf = None # use outputForm as input, will eventually convert to excel
 
         # 2.Fill all output column names
         grid = self.central.fieldWidget.gridLayout
@@ -158,20 +159,25 @@ class mainWindow(QtWidgets.QMainWindow):
         valColSrc = None
         valsList = None
 
-        num = 0
+        num_target = 0
+        num_total = 0
         for row in range(grid.rowCount() - 1):
             hboxLayout = grid.itemAtPosition(row, 0)
+            if hboxLayout.count() >= 3:
+                num_total += 1
+
             for col in range(3, hboxLayout.count(), 2):  # start from 1st block and ignore dashes
                 curBlk = hboxLayout.itemAt(col).widget()
                 if type(curBlk) == targetValBlock.targetValBlock:
-                    num += 1
+                    num_target += 1
                     valColSrc = curBlk.colSource
                     valsList = curBlk.settingData["targetVals"]
 
-        if num == 0:
+        # Consider invalid targetValBlk
+        if num_target == 0:
             self.statusBar().showMessage("輸出錯誤：不存在目標值方塊", msgDuration)
             return
-        elif num > 1:
+        elif num_target > 1:
             self.statusBar().showMessage("輸出錯誤：目標值方塊不唯一", msgDuration)
             return
         else:
@@ -182,9 +188,17 @@ class mainWindow(QtWidgets.QMainWindow):
                 self.statusBar().showMessage("輸出錯誤：沒有指定目標值", msgDuration)
                 return
 
+        # Consider only two rows(special form for single target val)
+        twoRowCase = False
+        if num_total == 2:
+            twoRowCase = True
+
         # 3-2.init progressBar range
         self.hintLabel.setText("正在輸出檔案...")
-        self.progressBar.setRange(0, len(valsList) * (grid.rowCount() - 1))
+        if twoRowCase:
+            self.progressBar.setRange(0, 1)
+        else:
+            self.progressBar.setRange(0, len(valsList) * (grid.rowCount() - 1))
         self.progressBar.setValue(0)
         self.progressBar.setVisible(True)
         finishNum = 0
@@ -202,10 +216,6 @@ class mainWindow(QtWidgets.QMainWindow):
             rowDataList = []
             for row in range(grid.rowCount() - 1):
                 hboxLayout = grid.itemAtPosition(row, 0)
-
-                ## empty row: ignore it
-                #if hboxLayout.count() == 1:
-                #    continue
 
                 print("\n row = {0}".format(row))
                 # start parsing...
@@ -291,18 +301,22 @@ class mainWindow(QtWidgets.QMainWindow):
                         data = data.reset_index()
                         del data["index"]
 
-                rowDataList.append(data)
-
-                # finish one field row
-                finishNum += 1
-                self.progressBar.setValue(finishNum)
+                if twoRowCase and row == 1:   # means the only df
+                    outputDf = out
+                    self.progressBar.setValue(1)
+                else:
+                    rowDataList.append(data)
+                    # finish one field row
+                    finishNum += 1
+                    self.progressBar.setValue(finishNum)
 
             # append whole row list to get form matrix
             outputForm.append(rowDataList)
             
 
         # 4.Transfer to df for post edit: two-dimen list -> dataFrame
-        outputDf = pd.DataFrame(outputForm)
+        if not twoRowCase:
+            outputDf = pd.DataFrame(outputForm)
 
         # 5.Adjust the dataframe with specified output setting
 
@@ -315,7 +329,13 @@ class mainWindow(QtWidgets.QMainWindow):
             path = path + ext
         writer = pd.ExcelWriter(path)
 
-        outputDf.to_excel(writer, self.tr("工作表1"), header=False, index=False)
+        if not twoRowCase:
+            outputDf.to_excel(writer, self.tr("工作表1"), header=False, index=False)
+        else:
+            if outputDf is None:
+                outputDf = pd.DataFrame(columns=['N/A'])
+
+            outputDf.to_excel(writer, self.tr("工作表1"), header=True, index=False)
         writer.save()
 
         self.hintLabel.setText("就緒")

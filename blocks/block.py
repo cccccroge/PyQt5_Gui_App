@@ -1,5 +1,6 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
 from glob import msgDuration, fieldRowHeight
+import clickEdit
 
 class block(QtWidgets.QWidget):
     def __init__(self, parent, field, **kwargs):
@@ -12,6 +13,7 @@ class block(QtWidgets.QWidget):
         self.colSource = None
         self.settingDialog = None
         self.settingData = {}
+        self.created = False
 
         # Widget elements
         hboxLayout = QtWidgets.QHBoxLayout()
@@ -19,11 +21,7 @@ class block(QtWidgets.QWidget):
         hboxLayout.setSpacing(0)
         self.setLayout(hboxLayout)
 
-        self.nameEdit = QtWidgets.QLineEdit()
-        self.nameEdit.setFixedSize(100, fieldRowHeight)
-        self.nameEdit.setAlignment(QtCore.Qt.AlignCenter)
-        self.nameEdit.setAcceptDrops(False)
-        self.nameEdit.setDisabled(True)
+        self.nameEdit = clickEdit.clickEdit()
         self.settingBtn = QtWidgets.QPushButton()
         self.settingBtn.setText(self.tr("..."))
         self.settingBtn.setFixedSize(20, fieldRowHeight)
@@ -81,6 +79,9 @@ class block(QtWidgets.QWidget):
     # Make block's center move with cursor
 
     def mouseMoveEvent(self, QMouseEvent):
+        if self.created:
+            return
+
         pos = self.mapToParent(QMouseEvent.pos()) - self.offset
         self.move(pos)
 
@@ -90,13 +91,32 @@ class block(QtWidgets.QWidget):
     # Actions when mouse button press
 
     def mousePressEvent(self, QMouseEvent):
+        if self.created:
+            if QMouseEvent.button() == QtCore.Qt.LeftButton:
+                self.nameEdit.setDisabled(False)
+                self.nameEdit.setReadOnly(False)
+
+            if QMouseEvent.button() == QtCore.Qt.RightButton:
+                hbox = self.field.gridLayout.itemAtPosition(self.putRow, 0)
+                print(hbox.count())
+                #self.deleteLater()
+
+                item1 = hbox.itemAt(hbox.count() - 1)
+                item2 = hbox.itemAt(hbox.count() - 2)
+                hbox.removeItem(item1)
+                hbox.removeItem(item2)
+                item1.widget().deleteLater()
+                item2.widget().deleteLater()
+                self.parent.statusBar().showMessage("已刪除方塊", msgDuration)
+            return
+
         # Right mouse button to cancel
         if QMouseEvent.button() == QtCore.Qt.RightButton:
             self.deleteLater()
             self.parent.statusBar().showMessage("已取消建立方塊", msgDuration)
 
         # Left mouse button to confirm
-        else:
+        elif QMouseEvent.button() == QtCore.Qt.LeftButton:
             # transform block-cord to fieldBody-cord
             globPos = self.mapToGlobal(QMouseEvent.pos())
             fieldBodyPos = self.field.bodyWidget.mapFromGlobal(globPos)
@@ -108,19 +128,19 @@ class block(QtWidgets.QWidget):
                 self.parent.statusBar().showMessage("該位置不能放置方塊", msgDuration)
                 return
 
+            self.created = True
+            self.setMouseTracking(False)
             hboxLayout = self.field.gridLayout.itemAtPosition(self.putRow, 0)
 
             # put a line and a block to that row's hboxLayout
-            self.setMouseTracking(False)
-
             lineLabel = QtWidgets.QLabel()
             lineLabel.setText("──")
             lineLabel.setFixedHeight(fieldRowHeight)
             hboxLayout.addWidget(lineLabel, 0, QtCore.Qt.AlignLeft)
             hboxLayout.addWidget(self, 0, QtCore.Qt.AlignLeft)
-            self.nameEdit.setDisabled(False)
 
             self.parent.statusBar().showMessage("已成功建立方塊", msgDuration)
+
 
 
     ####################

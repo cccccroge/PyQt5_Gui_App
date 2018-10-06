@@ -328,10 +328,9 @@ class mainWindow(QtWidgets.QMainWindow):
 
         # 5.Adjust the dataframe with specified output setting
         # 5-1 Change style for some cells
-        print("changing style...")
-        for pos in changeStyleCells:
-            print("changing pos: {0}".format(pos))
-            outputDf.style.apply(make_red_font, i=pos[0], j=pos[1])
+        if len(changeStyleCells) != 0:
+            print("changing style...")
+            outputDf = outputDf.style.apply(make_red_font, axis=None, target=changeStyleCells)
         # 5-2 Sort df
 
         # 6.Output to excel: dataFrame -> excel
@@ -344,10 +343,7 @@ class mainWindow(QtWidgets.QMainWindow):
         writer = pd.ExcelWriter(path)
 
         if not twoRowCase:
-            #outputDf.to_excel(writer, self.tr("工作表1"), header=False, index=False)
-            outputDf.style.apply(make_red_font, i=1, j=2) \
-                .to_excel(writer, self.tr("工作表1"), header=False, index=False)
-            #outputDf.style.to_excel(writer, self.tr("工作表1"), header=False, index=False)
+            outputDf.to_excel(writer, self.tr("工作表1"), header=False, index=False)
         else:
             if outputDf is None:
                 outputDf = pd.DataFrame(columns=['N/A'])
@@ -617,7 +613,7 @@ class mainWindow(QtWidgets.QMainWindow):
                 continue
 
             # is block, create corresponding block
-            blk = self.buildBlock(dataDict)
+            blk = self.buildBlock(dataDict, row)
             if blk is None:
                 continue
             
@@ -652,7 +648,7 @@ class mainWindow(QtWidgets.QMainWindow):
                     col += 2
 
 
-    def buildBlock(self, dataDict):
+    def buildBlock(self, dataDict, hboxRow):
         if "blkType" not in dataDict:
             return
 
@@ -762,7 +758,10 @@ class mainWindow(QtWidgets.QMainWindow):
             return
 
         blk.setMouseTracking(True)
-        blk.nameEdit.setDisabled(False)
+        blk.created = True
+        blk.putRow = hboxRow
+        blk.nameEdit.setDisabled(True)
+        blk.nameEdit.setReadOnly(True)
 
         return blk
 

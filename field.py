@@ -8,6 +8,7 @@ class field(QtWidgets.QWidget):
         super().__init__(**kwargs)
 
         self.parent = parent
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         vboxLayout1 = QtWidgets.QVBoxLayout()
         self.setLayout(vboxLayout1)

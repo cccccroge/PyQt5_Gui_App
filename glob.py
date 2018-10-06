@@ -13,12 +13,10 @@ def is_number(s):
         return False
 
 
-def make_red_font(dummyDf, i, j):
-    style = "color: red"
-    formatDf = pd.DataFrame('', index=dummyDf.index, columns=dummyDf.columns)
-    formatDf.iloc[i, j] = style
+def make_red_font(x, i, j):
+    x.iloc[i, j] = "background-color: red"
 
-    return formatDf
+    return x
 
 
 def get_special_years(name, planyear):

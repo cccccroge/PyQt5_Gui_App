@@ -316,6 +316,8 @@ class mainWindow(QtWidgets.QMainWindow):
                     pos = (idx + 1, row)    # first add one: consider cols header
                     changeStyleCells.append(pos)
 
+                    print("pos '{0}' should be stylized.".format(pos))
+
             # append whole row list to get form matrix
             outputForm.append(rowDataList)
             
@@ -328,6 +330,7 @@ class mainWindow(QtWidgets.QMainWindow):
         # 5-1 Change style for some cells
         print("changing style...")
         for pos in changeStyleCells:
+            print("changing pos: {0}".format(pos))
             outputDf.style.apply(make_red_font, i=pos[0], j=pos[1])
         # 5-2 Sort df
 
@@ -341,12 +344,15 @@ class mainWindow(QtWidgets.QMainWindow):
         writer = pd.ExcelWriter(path)
 
         if not twoRowCase:
-            outputDf.to_excel(writer, self.tr("工作表1"), header=False, index=False)
+            #outputDf.to_excel(writer, self.tr("工作表1"), header=False, index=False)
+            outputDf.style.apply(make_red_font, i=1, j=2) \
+                .to_excel(writer, self.tr("工作表1"), header=False, index=False)
+            #outputDf.style.to_excel(writer, self.tr("工作表1"), header=False, index=False)
         else:
             if outputDf is None:
                 outputDf = pd.DataFrame(columns=['N/A'])
-
             outputDf.to_excel(writer, self.tr("工作表1"), header=True, index=False)
+
         writer.save()
 
         self.hintLabel.setText("就緒")
@@ -507,9 +513,9 @@ class mainWindow(QtWidgets.QMainWindow):
                                             curBlk.lineEditNo.text())
                     dict["valData"] = []
                     grid = curBlk.groupBoxMaprulesLayout2
-                    for row in range(grid.rowCount()):
-                        fromText = grid.itemAtPosition(row, 0).widget().text()
-                        toText = grid.itemAtPosition(row, 2).widget().text()
+                    for mapRow in range(grid.rowCount()):
+                        fromText = grid.itemAtPosition(mapRow, 0).widget().text()
+                        toText = grid.itemAtPosition(mapRow, 2).widget().text()
                         dict["valData"].append((fromText, toText))
 
                     dict["formData"] = (curBlk.limitEdit.colSource, 

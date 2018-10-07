@@ -201,7 +201,17 @@ class dataFilterBlock(block.block):
         # modify second if needed
         if second == "special":
             name = self.settingData["satisfyCond"]
-            planyr = self.parent.tempData['2']
+            # find planyr (has to exist)
+            planyrId = -1
+            grid = self.field.gridLayout
+            for i in range(grid.rowCount() - 1):
+                hbox = grid.itemAtPosition(i, 0)
+                rowName = hbox.itemAt(1).widget().text()
+                if rowName == "申請計畫年度":
+                    planyrId = i
+                    break
+            
+            planyr = self.parent.tempData[str(planyrId)]
             second = glob.get_special_years(name, planyr)
             if second is None:
                 second = ""

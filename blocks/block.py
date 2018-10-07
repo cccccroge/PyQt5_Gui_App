@@ -124,7 +124,7 @@ class block(QtWidgets.QWidget):
 
             # decide position to put
             self.putRow = self.__getGridRow(pos.y(), self.field.gridLayout)
-            if self.putRow is None:
+            if type(self.putRow) != int:
                 self.parent.statusBar().showMessage("該位置不能放置方塊", msgDuration)
                 return
 
@@ -155,7 +155,7 @@ class block(QtWidgets.QWidget):
 
         # Not even get to first row
         if y_eff < 0:
-            return None
+            return -0.5
 
         # Estimate row position
         verSpace = gridLayout.verticalSpacing()
@@ -164,11 +164,11 @@ class block(QtWidgets.QWidget):
 
         # Exceed last row (exclude the addBtn)
         if row > gridLayout.rowCount() - 2:
-            return None
+            return (gridLayout.rowCount() - 2 + 0.5)
 
         # Not on the exact row (on spaces)
         if y_eff > unit * (row + 1) - verSpace:
-            return None
+            return (row + 0.5)
 
         return row
 

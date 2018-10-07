@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-import blockMenu
+import blockMenu, block
 from glob import msgDuration, fieldRowHeight
 
 class field(QtWidgets.QWidget):
@@ -111,6 +111,35 @@ class field(QtWidgets.QWidget):
 
 
     ####################
+    #    Overloadeds
+    ####################
+
+    def mouseDoubleClickEvent(self, QMouseEvent):
+        if QMouseEvent.button() != QtCore.Qt.LeftButton:
+            return
+
+        # transform block-cord to fieldBody-cord
+        globPos = self.mapToGlobal(QMouseEvent.pos())
+        fieldBodyPos = self.bodyWidget.mapFromGlobal(globPos)
+        pos = fieldBodyPos
+
+        # decide row to add
+        startRow = self.__getGridRow(pos.y() - fieldRowHeight / 2, self.gridLayout)
+        if type(startRow) == int:
+            print("on row {0}".format(startRow))
+            self.parent.statusBar().showMessage("該位置不能插入列", msgDuration)
+            return
+
+        # Insert new row
+        startRow = int(startRow + 0.5)
+        self.__insert_new_row(startRow)
+
+
+    def mousePressEvent(self, QMouseEvent):
+        pass
+
+
+    ####################
     #   Private funcs
     ####################
 
@@ -119,6 +148,7 @@ class field(QtWidgets.QWidget):
         le.setPlaceholderText(self.tr("欄位名稱"))
         le.setFixedSize(QtCore.QSize(125, fieldRowHeight))
         return le
+
 
     def __create_row_hBoxLayout(self, id):
         col = self.__create_default_col()
@@ -135,5 +165,61 @@ class field(QtWidgets.QWidget):
         rowLayout.addWidget(col, 0, QtCore.Qt.AlignLeft)
         #rowLayout.addStretch(-1)
         return rowLayout
+
+
+    def __insert_new_row(self, start):
+        print("now insert row at: {0}".format(start))
+
+        grid = self.gridLayout
+        # Store all rows after inserted row (included)
+        store = []
+        for i in range(start, grid.rowCount()):
+            item = grid.itemAtPosition(i, 0)
+            grid.removeItem(item)
+            store.append(item)
+
+        # Add new row
+        rowLayout = self.__create_row_hBoxLayout(start + 1)
+        grid.addLayout(rowLayout, start, 0, QtCore.Qt.AlignLeft)
+
+        # Restore old rows
+        for idx, item in enumerate(store):
+            if type(item) == QtWidgets.QHBoxLayout:
+                print("adding hbox...")
+                # increment index
+                idEdit = item.itemAt(0).widget()
+                newId = int(idEdit.text()) + 1
+                idEdit.setText(str(newId))
+                grid.addLayout(item, start + 1 + idx, 0, QtCore.Qt.AlignLeft)
+            else:
+                print("adding non-hbox...")
+                grid.addWidget(item.widget(), start + 1 + idx, 0, QtCore.Qt.AlignLeft)
+            #grid.addItem(item, start + 1 + idx, 0, QtCore.Qt.AlignLeft)
+
+        self.parent.statusBar().showMessage("新增一個欄位", msgDuration)
+
+
+    def __getGridRow(self, y, gridLayout):
+        l, topMargin, r, b = gridLayout.getContentsMargins()
+        y_eff = y - topMargin
+
+        # Not even get to first row
+        if y_eff < 0:
+            return -0.5
+
+        # Estimate row position
+        verSpace = gridLayout.verticalSpacing()
+        unit = fieldRowHeight + verSpace
+        row  = int(y_eff / unit)
+
+        # Exceed last row (exclude the addBtn)
+        if row > gridLayout.rowCount() - 2:
+            return (gridLayout.rowCount() - 2 + 0.5)
+
+        # Not on the exact row (on spaces)
+        if y_eff > unit * (row + 1) - verSpace:
+            return (row + 0.5)
+
+        return row
 
 

@@ -12,6 +12,6 @@ class clickEdit(QtWidgets.QLineEdit):
         self.setReadOnly(True)
 
     def focusOutEvent(self, QFocusEvent):
-        print("OUTOUTOUT")
+        print("focus out")
         self.setDisabled(True)
         self.setReadOnly(True)

@@ -194,6 +194,55 @@ class mainWindow(QtWidgets.QMainWindow):
         if num_total == 2:
             twoRowCase = True
 
+        # Force changing valsList if valColSrc is special case (not p40_patentno)
+        # 申請案號：first find p40_applypntno contains, 
+        #          use that row's p40_oripntno to gen p40_patentno
+        if valColSrc[2] == "p40_applypntno":
+            valColSrc = "dbo_pat040", "dbo_pat0401", "p40_patentno"
+
+            valsList_new = []
+            for val in valsList:
+                DFB_contains = dataFilterBlock.dataFilterBlock(self, self.central.fieldWidget)
+                DFB_contains.colSource = "dbo_pat040", "dbo_pat0401", "p40_applypntno"
+                DFB_contains.settingData["dataType"] = "str"
+                DFB_contains.settingData["filterCond"] = "contains " + val
+                DFB_contains.settingData["origChecked"] = True
+                out, outColSrc, msg = DFB_contains.generateOut(
+                    None, DFB_contains.colSource, self.relatedGraph)
+                print("Atfer DFB_contains, out is:")
+                print(out)
+
+                DB_getOri = dataBlock.dataBlock(self, self.central.fieldWidget)
+                DB_getOri.colSource = "dbo_pat040", "dbo_pat0401", "p40_oripntno"
+                out, outColSrc, msg = DB_getOri.generateOut(out, outColSrc, self.relatedGraph)
+                print("Atfer DB_getOri, out is:")
+                print(out)
+
+                DFB_getPat = dataFilterBlock.dataFilterBlock(self, self.central.fieldWidget)
+                DFB_getPat.colSource = "dbo_pat040", "dbo_pat0401", "p40_patentno"
+                DFB_getPat.settingData["dataType"] = "str"
+                DFB_getPat.settingData["filterCond"] = "contains " + out
+                DFB_getPat.settingData["origChecked"] = True
+                out, outColSrc, msg = DFB_getPat.generateOut(
+                    None, DFB_getPat.colSource, self.relatedGraph)
+                print("Atfer DFB_getPat, out is:")
+                print(out)
+
+                MDB_purePat = multiDataBlock.multiDataBlock(self, self.central.fieldWidget)
+                MDB_purePat.colSource = "p40_patentno"
+                out, outColSrc, msg = MDB_purePat.generateOut(
+                    out, MDB_purePat.colSource, self.relatedGraph)
+                print("Atfer MDB_purePat, out is:")
+                print(out)
+
+                #out = out.iloc[:,0]
+                out = out.tolist()
+
+                valsList_new.extend(out)
+
+            valsList = valsList_new
+
+
         # 3-2.init progressBar range
         self.hintLabel.setText("正在輸出檔案...")
         if twoRowCase:
@@ -339,7 +388,7 @@ class mainWindow(QtWidgets.QMainWindow):
         rpos = fileName[1].rfind(")")
         ext = "." + (fileName[1])[lpos:rpos]
 
-        today = datetime.datetime.now().strftime("%Y%m%d-%H%M$S")
+        today = datetime.datetime.now().strftime("%Y%m%d-%H%M")
         path = fileName[0]
         if path.find(ext) == -1:    # if user didn't type extension then add for them
             path = path  + "_" + today + ext

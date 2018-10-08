@@ -71,6 +71,21 @@ class dataFilterBlock(block.block):
         
 
     def generateOut(self, input, inputColSrc, graph):
+        # Use original file checked: don't care graph and input
+        if self.settingData["origChecked"] == True:
+            origFile = self.parent.srcFiles[self.colSource[0:2]]
+
+            # check should be filtered
+            satCond = self.settingData["satisfyCond"]
+            if satCond != "":
+                satCol = self.settingData["satisfyCol"][2]
+                satDf = origFile.loc[origFile[satCol] == satCond]
+                if satDf.empty:
+                    return input, inputColSrc, ""
+
+            data, msg = self.filter(origFile)
+            return data, self.colSource, msg
+
         # No input
         if input is None:
             return None, None, "-->資料輸入為空"
@@ -85,21 +100,6 @@ class dataFilterBlock(block.block):
         
         fromNode = inputColSrc[0:2]
         toNode = self.colSource[0:2]
-
-        # Use original file checked: don't care graph
-        if self.settingData["origChecked"] == True:
-            origFile = self.parent.srcFiles[toNode]
-
-            # check should be filtered
-            satCond = self.settingData["satisfyCond"]
-            if satCond != "":
-                satCol = self.settingData["satisfyCol"][2]
-                satDf = origFile.loc[origFile[satCol] == satCond]
-                if satDf.empty:
-                    return input, inputColSrc, ""
-
-            data, msg = self.filter(origFile)
-            return data, self.colSource, msg
 
         # Same file: don't care graph
         if fromNode == toNode:

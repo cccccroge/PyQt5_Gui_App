@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import networkx as nx
 import pickle
+import datetime
 
 import menu
 import tool
@@ -337,9 +338,17 @@ class mainWindow(QtWidgets.QMainWindow):
         lpos = fileName[1].rfind("(") + 2
         rpos = fileName[1].rfind(")")
         ext = "." + (fileName[1])[lpos:rpos]
+
+        today = datetime.datetime.now().strftime("%Y%m%d-%H%M$S")
         path = fileName[0]
         if path.find(ext) == -1:    # if user didn't type extension then add for them
-            path = path + ext
+            path = path  + "_" + today + ext
+        else:   # has extension: insert date before .
+            dot = path.rfind(".")
+            path_1 = path[:dot]
+            path_2 = path[dot:]
+            path = path_1 + "_" + today + path_2
+
         writer = pd.ExcelWriter(path)
 
         if not twoRowCase:

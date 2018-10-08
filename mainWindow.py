@@ -504,7 +504,7 @@ class mainWindow(QtWidgets.QMainWindow):
         if not isClosed:
             self.centralWidget().removeTab(targetIndex)
         else:
-            self.centralWidget().insertTab(0, self.mainWidget, self.tr("主要工作面板"))
+            self.centralWidget().insertTab(0, self.mainWidget, self.tr("樣板工作區"))
             self.centralWidget().setCurrentWidget(self.mainWidget)
 
 

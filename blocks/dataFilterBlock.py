@@ -196,6 +196,8 @@ class dataFilterBlock(block.block):
 
         first = condStrs[0]
         second = condStrs[1]
+        if second is None:
+            return None, "-->條件式非法： 不可用None來篩選"
         col = self.colSource[2]
 
         # modify second if needed
@@ -224,6 +226,8 @@ class dataFilterBlock(block.block):
             #    print("second str after = is: {0}".format(second))
             orPos = second.find("OR")
             if orPos == -1:
+                if second == "":
+                    return None, "-->條件式非法：不可以使用空字串篩選"
                 string = self.formulaToString(second)
                 out = input.loc[input[col] == string]
             else:   # assume only one OR

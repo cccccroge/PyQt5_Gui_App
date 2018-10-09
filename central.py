@@ -98,10 +98,15 @@ class central(QtWidgets.QTabWidget):
         okToChangeValsBtn.setFixedSize(100, 50)
         okToChangeValsBtn.setText(self.tr("確認"))
         okToChangeValsBtn.pressed.connect(self.on_okToChangeValsBtn_pressed)
+        outputBtn = QtWidgets.QPushButton()
+        outputBtn.setFixedSize(100, 50)
+        outputBtn.setText(self.tr("輸出"))
+        outputBtn.pressed.connect(self.on_outputBtn_pressed)
         groupboxTargetValsLayout.addWidget(self.checkbox_p40_patentno, QtCore.Qt.AlignCenter)
         groupboxTargetValsLayout.addWidget(self.checkbox_p40_applypntno, QtCore.Qt.AlignCenter)
         groupboxTargetValsLayout.addWidget(self.targetValsEdit, QtCore.Qt.AlignCenter)
         groupboxTargetValsLayout.addWidget(okToChangeValsBtn)
+        groupboxTargetValsLayout.addWidget(outputBtn)
         self.gridLayout.addWidget(groupboxTargetVals, 1, 0)
 
         self.addTab(parent.easyWidget, self.tr("簡易介面"))
@@ -268,10 +273,16 @@ class central(QtWidgets.QTabWidget):
         # Change edit, and also settingData
         TVB.textEdit.setText(plain)
 
+        TVB.settingData["targetVals"] = []
         vals = TVB.textEdit.toPlainText().split()
         for val in vals:
             TVB.settingData["targetVals"].append(val)
 
         print("settingData becomes: ")
         print(TVB.settingData)
+
+    def on_outputBtn_pressed(self):
+        # trigger menu's output action
+        outputAction = self.mainWindow.actions["exportExcel"]
+        outputAction.trigger()
 

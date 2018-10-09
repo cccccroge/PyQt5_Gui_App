@@ -36,7 +36,7 @@ class mainWindow(QtWidgets.QMainWindow):
         # Sending mainWindow obj to initialize components
         # No need to store the objs because they're just init helper
         # Use parent-child relationship to access between classes
-        menu.menu(self)
+        self.menu = menu.menu(self)
         tool.tool(self)
         status.status(self)
         self.central = central.central(self)
@@ -91,6 +91,7 @@ class mainWindow(QtWidgets.QMainWindow):
                 pos1 = path.rfind("/")
                 pos2 = excelPaths[i].rfind(".xls")
                 fileName = path[pos1 + 1 : pos2]
+                fileName = self.convertSpecialNameToFitTemplate(fileName)
                 if fileName in self.colNamesSet.keys():
                     isDuplicated = True
                 else:
@@ -104,6 +105,7 @@ class mainWindow(QtWidgets.QMainWindow):
                     pos1 = path.rfind("/")
                     pos2 = excelPaths[i].rfind(".xls")
                     fileName = path[pos1 + 1 : pos2]
+                    fileName = self.convertSpecialNameToFitTemplate(fileName)
                     keyName = fileName + " ： " + sheetName
 
                     if keyName in self.colNamesSet.keys():
@@ -382,6 +384,11 @@ class mainWindow(QtWidgets.QMainWindow):
             print("changing style...")
             outputDf = outputDf.style.apply(make_red_font, axis=None, target=changeStyleCells)
         # 5-2 Sort df
+        # TODO...
+
+        ## 5-3 replace illegal character
+        #outputDf = outputDf.applymap(lambda x: x.encode('unicode_escape').
+        #         decode('utf-8') if isinstance(x, str) else x)
 
         # 6.Output to excel: dataFrame -> excel
         lpos = fileName[1].rfind("(") + 2
@@ -838,3 +845,13 @@ class mainWindow(QtWidgets.QMainWindow):
                 # delete addBtn
                 else:
                     item.widget().deleteLater()
+
+    def convertSpecialNameToFitTemplate(self, fileName):
+        if fileName.find("科專成果盤點") != -1:
+            return "FY90-107科專成果盤點 (武昌)FY107僅列科專計畫編號 1070918"
+        elif fileName.find("專利暨可移轉技術資料") != -1:
+            return "專利暨可移轉技術資料對照表-v.20180508(欣唐)"
+        elif fileName.find("科專計畫編號對應ITRI計畫代號") != -1:
+            return "彙總 90-107 科專計畫編號對應ITRI計畫代號(1070908)"
+        else:
+            return fileName

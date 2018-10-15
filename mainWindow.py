@@ -853,5 +853,7 @@ class mainWindow(QtWidgets.QMainWindow):
             return "專利暨可移轉技術資料對照表-v.20180508(欣唐)"
         elif fileName.find("科專計畫編號對應ITRI計畫代號") != -1:
             return "彙總 90-107 科專計畫編號對應ITRI計畫代號(1070908)"
+        elif fileName.find("加值歷史紀錄") != -1:
+            return "過去加值歷史紀錄"
         else:
             return fileName

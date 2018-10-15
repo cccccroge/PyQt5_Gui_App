@@ -240,7 +240,9 @@ class dataFilterBlock(block.block):
         elif first == "!=":
             out = input.loc[input[col] != second]
         elif first == "contains":
+            print("now second is: {0}".format(second))
             string = str(self.formulaToString(second))
+            print("result of formulaToString is {0}".format(string))
             containList = []
             # Get all vals into list
             while True:
@@ -486,7 +488,17 @@ class dataFilterBlock(block.block):
             print("result: {0}".format(eval(curFormula)))
 
         if curFormula.isdigit():
-            return float(curFormula)
+            print("curFormula isdigit")
+            print("checking is int or float")
+            hasDot = curFormula.find(".")
+            if hasDot != -1:
+                print("curFormula is float")
+                print("returning {0}".format(float(curFormula)))
+                return float(curFormula)
+            else:
+                print("curFormula is int")
+                print("returning {0}".format(int(curFormula)))
+                return int(curFormula)
         else:
             needToAdd = True if (curFormula[0] != "'" and curFormula[0] != "\"") else False
             if needToAdd:

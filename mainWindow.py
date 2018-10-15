@@ -208,6 +208,7 @@ class mainWindow(QtWidgets.QMainWindow):
                 DFB_contains.colSource = "dbo_pat040", "dbo_pat0401", "p40_applypntno"
                 DFB_contains.settingData["dataType"] = "str"
                 DFB_contains.settingData["filterCond"] = "contains " + val
+                print("now settingDatap['filterCond'] is: {0}".format(DFB_contains.settingData["filterCond"]))
                 DFB_contains.settingData["origChecked"] = True
                 out, outColSrc, msg = DFB_contains.generateOut(
                     None, DFB_contains.colSource, self.relatedGraph)
@@ -223,6 +224,8 @@ class mainWindow(QtWidgets.QMainWindow):
                 DFB_getPat = dataFilterBlock.dataFilterBlock(self, self.central.fieldWidget)
                 DFB_getPat.colSource = "dbo_pat040", "dbo_pat0401", "p40_patentno"
                 DFB_getPat.settingData["dataType"] = "str"
+                if out is None:
+                    out = ""
                 DFB_getPat.settingData["filterCond"] = "contains " + out
                 DFB_getPat.settingData["origChecked"] = True
                 out, outColSrc, msg = DFB_getPat.generateOut(
@@ -238,9 +241,9 @@ class mainWindow(QtWidgets.QMainWindow):
                 print(out)
 
                 #out = out.iloc[:,0]
-                out = out.tolist()
-
-                valsList_new.extend(out)
+                if out is not None:
+                    out = out.tolist()
+                    valsList_new.extend(out)
 
             valsList = valsList_new
 
@@ -355,7 +358,10 @@ class mainWindow(QtWidgets.QMainWindow):
                         del data["index"]
 
                 if twoRowCase and row == 1:   # means the only df
-                    outputDf = out
+                    if outputDf is None:
+                        outputDf = out
+                    else:
+                        outputDf = outputDf.append(out, ignore_index=True)
                     self.progressBar.setValue(1)
                 else:
                     rowDataList.append(data)

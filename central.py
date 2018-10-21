@@ -42,6 +42,9 @@ class central(QtWidgets.QTabWidget):
         btn_format2 = QtWidgets.QPushButton()
         btn_format2.pressed.connect(self.on_btn_format2_pressed)
         btn_format2.setText(self.tr("專利清查"))
+        btn_format2_2 = QtWidgets.QPushButton()
+        btn_format2_2.pressed.connect(self.on_btn_format2_2_pressed)
+        btn_format2_2.setText(self.tr("授權資料"))
         btn_format3 = QtWidgets.QPushButton()
         btn_format3.pressed.connect(self.on_btn_format3_pressed)
         btn_format3.setText(self.tr("專利清單"))
@@ -57,6 +60,7 @@ class central(QtWidgets.QTabWidget):
         sp2.setVerticalStretch(2)
         btn_format1.setSizePolicy(sp2)
         btn_format2.setSizePolicy(sp2)
+        btn_format2_2.setSizePolicy(sp2)
         btn_format3.setSizePolicy(sp2)
         btn_format4.setSizePolicy(sp2)
         btn_format5.setSizePolicy(sp2)
@@ -66,12 +70,14 @@ class central(QtWidgets.QTabWidget):
         bigFont.setBold(True)
         btn_format1.setFont(bigFont)
         btn_format2.setFont(bigFont)
+        btn_format2_2.setFont(bigFont)
         btn_format3.setFont(bigFont)
         btn_format4.setFont(bigFont)
         btn_format5.setFont(bigFont)
 
         groupboxSelectFormatLayout.addWidget(btn_format1, QtCore.Qt.AlignCenter)
         groupboxSelectFormatLayout.addWidget(btn_format2, QtCore.Qt.AlignCenter)
+        groupboxSelectFormatLayout.addWidget(btn_format2_2, QtCore.Qt.AlignCenter)
         groupboxSelectFormatLayout.addWidget(btn_format3, QtCore.Qt.AlignCenter)
         groupboxSelectFormatLayout.addWidget(btn_format4, QtCore.Qt.AlignCenter)
         groupboxSelectFormatLayout.addWidget(btn_format5, QtCore.Qt.AlignCenter)
@@ -177,6 +183,26 @@ class central(QtWidgets.QTabWidget):
             path = ("./template/專利清查樣板.ieb")
         else:
             path = ("./template/專利清查樣板_使用申請案號.ieb")
+        loadFile = open(path, "rb")
+
+        # Take out objs from .ieb
+        objsList = pickle.load(loadFile)
+        graphTemplate = objsList[0]
+        blksDataTemplate = objsList[1]
+        print("extract data:")
+        print(blksDataTemplate)
+
+        # Replace current setting
+        self.mainWindow.relatedGraph = graphTemplate
+        self.mainWindow.buildBlocksUseData(blksDataTemplate)
+
+        self.mainWindow.statusBar().showMessage("成功讀取樣板", msgDuration)
+
+    def on_btn_format2_2_pressed(self):
+        if self.checkbox_p40_patentno.checkState() == QtCore.Qt.Checked:
+            path = ("./template/授權紀錄資料.ieb")
+        else:
+            path = ("./template/授權紀錄資料_使用申請案號.ieb")
         loadFile = open(path, "rb")
 
         # Take out objs from .ieb

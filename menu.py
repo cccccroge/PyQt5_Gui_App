@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 
 import mainWindow
-from glob import msgDuration
+from globalUsed import msgDuration
 
 class menu(QtWidgets.QMenu):
     def __init__(self, parent, **kwargs):

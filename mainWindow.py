@@ -10,7 +10,7 @@ import menu
 import tool
 import status
 import central
-from glob import msgDuration, fieldRowHeight, make_red_font
+from globalUsed import msgDuration, fieldRowHeight, make_red_font
 
 import targetValBlock, dataBlock, multiDataBlock, condDataBlock
 import dataFilterBlock, calculatorBlock, numberBlock, useAnotherBlock, defaultBlock

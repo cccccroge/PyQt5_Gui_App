@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
-from glob import msgDuration
+from globalUsed import msgDuration
 
 class list(QtWidgets.QListWidget):
     def __init__(self, parent, **kwargs):

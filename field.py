@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 import blockMenu, block
-from glob import msgDuration, fieldRowHeight
+from globalUsed import msgDuration, fieldRowHeight
 
 class field(QtWidgets.QWidget):
     def __init__(self, parent, **kwargs):

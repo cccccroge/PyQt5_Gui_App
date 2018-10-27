@@ -5,7 +5,7 @@ import pickle
 import properties
 import field
 import targetValBlock
-from glob import msgDuration
+from globalUsed import msgDuration
 
 class central(QtWidgets.QTabWidget):
     def __init__(self, parent, **kwargs):

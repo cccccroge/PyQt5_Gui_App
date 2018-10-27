@@ -74,7 +74,7 @@
     <Compile Include="field.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="glob.py">
+    <Compile Include="globalUsed.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="list.py">

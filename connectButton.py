@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets
 import networkx as nx
 
-from glob import msgDuration
+from globalUsed import msgDuration
 
 class connectButton(QtWidgets.QPushButton):
     def __init__(self, parent, **kwargs):

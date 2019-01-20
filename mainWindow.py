@@ -31,6 +31,24 @@ class mainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle(self.tr("工研院技轉中心服務程式"))
         self.init_ui()
 
+        # connect workers' signal to mainWindow's slot
+        self.importWorker = import_excel_thread(self)
+        self.importWorker.progress.connect(self.update_progress)
+        self.importWorker.message.connect(self.show_message)
+        self.importWorker.hint.connect(self.show_hint)
+        self.importWorker.convertFileName.connect(self.convertSpecialNameToFitTemplate)
+        self.importWorker.addKey.connect(self.add_key)
+        self.importWorker.openFile.connect(self.get_open_files)
+        self.importWorker.progressBarRange.connect(self.set_progressBar_range)
+        self.importWorker.progressBarVisible.connect(self.set_progressBar_visible)
+
+        self.exportWorker = export_excel_thread(self)
+        self.exportWorker.progress.connect(self.update_progress)
+        self.exportWorker.progressBarRange.connect(self.set_progressBar_range)
+        self.exportWorker.progressBarVisible.connect(self.set_progressBar_visible)
+        self.exportWorker.message.connect(self.show_message)
+        self.exportWorker.hint.connect(self.show_hint)
+
 
     def init_ui(self):
         # Sending mainWindow obj to initialize components
@@ -47,7 +65,6 @@ class mainWindow(QtWidgets.QMainWindow):
     # Action slots
     ####################
 
-
     def choose_work_dir(self):
         pass
 
@@ -55,83 +72,17 @@ class mainWindow(QtWidgets.QMainWindow):
     # Import selected excel, store columns info, excel path and file dataframes
     # After import, properties list should show sets of column name
 
-    def import_excel(self):
-        # Get paths of selecting files
-        filenames = QtWidgets.QFileDialog.getOpenFileNames(
-            self, self.tr("選取檔案"), ""
-            , "All Files (*);;Excel Files (*xlsx);;Excel 97-2003 Files(*xls)"
-            , "All Files (*)")
+    def import_excel_concurrent(self):
+         # Get paths of selecting files
+        filenamesList = [""]    # use another list to wrap the filenames, make it modifiable in another function
+        self.get_open_files(filenamesList)
+        filenames = filenamesList[0]
 
-        if len(filenames) == 0:
-            self.statusBar().showMessage("取消讀取或未選取檔案", msgDuration)
-            return
+        # Start importing on another thread
+        self.importWorker.setFilenames(filenames)
+        self.importWorker.start()
 
-        excelPaths = []
-        for n in filenames[0]:
-            excelPaths.append(n)
-
-        # Covert each sheet of files to set of column names
-        self.statusBar().showMessage("已選擇 " + str(len(excelPaths)) + " 個檔案", msgDuration)
-        self.hintLabel.setText("正在讀取檔案...")
-        self.progressBar.setRange(0, len(excelPaths))
-        self.progressBar.setValue(0)
-        self.progressBar.setVisible(True)
-
-        newKeys = []
-        isDuplicated = False
-
-        for i in range(len(excelPaths)):
-            print("reading a file to obj...")
-            fileObj = pd.ExcelFile(excelPaths[i])
-            sheetNames = fileObj.sheet_names
-            print("finish reading")
-            if (len(sheetNames) == 1):
-                # No sheet name provided, use file name as key
-                path = excelPaths[i]
-                pos1 = path.rfind("/")
-                pos2 = excelPaths[i].rfind(".xls")
-                fileName = path[pos1 + 1 : pos2]
-                fileName = self.convertSpecialNameToFitTemplate(fileName)
-                if fileName in self.colNamesSet.keys():
-                    isDuplicated = True
-                else:
-                    newKeys.append(fileName)
-                    self.colNamesSet[fileName] = \
-                        self.load_excel_and_return_columns(fileObj, fileName, 0)
-            else:
-                # Multiple sheets, use (file ： sheet) name as key
-                for sheetName in sheetNames:
-                    path = excelPaths[i]
-                    pos1 = path.rfind("/")
-                    pos2 = excelPaths[i].rfind(".xls")
-                    fileName = path[pos1 + 1 : pos2]
-                    fileName = self.convertSpecialNameToFitTemplate(fileName)
-                    keyName = fileName + " ： " + sheetName
-
-                    if keyName in self.colNamesSet.keys():
-                        isDuplicated = True
-                    else:
-                        newKeys.append(keyName)
-                        self.colNamesSet[keyName] = \
-                            self.load_excel_and_return_columns(fileObj, fileName, sheetName)
-
-            self.progressBar.setValue(i + 1)
-
-        # Add new file names to combobox
-        for key in newKeys:
-            self.comboBox.addItem(key)
-
-        self.hintLabel.setText("就緒")
-        self.progressBar.setVisible(False)
-
-        if isDuplicated:
-            self.statusBar().showMessage("檔案讀取時發現重複的檔案或表單名稱，該部分已自動忽略"
-                                         , msgDuration)
-        else:
-            self.statusBar().showMessage("檔案讀取成功", msgDuration)
-        
-
-    def export_excel(self):
+    def export_excel_concurrent(self):
         # Select save file path
         fileName = QtWidgets.QFileDialog.getSaveFileName(
             self, self.tr("儲存檔案"), ""
@@ -141,291 +92,10 @@ class mainWindow(QtWidgets.QMainWindow):
         if fileName[0] == "":
             self.statusBar().showMessage("取消儲存檔案", msgDuration)
             return
-
-
-        # 1.Empty two-dimen list
-        outputForm = [] # will append lists into it
-        outputDf = None # use outputForm as input, will eventually convert to excel
-
-        # 2.Fill all output column names
-        grid = self.central.fieldWidget.gridLayout
-
-        colNamesList = []
-        for row in range(grid.rowCount() - 1):
-            hboxLayout = grid.itemAtPosition(row, 0)
-            colName = hboxLayout.itemAt(1).widget().text()
-            colNamesList.append(colName)
-        outputForm.append(colNamesList)  
-
-        # 3.Fill data by parsing field blocks & relation graph info
-        # 3-1.find the tagetValBlock's info
-        valColSrc = None
-        valsList = None
-
-        num_target = 0
-        num_total = 0
-        for row in range(grid.rowCount() - 1):
-            hboxLayout = grid.itemAtPosition(row, 0)
-            if hboxLayout.count() >= 3:
-                num_total += 1
-
-            for col in range(3, hboxLayout.count(), 2):  # start from 1st block and ignore dashes
-                curBlk = hboxLayout.itemAt(col).widget()
-                if type(curBlk) == targetValBlock.targetValBlock:
-                    num_target += 1
-                    valColSrc = curBlk.colSource
-                    valsList = curBlk.settingData["targetVals"]
-
-        # Consider invalid targetValBlk
-        if num_target == 0:
-            self.statusBar().showMessage("輸出錯誤：不存在目標值方塊", msgDuration)
-            return
-        elif num_target > 1:
-            self.statusBar().showMessage("輸出錯誤：目標值方塊不唯一", msgDuration)
-            return
-        else:
-            if valColSrc is None:
-                self.statusBar().showMessage("輸出錯誤：沒有指定目標值欄位", msgDuration)
-                return
-            if (valsList is None) or len(valsList) == 0:
-                self.statusBar().showMessage("輸出錯誤：沒有指定目標值", msgDuration)
-                return
-
-        # Consider only two rows(special form for single target val)
-        twoRowCase = False
-        if num_total == 2:
-            twoRowCase = True
-
-        # Force changing valsList if valColSrc is special case (not p40_patentno)
-        # 申請案號：first find p40_applypntno contains, 
-        #          use that row's p40_oripntno to gen p40_patentno
-        if valColSrc[2] == "p40_applypntno":
-            valColSrc = "dbo_pat040", "dbo_pat0401", "p40_patentno"
-
-            valsList_new = []
-            for val in valsList:
-                DFB_contains = dataFilterBlock.dataFilterBlock(self, self.central.fieldWidget)
-                DFB_contains.colSource = "dbo_pat040", "dbo_pat0401", "p40_applypntno"
-                DFB_contains.settingData["dataType"] = "str"
-                DFB_contains.settingData["filterCond"] = "contains " + val
-                print("now settingDatap['filterCond'] is: {0}".format(DFB_contains.settingData["filterCond"]))
-                DFB_contains.settingData["origChecked"] = True
-                out, outColSrc, msg = DFB_contains.generateOut(
-                    None, DFB_contains.colSource, self.relatedGraph)
-                print("Atfer DFB_contains, out is:")
-                print(out)
-
-                DB_getOri = dataBlock.dataBlock(self, self.central.fieldWidget)
-                DB_getOri.colSource = "dbo_pat040", "dbo_pat0401", "p40_oripntno"
-                out, outColSrc, msg = DB_getOri.generateOut(out, outColSrc, self.relatedGraph)
-                print("Atfer DB_getOri, out is:")
-                print(out)
-
-                DFB_getPat = dataFilterBlock.dataFilterBlock(self, self.central.fieldWidget)
-                DFB_getPat.colSource = "dbo_pat040", "dbo_pat0401", "p40_patentno"
-                DFB_getPat.settingData["dataType"] = "str"
-                if out is None:
-                    out = ""
-                DFB_getPat.settingData["filterCond"] = "contains " + out
-                DFB_getPat.settingData["origChecked"] = True
-                out, outColSrc, msg = DFB_getPat.generateOut(
-                    None, DFB_getPat.colSource, self.relatedGraph)
-                print("Atfer DFB_getPat, out is:")
-                print(out)
-
-                MDB_purePat = multiDataBlock.multiDataBlock(self, self.central.fieldWidget)
-                MDB_purePat.colSource = "p40_patentno"
-                out, outColSrc, msg = MDB_purePat.generateOut(
-                    out, MDB_purePat.colSource, self.relatedGraph)
-                print("Atfer MDB_purePat, out is:")
-                print(out)
-
-                #out = out.iloc[:,0]
-                if out is not None:
-                    out = out.tolist()
-                    valsList_new.extend(out)
-
-            valsList = valsList_new
-
-
-        # 3-2.init progressBar range
-        self.hintLabel.setText("正在輸出檔案...")
-        if twoRowCase:
-            self.progressBar.setRange(0, 1)
-        else:
-            self.progressBar.setRange(0, len(valsList) * (grid.rowCount() - 1))
-        self.progressBar.setValue(0)
-        self.progressBar.setVisible(True)
-        finishNum = 0
-
-        # 3-3.start parsing
-        valRow = 0   # used in calculatorBlk
-        changeStyleCells = []   # change style on these element at final stage
-        for idx, val in enumerate(valsList):
-            valRow += 1
-            # find start rows as beginning point
-            fileDf = self.srcFiles[(valColSrc[0], valColSrc[1])]
-            colName = valColSrc[2]
-            startRows = fileDf.loc[fileDf[colName] == val]
-
-            # parse single row
-            rowDataList = []
-            for row in range(grid.rowCount() - 1):
-                hboxLayout = grid.itemAtPosition(row, 0)
-
-                print("\n row = {0}".format(row))
-                # start parsing...
-                out = startRows
-                style = "default"
-                outColSrc = valColSrc
-                errorMsg = ""
-                errorPos = ()
-
-                for col in range(3, hboxLayout.count(), 2):
-                    curBlk = hboxLayout.itemAt(col).widget()
-
-                    # change out data
-                    if type(curBlk) == useAnotherBlock.useAnotherBlock:
-                        out, outColSrc, newMsg = curBlk.generateOut(out, startRows, valColSrc)
-                        if outColSrc is None:   # has value, use this val
-                            errorMsg = newMsg
-                            break
-                        else:
-                            errorMsg += ("\n" + newMsg)
-                            errorPos = (row, col)
-                            continue    # no value, consider next
-                    elif type(curBlk) == condDataBlock.condDataBlock:
-                        out, errorMsg = curBlk.generateOut(out)
-                        if out is None:
-                            errorPos = (row, col)
-
-                    elif type(curBlk) == numberBlock.numberBlock:
-                        out = curBlk.generateOut(out)
-                    elif type(curBlk) == targetValBlock.targetValBlock: # should be alone
-                        out = val
-                        break
-                    elif type(curBlk) == calculatorBlock.calculatorBlock: # assume alone
-                        out, errorMsg = curBlk.generateOut(valRow)
-                    elif type(curBlk) == dataBlock.dataBlock:
-                        out, outColSrc, newMsg = \
-                            curBlk.generateOut(out, outColSrc, self.relatedGraph)
-                        if out is None:
-                            errorMsg += ("\n" + newMsg)
-                            errorPos = (row, col)
-                    elif type(curBlk) == multiDataBlock.multiDataBlock:
-                        out, outColSrc, newMsg = \
-                            curBlk.generateOut(out, outColSrc, self.relatedGraph)
-                        if out is None:
-                            errorMsg += ("\n" + newMsg)
-                            errorPos = (row, col)
-                    elif type(curBlk) == dataFilterBlock.dataFilterBlock:
-                        out, outColSrc, newMsg = \
-                            curBlk.generateOut(out, outColSrc, self.relatedGraph)
-                        if out is None:
-                            errorMsg += ("\n" + newMsg)
-                            errorPos = (row, col)
-                    elif type(curBlk) == defaultBlock.defaultBlock:
-                        out, errorMsg = curBlk.generateOut()
-                    elif type(curBlk) == styleBlock.styleBlock:
-                        pass
-                    else:
-                        out = "you're not using any valid blocks, Bro"
-                        break
-
-                    # change style
-                    if style != "red" and type(curBlk) == styleBlock.styleBlock:
-                        style = "red"
-                    elif style != "default" and type(curBlk) != styleBlock.styleBlock:
-                        style = "default"
-
-                # append final output val to get row list, and store to temp data dict
-                data = None
-                if hboxLayout.count() == 2: # no trailing blocks
-                    data = ""
-                    self.tempData[str(row)] = data
-                else:
-                    if out is not None:
-                        data = out
-                        self.tempData[str(row)] = data
-                    else:
-                        data = "N/A" + "\n最後錯誤發生在" \
-                            + str(errorPos) + ":\n" + errorMsg  # leave N/A + reasons
-                        self.tempData[str(row)] = None
-
-                    if type(data) == pd.core.frame.DataFrame \
-                        or type(data) == pd.core.frame.Series:     
-                        data = data.reset_index()
-                        del data["index"]
-
-                if twoRowCase and row == 1:   # means the only df
-                    if outputDf is None:
-                        outputDf = out
-                    else:
-                        outputDf = outputDf.append(out, ignore_index=True)
-                    self.progressBar.setValue(1)
-                else:
-                    rowDataList.append(data)
-                    # finish one field row
-                    finishNum += 1
-                    self.progressBar.setValue(finishNum)
-
-                # record pos that need to change its style
-                if style == "red":
-                    pos = (idx + 1, row)    # first add one: consider cols header
-                    changeStyleCells.append(pos)
-
-                    print("pos '{0}' should be stylized.".format(pos))
-
-            # append whole row list to get form matrix
-            outputForm.append(rowDataList)
-            
-
-        # 4.Transfer to df for post edit: two-dimen list -> dataFrame
-        if not twoRowCase:
-            outputDf = pd.DataFrame(outputForm)
-
-        # 5.Adjust the dataframe with specified output setting
-        # 5-1 Change style for some cells
-        if len(changeStyleCells) != 0:
-            print("changing style...")
-            outputDf = outputDf.style.apply(make_red_font, axis=None, target=changeStyleCells)
-        # 5-2 Sort df
-        # TODO...
-
-        ## 5-3 replace illegal character
-        #outputDf = outputDf.applymap(lambda x: x.encode('unicode_escape').
-        #         decode('utf-8') if isinstance(x, str) else x)
-
-        # 6.Output to excel: dataFrame -> excel
-        lpos = fileName[1].rfind("(") + 2
-        rpos = fileName[1].rfind(")")
-        ext = "." + (fileName[1])[lpos:rpos]
-
-        today = datetime.datetime.now().strftime("%Y%m%d-%H%M")
-        path = fileName[0]
-        if path.find(ext) == -1:    # if user didn't type extension then add for them
-            path = path  + "_" + today + ext
-        else:   # has extension: insert date before .
-            dot = path.rfind(".")
-            path_1 = path[:dot]
-            path_2 = path[dot:]
-            path = path_1 + "_" + today + path_2
-
-        writer = pd.ExcelWriter(path)
-
-        if not twoRowCase:
-            outputDf.to_excel(writer, self.tr("工作表1"), header=False, index=False)
-        else:
-            if outputDf is None:
-                outputDf = pd.DataFrame(columns=['N/A'])
-            outputDf.to_excel(writer, self.tr("工作表1"), header=True, index=False)
-
-        writer.save()
-
-        self.hintLabel.setText("就緒")
-        self.progressBar.setVisible(False)
-
-        self.statusBar().showMessage("檔案儲存成功", msgDuration)
+        
+        # Start exporting on another thread
+        self.exportWorker.setFileName(fileName)
+        self.exportWorker.start()
 
 
     def add_related_property(self):
@@ -854,12 +524,440 @@ class mainWindow(QtWidgets.QMainWindow):
 
     def convertSpecialNameToFitTemplate(self, fileName):
         if fileName.find("科專成果盤點") != -1:
-            return "FY90-107科專成果盤點 (武昌)FY107僅列科專計畫編號 1070918"
+            fileName = "FY90-107科專成果盤點 (武昌)FY107僅列科專計畫編號 1070918"
         elif fileName.find("專利暨可移轉技術資料") != -1:
-            return "專利暨可移轉技術資料對照表-v.20180508(欣唐)"
+            fileName =  "專利暨可移轉技術資料對照表-v.20180508(欣唐)"
         elif fileName.find("科專計畫編號對應ITRI計畫代號") != -1:
-            return "彙總 90-107 科專計畫編號對應ITRI計畫代號(1070908)"
+            fileName = "彙總 90-107 科專計畫編號對應ITRI計畫代號(1070908)"
         elif fileName.find("加值歷史紀錄") != -1:
-            return "過去加值歷史紀錄"
+            fileName = "過去加值歷史紀錄"
         else:
-            return fileName
+            return
+
+
+
+    ####################
+    # Slots
+    ####################
+
+    def update_progress(self, float):
+        self.progressBar.setValue(float)
+
+    def show_message(self, str):
+        self.statusBar().showMessage(str, msgDuration)
+
+    def show_hint(self, str):
+        self.hintLabel.setText(str)
+
+    def add_key(self, str):
+        self.comboBox.addItem(str)
+
+    def get_open_files(self, filenamesList):
+        filenamesList[0] = QtWidgets.QFileDialog.getOpenFileNames(
+            self, self.tr("選取檔案"), ""
+            , "All Files (*);;Excel Files (*xlsx);;Excel 97-2003 Files(*xls)"
+            , "All Files (*)")
+
+    def set_progressBar_range(self, f1, f2):
+        self.progressBar.setRange(f1, f2)
+
+    def set_progressBar_visible(self, boolean):
+        self.progressBar.setVisible(boolean)
+
+
+class import_excel_thread(QtCore.QThread):
+    progress = QtCore.pyqtSignal(float)
+    message = QtCore.pyqtSignal(str)
+    hint = QtCore.pyqtSignal(str)
+    convertFileName = QtCore.pyqtSignal(str)
+    addKey = QtCore.pyqtSignal(str)
+    openFile = QtCore.pyqtSignal(list)
+    progressBarRange = QtCore.pyqtSignal(float, float)
+    progressBarVisible = QtCore.pyqtSignal(bool)
+    
+    def __init__(self, caller, parent=None):
+        super(import_excel_thread, self).__init__(parent)
+        self.obj = caller
+        self.filenames = None
+
+    def setFilenames(self, filenames):
+        self.filenames = filenames
+
+    def run(self):
+        # filenames is the list get from 'getOpenFileNames'
+        filenames = self.filenames
+
+        if len(filenames) == 0:
+            self.message.emit("取消讀取或未選取檔案")
+            print("yoyo")
+            return
+
+        excelPaths = []
+        for n in filenames[0]:
+            excelPaths.append(n)
+
+        # Covert each sheet of files to set of column names
+        self.message.emit("已選擇 " + str(len(excelPaths)) + " 個檔案")
+        self.hint.emit("正在讀取檔案...")
+        self.progressBarRange.emit(0, len(excelPaths))
+        self.progress.emit(0)
+        self.progressBarVisible.emit(True)
+
+        newKeys = []
+        isDuplicated = False
+
+        for i in range(len(excelPaths)):
+            print("reading a file to obj...")
+            fileObj = pd.ExcelFile(excelPaths[i])
+            sheetNames = fileObj.sheet_names
+            print("finish reading")
+            if (len(sheetNames) == 1):
+                # No sheet name provided, use file name as key
+                path = excelPaths[i]
+                pos1 = path.rfind("/")
+                pos2 = path.rfind(".xls")
+                fileName = path[pos1 + 1 : pos2]
+                self.convertFileName.emit(fileName)
+                if fileName in self.obj.colNamesSet.keys():
+                    isDuplicated = True
+                else:
+                    newKeys.append(fileName)
+                    self.obj.colNamesSet[fileName] = \
+                        self.obj.load_excel_and_return_columns(fileObj, fileName, 0)
+            else:
+                # Multiple sheets, use (file ： sheet) name as key
+                for sheetName in sheetNames:
+                    path = excelPaths[i]
+                    pos1 = path.rfind("/")
+                    pos2 = path.rfind(".xls")
+                    fileName = path[pos1 + 1 : pos2]
+                    self.convertFileName.emit(fileName)
+                    keyName = fileName + " ： " + sheetName
+
+                    if keyName in self.obj.colNamesSet.keys():
+                        isDuplicated = True
+                    else:
+                        newKeys.append(keyName)
+                        self.obj.colNamesSet[keyName] = \
+                            self.obj.load_excel_and_return_columns(fileObj, fileName, sheetName)
+
+            self.progress.emit(i + 1)
+
+        # Add new file names to combobox
+        for key in newKeys:
+            self.addKey.emit(key)
+
+        self.hint.emit("就緒")
+        self.progressBarVisible.emit(False)
+
+        if isDuplicated:
+            self.message.emit("檔案讀取時發現重複的檔案或表單名稱，該部分已自動忽略")
+        else:
+            self.message.emit("檔案讀取成功")
+
+
+class export_excel_thread(QtCore.QThread):
+    progress = QtCore.pyqtSignal(float)
+    progressBarRange = QtCore.pyqtSignal(float, float)
+    progressBarVisible = QtCore.pyqtSignal(bool)
+    message = QtCore.pyqtSignal(str)
+    hint = QtCore.pyqtSignal(str)
+
+    def __init__(self, caller, **kwargs):
+        super(export_excel_thread, self).__init__(**kwargs)
+        self.obj = caller
+        self.fileName = None
+
+    def setFileName(self, filename):
+        self.fileName = filename
+
+    def run(self):
+        # 1.Empty two-dimen list
+        outputForm = [] # will append lists into it
+        outputDf = None # use outputForm as input, will eventually convert to excel
+
+        # 2.Fill all output column names
+        grid = self.obj.central.fieldWidget.gridLayout
+
+        colNamesList = []
+        for row in range(grid.rowCount() - 1):
+            hboxLayout = grid.itemAtPosition(row, 0)
+            colName = hboxLayout.itemAt(1).widget().text()
+            colNamesList.append(colName)
+        outputForm.append(colNamesList)  
+
+        # 3.Fill data by parsing field blocks & relation graph info
+        # 3-1.find the tagetValBlock's info
+        valColSrc = None
+        valsList = None
+
+        num_target = 0
+        num_total = 0
+        for row in range(grid.rowCount() - 1):
+            hboxLayout = grid.itemAtPosition(row, 0)
+            if hboxLayout.count() >= 3:
+                num_total += 1
+
+            for col in range(3, hboxLayout.count(), 2):  # start from 1st block and ignore dashes
+                curBlk = hboxLayout.itemAt(col).widget()
+                if type(curBlk) == targetValBlock.targetValBlock:
+                    num_target += 1
+                    valColSrc = curBlk.colSource
+                    valsList = curBlk.settingData["targetVals"]
+
+        # Consider invalid targetValBlk
+        if num_target == 0:
+            self.message.emit("輸出錯誤：不存在目標值方塊")
+            return
+        elif num_target > 1:
+            self.message.emit("輸出錯誤：目標值方塊不唯一")
+            return
+        else:
+            if valColSrc is None:
+                self.message.emit("輸出錯誤：沒有指定目標值欄位")
+                return
+            if (valsList is None) or len(valsList) == 0:
+                self.message.emit("輸出錯誤：沒有指定目標值")
+                return
+
+        # Consider only two rows(special form for single target val)
+        twoRowCase = False
+        if num_total == 2:
+            twoRowCase = True
+
+        # Force changing valsList if valColSrc is special case (not p40_patentno)
+        # 申請案號：first find p40_applypntno contains, 
+        #          use that row's p40_oripntno to gen p40_patentno
+        if valColSrc[2] == "p40_applypntno":
+            valColSrc = "dbo_pat040", "dbo_pat0401", "p40_patentno"
+
+            valsList_new = []
+            for val in valsList:
+                DFB_contains = dataFilterBlock.dataFilterBlock(self.obj, self.obj.central.fieldWidget)
+                DFB_contains.colSource = "dbo_pat040", "dbo_pat0401", "p40_applypntno"
+                DFB_contains.settingData["dataType"] = "str"
+                DFB_contains.settingData["filterCond"] = "contains " + val
+                print("now settingDatap['filterCond'] is: {0}".format(DFB_contains.settingData["filterCond"]))
+                DFB_contains.settingData["origChecked"] = True
+                out, outColSrc, msg = DFB_contains.generateOut(
+                    None, DFB_contains.colSource, self.obj.relatedGraph)
+                print("Atfer DFB_contains, out is:")
+                print(out)
+
+                DB_getOri = dataBlock.dataBlock(self.obj, self.obj.central.fieldWidget)
+                DB_getOri.colSource = "dbo_pat040", "dbo_pat0401", "p40_oripntno"
+                out, outColSrc, msg = DB_getOri.generateOut(out, outColSrc, self.obj.relatedGraph)
+                print("Atfer DB_getOri, out is:")
+                print(out)
+
+                DFB_getPat = dataFilterBlock.dataFilterBlock(self.obj, self.obj.central.fieldWidget)
+                DFB_getPat.colSource = "dbo_pat040", "dbo_pat0401", "p40_patentno"
+                DFB_getPat.settingData["dataType"] = "str"
+                if out is None:
+                    out = ""
+                DFB_getPat.settingData["filterCond"] = "contains " + out
+                DFB_getPat.settingData["origChecked"] = True
+                out, outColSrc, msg = DFB_getPat.generateOut(
+                    None, DFB_getPat.colSource, self.obj.relatedGraph)
+                print("Atfer DFB_getPat, out is:")
+                print(out)
+
+                MDB_purePat = multiDataBlock.multiDataBlock(self.obj, self.obj.central.fieldWidget)
+                MDB_purePat.colSource = "p40_patentno"
+                out, outColSrc, msg = MDB_purePat.generateOut(
+                    out, MDB_purePat.colSource, self.obj.relatedGraph)
+                print("Atfer MDB_purePat, out is:")
+                print(out)
+
+                #out = out.iloc[:,0]
+                if out is not None:
+                    out = out.tolist()
+                    valsList_new.extend(out)
+
+            valsList = valsList_new
+
+
+        # 3-2.init progressBar range
+        self.hint.emit("正在輸出檔案...")
+        if twoRowCase:
+            self.progressBarRange.emit(0, 1)
+        else:
+            self.progressBarRange.emit(0, len(valsList) * (grid.rowCount() - 1))
+        self.progress.emit(0)
+        self.progressBarVisible.emit(True)
+        finishNum = 0
+
+        # 3-3.start parsing
+        valRow = 0   # used in calculatorBlk
+        changeStyleCells = []   # change style on these element at final stage
+        for idx, val in enumerate(valsList):
+            valRow += 1
+            # find start rows as beginning point
+            fileDf = self.obj.srcFiles[(valColSrc[0], valColSrc[1])]
+            colName = valColSrc[2]
+            startRows = fileDf.loc[fileDf[colName] == val]
+
+            # parse single row
+            rowDataList = []
+            for row in range(grid.rowCount() - 1):
+                hboxLayout = grid.itemAtPosition(row, 0)
+
+                print("\n row = {0}".format(row))
+                # start parsing...
+                out = startRows
+                style = "default"
+                outColSrc = valColSrc
+                errorMsg = ""
+                errorPos = ()
+
+                for col in range(3, hboxLayout.count(), 2):
+                    curBlk = hboxLayout.itemAt(col).widget()
+
+                    # change out data
+                    if type(curBlk) == useAnotherBlock.useAnotherBlock:
+                        out, outColSrc, newMsg = curBlk.generateOut(out, startRows, valColSrc)
+                        if outColSrc is None:   # has value, use this val
+                            errorMsg = newMsg
+                            break
+                        else:
+                            errorMsg += ("\n" + newMsg)
+                            errorPos = (row, col)
+                            continue    # no value, consider next
+                    elif type(curBlk) == condDataBlock.condDataBlock:
+                        out, errorMsg = curBlk.generateOut(out)
+                        if out is None:
+                            errorPos = (row, col)
+
+                    elif type(curBlk) == numberBlock.numberBlock:
+                        out = curBlk.generateOut(out)
+                    elif type(curBlk) == targetValBlock.targetValBlock: # should be alone
+                        out = val
+                        break
+                    elif type(curBlk) == calculatorBlock.calculatorBlock: # assume alone
+                        out, errorMsg = curBlk.generateOut(valRow)
+                    elif type(curBlk) == dataBlock.dataBlock:
+                        out, outColSrc, newMsg = \
+                            curBlk.generateOut(out, outColSrc, self.obj.relatedGraph)
+                        if out is None:
+                            errorMsg += ("\n" + newMsg)
+                            errorPos = (row, col)
+                    elif type(curBlk) == multiDataBlock.multiDataBlock:
+                        out, outColSrc, newMsg = \
+                            curBlk.generateOut(out, outColSrc, self.obj.relatedGraph)
+                        if out is None:
+                            errorMsg += ("\n" + newMsg)
+                            errorPos = (row, col)
+                    elif type(curBlk) == dataFilterBlock.dataFilterBlock:
+                        out, outColSrc, newMsg = \
+                            curBlk.generateOut(out, outColSrc, self.obj.relatedGraph)
+                        if out is None:
+                            errorMsg += ("\n" + newMsg)
+                            errorPos = (row, col)
+                    elif type(curBlk) == defaultBlock.defaultBlock:
+                        out, errorMsg = curBlk.generateOut()
+                    elif type(curBlk) == styleBlock.styleBlock:
+                        pass
+                    else:
+                        out = "you're not using any valid blocks, Bro"
+                        break
+
+                    # change style
+                    if style != "red" and type(curBlk) == styleBlock.styleBlock:
+                        style = "red"
+                    elif style != "default" and type(curBlk) != styleBlock.styleBlock:
+                        style = "default"
+
+                # append final output val to get row list, and store to temp data dict
+                data = None
+                if hboxLayout.count() == 2: # no trailing blocks
+                    data = ""
+                    self.obj.tempData[str(row)] = data
+                else:
+                    if out is not None:
+                        data = out
+                        self.obj.tempData[str(row)] = data
+                    else:
+                        data = "N/A" + "\n最後錯誤發生在" \
+                            + str(errorPos) + ":\n" + errorMsg  # leave N/A + reasons
+                        self.obj.tempData[str(row)] = None
+
+                    if type(data) == pd.core.frame.DataFrame \
+                        or type(data) == pd.core.frame.Series:     
+                        data = data.reset_index()
+                        del data["index"]
+
+                if twoRowCase and row == 1:   # means the only df
+                    if outputDf is None:
+                        outputDf = out
+                    else:
+                        outputDf = outputDf.append(out, ignore_index=True)
+                    self.progress.emit(1)
+                else:
+                    rowDataList.append(data)
+                    # finish one field row
+                    finishNum += 1
+                    self.progress.emit(finishNum)
+
+                # record pos that need to change its style
+                if style == "red":
+                    pos = (idx + 1, row)    # first add one: consider cols header
+                    changeStyleCells.append(pos)
+
+                    print("pos '{0}' should be stylized.".format(pos))
+
+            # append whole row list to get form matrix
+            outputForm.append(rowDataList)
+            
+
+        # 4.Transfer to df for post edit: two-dimen list -> dataFrame
+        if not twoRowCase:
+            outputDf = pd.DataFrame(outputForm)
+
+        # 5.Adjust the dataframe with specified output setting
+        # 5-1 Change style for some cells
+        if len(changeStyleCells) != 0:
+            print("changing style...")
+            try:
+                outputDf = outputDf.style.apply(make_red_font, axis=None, target=changeStyleCells)
+            except NotImplementedError:
+                self.message.emit("無法將特殊算法欄位轉換為紅色")
+
+        # 5-2 Sort df
+        # TODO...
+
+        ## 5-3 replace illegal character
+        #outputDf = outputDf.applymap(lambda x: x.encode('unicode_escape').
+        #         decode('utf-8') if isinstance(x, str) else x)
+
+        # 6.Output to excel: dataFrame -> excel
+        fileName = self.fileName
+
+        lpos = fileName[1].rfind("(") + 2
+        rpos = fileName[1].rfind(")")
+        ext = "." + (fileName[1])[lpos:rpos]
+
+        today = datetime.datetime.now().strftime("%Y%m%d-%H%M")
+        path = fileName[0]
+        if path.find(ext) == -1:    # if user didn't type extension then add for them
+            path = path  + "_" + today + ext
+        else:   # has extension: insert date before .
+            dot = path.rfind(".")
+            path_1 = path[:dot]
+            path_2 = path[dot:]
+            path = path_1 + "_" + today + path_2
+
+        writer = pd.ExcelWriter(path)
+
+        if not twoRowCase:
+            outputDf.to_excel(writer, self.obj.tr("工作表1"), header=False, index=False)
+        else:
+            if outputDf is None:
+                outputDf = pd.DataFrame(columns=['N/A'])
+            outputDf.to_excel(writer, self.obj.tr("工作表1"), header=True, index=False)
+
+        writer.save()
+
+        self.hint.emit("就緒")
+        self.progressBarVisible.emit(False)
+
+        self.message.emit("檔案儲存成功")

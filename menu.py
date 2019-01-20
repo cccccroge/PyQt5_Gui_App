@@ -19,11 +19,11 @@ class menu(QtWidgets.QMenu):
         actions["openDir"].triggered.connect(lambda: parent.choose_work_dir())
         actions["importExcel"] = menuFile.addAction(self.tr("匯入Excel檔案"))
         actions["importExcel"].hovered.connect(lambda: self.on_hovered(parent, 2))
-        actions["importExcel"].triggered.connect(lambda: parent.import_excel())
+        actions["importExcel"].triggered.connect(lambda: parent.import_excel_concurrent())
         menuFile.addSeparator()
         actions["exportExcel"] = menuFile.addAction(self.tr("輸出Excel檔案"))
         actions["exportExcel"].hovered.connect(lambda: self.on_hovered(parent, 3))
-        actions["exportExcel"].triggered.connect(lambda: parent.export_excel())
+        actions["exportExcel"].triggered.connect(lambda: parent.export_excel_concurrent())
 
         menuTool = menuBar.addMenu(self.tr("工具"))
         actions["relatedProperty"] = menuTool.addAction(self.tr("新增關聯項目"))

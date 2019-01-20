@@ -135,13 +135,21 @@
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\__init__.py',
    'PYMODULE'),
+  ('pkg_resources._vendor.packaging.utils',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\_vendor\\packaging\\utils.py',
+   'PYMODULE'),
+  ('pkg_resources._vendor.appdirs',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\_vendor\\appdirs.py',
+   'PYMODULE'),
+  ('pkg_resources._vendor.packaging._structures',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\_vendor\\packaging\\_structures.py',
+   'PYMODULE'),
   ('pkg_resources._vendor.packaging.version',
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\_vendor\\packaging\\version.py',
-   'PYMODULE'),
-  ('pkg_resources._vendor.packaging.requirements',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\_vendor\\packaging\\requirements.py',
    'PYMODULE'),
   ('pkg_resources._vendor.pyparsing',
    'B:\\program_files\\Microsoft Visual '
@@ -175,21 +183,13 @@
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\_vendor\\packaging\\_compat.py',
    'PYMODULE'),
-  ('pkg_resources._vendor.packaging.markers',
+  ('pkg_resources._vendor.packaging',
    'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\_vendor\\packaging\\markers.py',
+   'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\_vendor\\packaging\\__init__.py',
    'PYMODULE'),
-  ('pkg_resources._vendor.packaging.utils',
+  ('pkg_resources._vendor.packaging.specifiers',
    'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\_vendor\\packaging\\utils.py',
-   'PYMODULE'),
-  ('pkg_resources._vendor.six',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\_vendor\\six.py',
-   'PYMODULE'),
-  ('pkg_resources._vendor.appdirs',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\_vendor\\appdirs.py',
+   'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\_vendor\\packaging\\specifiers.py',
    'PYMODULE'),
   ('pkg_resources._vendor.packaging.__about__',
    'B:\\program_files\\Microsoft Visual '
@@ -199,17 +199,17 @@
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\_vendor\\__init__.py',
    'PYMODULE'),
-  ('pkg_resources._vendor.packaging._structures',
+  ('pkg_resources._vendor.packaging.requirements',
    'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\_vendor\\packaging\\_structures.py',
+   'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\_vendor\\packaging\\requirements.py',
    'PYMODULE'),
-  ('pkg_resources._vendor.packaging',
+  ('pkg_resources._vendor.six',
    'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\_vendor\\packaging\\__init__.py',
+   'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\_vendor\\six.py',
    'PYMODULE'),
-  ('pkg_resources._vendor.packaging.specifiers',
+  ('pkg_resources._vendor.packaging.markers',
    'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\_vendor\\packaging\\specifiers.py',
+   'Studio\\Shared\\Python36_64\\lib\\site-packages\\pkg_resources\\_vendor\\packaging\\markers.py',
    'PYMODULE'),
   ('sysconfig',
    'B:\\program_files\\Microsoft Visual '
@@ -371,21 +371,25 @@
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\stringprep.py',
    'PYMODULE'),
-  ('fnmatch',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\fnmatch.py',
-   'PYMODULE'),
-  ('struct',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\struct.py',
-   'PYMODULE'),
   ('_compat_pickle',
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\_compat_pickle.py',
    'PYMODULE'),
+  ('pickle',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\pickle.py',
+   'PYMODULE'),
+  ('tracemalloc',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\tracemalloc.py',
+   'PYMODULE'),
   ('__future__',
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\__future__.py',
+   'PYMODULE'),
+  ('argparse',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\argparse.py',
    'PYMODULE'),
   ('difflib',
    'B:\\program_files\\Microsoft Visual '
@@ -398,6 +402,10 @@
   ('inspect',
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\inspect.py',
+   'PYMODULE'),
+  ('os',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\os.py',
    'PYMODULE'),
   ('cmd',
    'B:\\program_files\\Microsoft Visual '
@@ -551,6 +559,10 @@
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\tempfile.py',
    'PYMODULE'),
+  ('subprocess',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\subprocess.py',
+   'PYMODULE'),
   ('tty',
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\tty.py',
@@ -562,6 +574,10 @@
   ('pydoc_data.topics',
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\pydoc_data\\topics.py',
+   'PYMODULE'),
+  ('textwrap',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\textwrap.py',
    'PYMODULE'),
   ('html.entities',
    'B:\\program_files\\Microsoft Visual '
@@ -735,6 +751,14 @@
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\tarfile.py',
    'PYMODULE'),
+  ('_dummy_thread',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\_dummy_thread.py',
+   'PYMODULE'),
+  ('dummy_threading',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\dummy_threading.py',
+   'PYMODULE'),
   ('py_compile',
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\py_compile.py',
@@ -747,6 +771,10 @@
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\shutil.py',
    'PYMODULE'),
+  ('selectors',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\selectors.py',
+   'PYMODULE'),
   ('socket',
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\socket.py',
@@ -758,6 +786,18 @@
   ('pydoc',
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\pydoc.py',
+   'PYMODULE'),
+  ('copy',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\copy.py',
+   'PYMODULE'),
+  ('struct',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\struct.py',
+   'PYMODULE'),
+  ('gettext',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\gettext.py',
    'PYMODULE'),
   ('getopt',
    'B:\\program_files\\Microsoft Visual '
@@ -779,9 +819,25 @@
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\string.py',
    'PYMODULE'),
+  ('_threading_local',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\_threading_local.py',
+   'PYMODULE'),
+  ('threading',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\threading.py',
+   'PYMODULE'),
   ('logging',
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\logging\\__init__.py',
+   'PYMODULE'),
+  ('pprint',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\pprint.py',
+   'PYMODULE'),
+  ('contextlib',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\contextlib.py',
    'PYMODULE'),
   ('unittest.case',
    'B:\\program_files\\Microsoft Visual '
@@ -790,58 +846,6 @@
   ('unittest.suite',
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\unittest\\suite.py',
-   'PYMODULE'),
-  ('unittest.loader',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\unittest\\loader.py',
-   'PYMODULE'),
-  ('unittest.runner',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\unittest\\runner.py',
-   'PYMODULE'),
-  ('unittest.main',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\unittest\\main.py',
-   'PYMODULE'),
-  ('unittest.signals',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\unittest\\signals.py',
-   'PYMODULE'),
-  ('unittest',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\unittest\\__init__.py',
-   'PYMODULE'),
-  ('doctest',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\doctest.py',
-   'PYMODULE'),
-  ('textwrap',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\textwrap.py',
-   'PYMODULE'),
-  ('gettext',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\gettext.py',
-   'PYMODULE'),
-  ('argparse',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\argparse.py',
-   'PYMODULE'),
-  ('pprint',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\pprint.py',
-   'PYMODULE'),
-  ('pickle',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\pickle.py',
-   'PYMODULE'),
-  ('tracemalloc',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\tracemalloc.py',
-   'PYMODULE'),
-  ('copy',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\copy.py',
    'PYMODULE'),
   ('stat',
    'B:\\program_files\\Microsoft Visual '
@@ -855,41 +859,37 @@
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\posixpath.py',
    'PYMODULE'),
+  ('fnmatch',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\fnmatch.py',
+   'PYMODULE'),
+  ('unittest.loader',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\unittest\\loader.py',
+   'PYMODULE'),
+  ('unittest.runner',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\unittest\\runner.py',
+   'PYMODULE'),
+  ('unittest.main',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\unittest\\main.py',
+   'PYMODULE'),
   ('signal',
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\signal.py',
    'PYMODULE'),
-  ('contextlib',
+  ('unittest.signals',
    'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\contextlib.py',
+   'Studio\\Shared\\Python36_64\\lib\\unittest\\signals.py',
    'PYMODULE'),
-  ('_threading_local',
+  ('unittest',
    'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\_threading_local.py',
+   'Studio\\Shared\\Python36_64\\lib\\unittest\\__init__.py',
    'PYMODULE'),
-  ('threading',
+  ('doctest',
    'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\threading.py',
-   'PYMODULE'),
-  ('selectors',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\selectors.py',
-   'PYMODULE'),
-  ('_dummy_thread',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\_dummy_thread.py',
-   'PYMODULE'),
-  ('dummy_threading',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\dummy_threading.py',
-   'PYMODULE'),
-  ('subprocess',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\subprocess.py',
-   'PYMODULE'),
-  ('os',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\os.py',
+   'Studio\\Shared\\Python36_64\\lib\\doctest.py',
    'PYMODULE'),
   ('mainWindow',
    'C:\\projects\\vs2017_project\\PyQt5_Gui_App\\mainWindow.py',
@@ -1456,45 +1456,13 @@
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\__init__.py',
    'PYMODULE'),
-  ('setuptools._vendor.packaging._structures',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\_vendor\\packaging\\_structures.py',
-   'PYMODULE'),
-  ('setuptools._vendor.packaging',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\_vendor\\packaging\\__init__.py',
-   'PYMODULE'),
-  ('setuptools._vendor',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\_vendor\\__init__.py',
-   'PYMODULE'),
   ('setuptools._vendor.packaging.requirements',
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\_vendor\\packaging\\requirements.py',
    'PYMODULE'),
-  ('setuptools._vendor.packaging._compat',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\_vendor\\packaging\\_compat.py',
-   'PYMODULE'),
-  ('setuptools._vendor.packaging.utils',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\_vendor\\packaging\\utils.py',
-   'PYMODULE'),
-  ('setuptools._vendor.pyparsing',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\_vendor\\pyparsing.py',
-   'PYMODULE'),
   ('setuptools._vendor.packaging.markers',
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\_vendor\\packaging\\markers.py',
-   'PYMODULE'),
-  ('setuptools._vendor.packaging.version',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\_vendor\\packaging\\version.py',
-   'PYMODULE'),
-  ('setuptools._vendor.six',
-   'B:\\program_files\\Microsoft Visual '
-   'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\_vendor\\six.py',
    'PYMODULE'),
   ('setuptools._vendor.packaging.specifiers',
    'B:\\program_files\\Microsoft Visual '
@@ -1503,6 +1471,38 @@
   ('setuptools._vendor.packaging.__about__',
    'B:\\program_files\\Microsoft Visual '
    'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\_vendor\\packaging\\__about__.py',
+   'PYMODULE'),
+  ('setuptools._vendor.packaging',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\_vendor\\packaging\\__init__.py',
+   'PYMODULE'),
+  ('setuptools._vendor.six',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\_vendor\\six.py',
+   'PYMODULE'),
+  ('setuptools._vendor.pyparsing',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\_vendor\\pyparsing.py',
+   'PYMODULE'),
+  ('setuptools._vendor.packaging.utils',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\_vendor\\packaging\\utils.py',
+   'PYMODULE'),
+  ('setuptools._vendor.packaging._structures',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\_vendor\\packaging\\_structures.py',
+   'PYMODULE'),
+  ('setuptools._vendor',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\_vendor\\__init__.py',
+   'PYMODULE'),
+  ('setuptools._vendor.packaging._compat',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\_vendor\\packaging\\_compat.py',
+   'PYMODULE'),
+  ('setuptools._vendor.packaging.version',
+   'B:\\program_files\\Microsoft Visual '
+   'Studio\\Shared\\Python36_64\\lib\\site-packages\\setuptools\\_vendor\\packaging\\version.py',
    'PYMODULE'),
   ('setuptools.msvc',
    'B:\\program_files\\Microsoft Visual '

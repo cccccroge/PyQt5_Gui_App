@@ -281,7 +281,7 @@ class central(QtWidgets.QTabWidget):
     def on_okToChangeValsBtn_pressed(self):
         plain = self.targetValsEdit.toPlainText()
 
-        # Find template's TVB
+        # Find template's TargetValueBlock
         TVB = None
 
         grid = self.fieldWidget.gridLayout

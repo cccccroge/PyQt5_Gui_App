@@ -36,7 +36,6 @@ class mainWindow(QtWidgets.QMainWindow):
         self.importWorker.progress.connect(self.update_progress)
         self.importWorker.message.connect(self.show_message)
         self.importWorker.hint.connect(self.show_hint)
-        self.importWorker.convertFileName.connect(self.convertSpecialNameToFitTemplate)
         self.importWorker.addKey.connect(self.add_key)
         self.importWorker.openFile.connect(self.get_open_files)
         self.importWorker.progressBarRange.connect(self.set_progressBar_range)
@@ -522,18 +521,6 @@ class mainWindow(QtWidgets.QMainWindow):
                 else:
                     item.widget().deleteLater()
 
-    def convertSpecialNameToFitTemplate(self, fileName):
-        if fileName.find("科專成果盤點") != -1:
-            fileName = "FY90-107科專成果盤點 (武昌)FY107僅列科專計畫編號 1070918"
-        elif fileName.find("專利暨可移轉技術資料") != -1:
-            fileName =  "專利暨可移轉技術資料對照表-v.20180508(欣唐)"
-        elif fileName.find("科專計畫編號對應ITRI計畫代號") != -1:
-            fileName = "彙總 90-107 科專計畫編號對應ITRI計畫代號(1070908)"
-        elif fileName.find("加值歷史紀錄") != -1:
-            fileName = "過去加值歷史紀錄"
-        else:
-            return
-
 
 
     ####################
@@ -569,7 +556,6 @@ class import_excel_thread(QtCore.QThread):
     progress = QtCore.pyqtSignal(float)
     message = QtCore.pyqtSignal(str)
     hint = QtCore.pyqtSignal(str)
-    convertFileName = QtCore.pyqtSignal(str)
     addKey = QtCore.pyqtSignal(str)
     openFile = QtCore.pyqtSignal(list)
     progressBarRange = QtCore.pyqtSignal(float, float)
@@ -617,7 +603,7 @@ class import_excel_thread(QtCore.QThread):
                 pos1 = path.rfind("/")
                 pos2 = path.rfind(".xls")
                 fileName = path[pos1 + 1 : pos2]
-                self.convertFileName.emit(fileName)
+                fileName = self.convertSpecialNameToFitTemplate(fileName)
                 if fileName in self.obj.colNamesSet.keys():
                     isDuplicated = True
                 else:
@@ -631,7 +617,7 @@ class import_excel_thread(QtCore.QThread):
                     pos1 = path.rfind("/")
                     pos2 = path.rfind(".xls")
                     fileName = path[pos1 + 1 : pos2]
-                    self.convertFileName.emit(fileName)
+                    fileName = self.convertSpecialNameToFitTemplate(fileName)
                     keyName = fileName + " ： " + sheetName
 
                     if keyName in self.obj.colNamesSet.keys():
@@ -654,6 +640,19 @@ class import_excel_thread(QtCore.QThread):
             self.message.emit("檔案讀取時發現重複的檔案或表單名稱，該部分已自動忽略")
         else:
             self.message.emit("檔案讀取成功")
+
+    def convertSpecialNameToFitTemplate(self, fileName):
+        if fileName.find("科專成果盤點") != -1:
+            fileName = "FY90-107科專成果盤點 (武昌)FY107僅列科專計畫編號 1070918"
+        elif fileName.find("專利暨可移轉技術資料") != -1:
+            fileName =  "專利暨可移轉技術資料對照表-v.20180508(欣唐)"
+        elif fileName.find("科專計畫編號對應ITRI計畫代號") != -1:
+            fileName = "彙總 90-107 科專計畫編號對應ITRI計畫代號(1070908)"
+        elif fileName.find("加值歷史紀錄") != -1:
+            fileName = "過去加值歷史紀錄"
+
+        return fileName
+
 
 
 class export_excel_thread(QtCore.QThread):
@@ -728,6 +727,8 @@ class export_excel_thread(QtCore.QThread):
         # Force changing valsList if valColSrc is special case (not p40_patentno)
         # 申請案號：first find p40_applypntno contains, 
         #          use that row's p40_oripntno to gen p40_patentno
+
+        # fix: find all p40_patentno in those rows of according p40_applypntno
         if valColSrc[2] == "p40_applypntno":
             valColSrc = "dbo_pat040", "dbo_pat0401", "p40_patentno"
 
@@ -744,23 +745,23 @@ class export_excel_thread(QtCore.QThread):
                 print("Atfer DFB_contains, out is:")
                 print(out)
 
-                DB_getOri = dataBlock.dataBlock(self.obj, self.obj.central.fieldWidget)
-                DB_getOri.colSource = "dbo_pat040", "dbo_pat0401", "p40_oripntno"
-                out, outColSrc, msg = DB_getOri.generateOut(out, outColSrc, self.obj.relatedGraph)
-                print("Atfer DB_getOri, out is:")
-                print(out)
+                #DB_getOri = dataBlock.dataBlock(self.obj, self.obj.central.fieldWidget)
+                #DB_getOri.colSource = "dbo_pat040", "dbo_pat0401", "p40_oripntno"
+                #out, outColSrc, msg = DB_getOri.generateOut(out, outColSrc, self.obj.relatedGraph)
+                #print("Atfer DB_getOri, out is:")
+                #print(out)
 
-                DFB_getPat = dataFilterBlock.dataFilterBlock(self.obj, self.obj.central.fieldWidget)
-                DFB_getPat.colSource = "dbo_pat040", "dbo_pat0401", "p40_patentno"
-                DFB_getPat.settingData["dataType"] = "str"
-                if out is None:
-                    out = ""
-                DFB_getPat.settingData["filterCond"] = "contains " + out
-                DFB_getPat.settingData["origChecked"] = True
-                out, outColSrc, msg = DFB_getPat.generateOut(
-                    None, DFB_getPat.colSource, self.obj.relatedGraph)
-                print("Atfer DFB_getPat, out is:")
-                print(out)
+                #DFB_getPat = dataFilterBlock.dataFilterBlock(self.obj, self.obj.central.fieldWidget)
+                #DFB_getPat.colSource = "dbo_pat040", "dbo_pat0401", "p40_patentno"
+                #DFB_getPat.settingData["dataType"] = "str"
+                #if out is None:
+                #    out = ""
+                #DFB_getPat.settingData["filterCond"] = "contains " + out
+                #DFB_getPat.settingData["origChecked"] = True
+                #out, outColSrc, msg = DFB_getPat.generateOut(
+                #    None, DFB_getPat.colSource, self.obj.relatedGraph)
+                #print("Atfer DFB_getPat, out is:")
+                #print(out)
 
                 MDB_purePat = multiDataBlock.multiDataBlock(self.obj, self.obj.central.fieldWidget)
                 MDB_purePat.colSource = "p40_patentno"
